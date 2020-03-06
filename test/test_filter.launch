@@ -1,0 +1,26 @@
+<launch>
+  <arg name="filename"      default="new_data.bag"/>
+  <arg name="path"          default="$(find localisation)/test/data"/>
+
+  <arg name="ns"            default="cf1"/>
+  <arg name="filter_type"   default="iekf"/>
+  
+
+  <param name="use_sim_time" value="true"/>
+  
+  <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(arg path)/$(arg filename)" required="true"/>
+
+  <node pkg="localisation" type="pose_compare.py" name="pose_compare" output="screen">
+    <param name="odom_frame"            value="$(arg ns)/odom"/>
+    <param name="base_frame_internal"   value="$(arg ns)/base_link"/>
+    <param name="base_frame_external"   value="$(arg ns)/base_link_test"/>
+
+    <remap from="vel_filtered" to="$(arg ns)/vel_filtered"/>
+  </node>
+
+  <include file="$(find localisation)/launch/localisation.launch">
+    <arg name="ns"            value="$(arg ns)"/>
+    <arg name="base_frame"    value="base_link_test"/>
+    <arg name="filter_type"   value="$(arg filter_type)"/>
+  </include>
+</launch>

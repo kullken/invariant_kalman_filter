@@ -1,0 +1,25 @@
+<launch>
+  <arg name="ns"            default="cf"/>
+  <arg name="tfprefix"      default="$(arg ns)"/>
+  <arg name="base_frame"    default="base_link"/>
+  <arg name="odom_frame"    default="odom"/>
+  <arg name="map_frame"     default="map"/>
+
+  <arg name="filter_type"   default="iekf"/>
+
+  <arg name="mock"          default="false"/>
+
+  <group ns="$(arg ns)" unless="$(arg mock)">
+    <node pkg="localisation" type="$(arg filter_type)_node" name="$(arg filter_type)" output="screen">
+      <param name="base_frame"  value="$(arg tfprefix)/$(arg base_frame)"/>
+      <param name="odom_frame"  value="$(arg tfprefix)/$(arg odom_frame)"/>
+      <param name="map_frame"   value="$(arg map_frame)"/>
+      <param name="frequency"   value="100"/>
+    </node>
+  </group>
+
+  <group if="$(arg mock)">
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_map_to_odom_broadcaster" args="0 0 0 0 0 0 map $(arg tfprefix)/odom"/>
+  </group>
+
+</launch>
