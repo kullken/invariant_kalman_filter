@@ -1,11 +1,8 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(localisation)
+cmake_minimum_required(VERSION 3.10.2)
+project(invariant_kalman_filter)
 
 add_compile_options(-std=c++17 -g -Wall -Wextra -pedantic)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED 
   COMPONENTS
   cmake_modules
@@ -17,14 +14,7 @@ find_package(catkin REQUIRED
   tf2_eigen
 )
 
-## System dependencies are found with CMake's conventions
 find_package(Eigen3 REQUIRED)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-catkin_python_setup()
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -75,29 +65,29 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/localisation.cpp
-# )
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(lib${PROJECT_NAME}_lie_group
+  src/lie_group.cpp
+)
 
 ## Declare a C++ executable
 add_executable(ekf_node src/ekf_node.cpp src/ekf.cpp)
-add_executable(iekf_node src/iekf_node.cpp src/iekf.cpp src/lie_group.cpp)
-
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(iekf_node src/iekf_node.cpp src/iekf.cpp)
+add_executable(kalman_node src/kalman_node.cpp src/iekf.cpp)
 
 ## Specify libraries to link a library or executable target against
+target_link_libraries(lib${PROJECT_NAME}_lie_group
+  ${catkin_LIBRARIES}
+)
 target_link_libraries(ekf_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(iekf_node
   ${catkin_LIBRARIES}
+  lib${PROJECT_NAME}_lie_group
+)
+target_link_libraries(kalman_node
+  ${catkin_LIBRARIES}
+  lib${PROJECT_NAME}_lie_group
 )
 
 #############
