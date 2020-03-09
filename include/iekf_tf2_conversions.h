@@ -19,6 +19,14 @@ void fromMsg(const geometry_msgs::Quaternion& in, invariant::Rotation& out)
     out = temp_q.toRotationMatrix();
 }
 
+inline
+invariant::Vector3 fromMsg(const geometry_msgs::Vector3& in)
+{
+    invariant::Vector3 out;
+    tf2::fromMsg(in, out);
+    return out;
+}
+
 // template<>
 // geometry_msgs::Quaternion toMsg(const invariant::Rotation& R)
 // {
