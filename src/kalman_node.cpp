@@ -40,10 +40,11 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
 
     m_imu_buffer.reserve(k_imu_buffer_capacity);
 
-    ros_utils::wait_for_message<sensor_msgs::Imu>(m_imu_sub);
+    initialise_iekf_filter();
 
     // TODO: Measure accelerometer bias.
-    initialise_iekf_filter();
+
+    ros_utils::wait_for_message<sensor_msgs::Imu>(m_imu_sub);
 
     ROS_DEBUG_STREAM("State initialised to:" 
                     << "\nR = \n" << m_iekf_filter.get_rot()
@@ -60,10 +61,26 @@ void KalmanNode::start()
 
 void KalmanNode::initialise_iekf_filter()
 {
-    // TODO: Initilise from launch parameters.
-    const Vector3 p0 = Vector3::Zero();
-    const Vector3 v0 = Vector3::Zero();
-    const Rotation R0 = Rotation::Identity();
+    const double x0 = m_nh_private.param<double>("init/x", 0.0);
+    const double y0 = m_nh_private.param<double>("init/y", 0.0);
+    const double z0 = m_nh_private.param<double>("init/z", 0.0);
+    const Vector3 p0{x0, y0, z0};
+
+    const double vx0 = m_nh_private.param<double>("init/vx", 0.0);
+    const double vy0 = m_nh_private.param<double>("init/vy", 0.0);
+    const double vz0 = m_nh_private.param<double>("init/vz", 0.0);
+    const Vector3 v0{vx0, vy0, vz0};
+
+    const double roll  = m_nh_private.param<double>("init/roll" , 0.0);
+    const double pitch = m_nh_private.param<double>("init/pitch", 0.0);
+    const double yaw   = m_nh_private.param<double>("init/yaw"  , 0.0);
+    tf2::Quaternion quat_tf;
+    quat_tf.setRPY(roll, pitch, yaw);
+    // geometry_msgs::Quaternion quat_msg = tf2::toMsg(quat_tf);
+    // const Rotation R0 = tf2::fromMsg(quat_msg);
+    const Rotation R0 = tf2::fromMsg(tf2::toMsg(quat_tf));
+
+    // TODO: Initilise from launch parameters?
     const Covariance<9> P0 = Covariance<9>::Identity() * 0.1;
 
     m_iekf_filter = IEKF(R0, p0, v0, P0);

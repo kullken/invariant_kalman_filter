@@ -20,6 +20,14 @@ void fromMsg(const geometry_msgs::Quaternion& in, invariant::Rotation& out)
 }
 
 inline
+invariant::Rotation fromMsg(const geometry_msgs::Quaternion& in)
+{
+    invariant::Rotation out;
+    tf2::fromMsg(in, out);
+    return out;
+}
+
+inline
 invariant::Vector3 fromMsg(const geometry_msgs::Vector3& in)
 {
     invariant::Vector3 out;
