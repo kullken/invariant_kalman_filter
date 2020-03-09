@@ -30,8 +30,8 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     , m_base_frame( [&nh_private]() -> std::string { return nh_private.param<std::string>("base_frame", "base_link"); }() )
     , m_map_frame(  [&nh_private]() -> std::string { return nh_private.param<std::string>("map_frame", "map"); }() )
 {
-    m_imu_sub       = m_nh.subscribe("imu", 10, KalmanNode::imu_cb, this);
-    m_mocap_sub     = m_nh.subscribe("mocap/pose", 10, KalmanNode::mocap_cb, this);
+    m_imu_sub       = m_nh.subscribe("imu", 10, &KalmanNode::imu_cb, this);
+    m_mocap_sub     = m_nh.subscribe("mocap/pose", 10, &KalmanNode::mocap_cb, this);
     m_pose_pub      = m_nh.advertise<geometry_msgs::PoseStamped>("pose_filtered", 10);
     m_velocity_pub  = m_nh.advertise<geometry_msgs::PointStamped>("vel_filtered", 10);
 
@@ -54,7 +54,6 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
 void KalmanNode::start()
 {
     m_previous_imu_time = ros::Time::now();
-    m_mocap_recieved = false;
     m_timer.start();
     ROS_INFO("Timer started!");
 }
@@ -77,6 +76,10 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
     for (const auto& imu_msg : m_imu_buffer)
     {
         const double dt = (imu_msg.header.stamp - m_previous_imu_time).toSec();
+        if (dt > 0.05)
+        {
+            ROS_WARN("Time between IMU messages is high [dt=%f]. Might result in large discretisation errors.", dt);
+        }
         m_iekf_filter.predict(dt, tf2::fromMsg(imu_msg.linear_acceleration), tf2::fromMsg(imu_msg.angular_velocity));
         m_previous_imu_time = imu_msg.header.stamp;
     }
@@ -120,8 +123,8 @@ void KalmanNode::publish_tf(const ros::Time& stamp)
     tf.header.frame_id  = m_map_frame;
     tf.child_frame_id   = m_base_frame;
 
-    tf2::toMsg(m_iekf_filter.get_rot(), tf.transform.rotation);
     tf2::toMsg(m_iekf_filter.get_pos(), tf.transform.translation);
+    tf2::toMsg(m_iekf_filter.get_rot(), tf.transform.rotation);
 
     m_tf_broadcaster.sendTransform(tf);
 }
