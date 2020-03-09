@@ -14,6 +14,7 @@
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 
 #include "iekf.h"
 #include "iekf_types.h"
@@ -35,7 +36,7 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     m_imu_sub       = m_nh.subscribe("imu", 10, &KalmanNode::imu_cb, this);
     m_mocap_sub     = m_nh.subscribe("mocap/pose", 10, &KalmanNode::mocap_cb, this);
     m_pose_pub      = m_nh.advertise<geometry_msgs::PoseStamped>("pose_filtered", 10);
-    m_velocity_pub  = m_nh.advertise<geometry_msgs::PointStamped>("vel_filtered", 10);
+    m_velocity_pub  = m_nh.advertise<geometry_msgs::Vector3Stamped>("vel_filtered", 10);
 
     const double frequency = m_nh_private.param<double>("frequency", 10.0);
     m_timer = m_nh.createTimer(1.0/frequency, &KalmanNode::timer_cb, this, false, false);
@@ -162,11 +163,11 @@ void KalmanNode::publish_pose(const ros::Time& stamp)
 
 void KalmanNode::publish_velocity(const ros::Time& stamp)
 {
-    geometry_msgs::PointStamped vel;
+    geometry_msgs::Vector3Stamped vel;
 
     vel.header.stamp    = stamp;
     vel.header.frame_id = m_map_frame;
-    vel.point           = tf2::toMsg(m_iekf_filter.get_vel());
+    vel.vector = tf2::toMsg<invariant::Vector3, geometry_msgs::Vector3>(m_iekf_filter.get_vel());
 
     m_velocity_pub.publish(vel);
 }

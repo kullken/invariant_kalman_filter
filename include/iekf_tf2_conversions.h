@@ -42,6 +42,16 @@ invariant::Vector3 fromMsg(const geometry_msgs::Vector3& in)
 //     return q;
 // }
 
+template<>
+geometry_msgs::Vector3 toMsg(const invariant::Vector3& in)
+{
+    geometry_msgs::Vector3 out;
+    out.x = in.x();
+    out.y = in.y();
+    out.z = in.z();
+    return out;
+}
+
 inline
 geometry_msgs::Quaternion& toMsg(const invariant::Rotation& in, geometry_msgs::Quaternion& out)
 {
