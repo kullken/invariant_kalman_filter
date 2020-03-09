@@ -19,7 +19,7 @@
 
 #include "ros_utils.h"
 
-namespace iekf
+namespace invariant
 {
 
 IEKFNode::IEKFNode(ros::NodeHandle& nh)
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     ROS_INFO("Initialising node...");
-    iekf::IEKFNode node(nh);
+    invariant::IEKFNode node(nh);
     ROS_INFO("Node initialisation done.");
 
     node.start();

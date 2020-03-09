@@ -5,7 +5,7 @@
 #include "iekf_types.h"
 
 
-namespace iekf::lie
+namespace invariant::lie
 {
 
 template<int n>

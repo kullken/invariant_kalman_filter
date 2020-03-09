@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-namespace iekf
+namespace invariant
 {
 
 template<int rows>

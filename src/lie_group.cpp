@@ -9,7 +9,7 @@
 #include "iekf_types.h"
 
 
-namespace iekf::lie
+namespace invariant::lie
 {
 
 Matrix3 skew(const Vector3& w)

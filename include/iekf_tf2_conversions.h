@@ -12,29 +12,29 @@ namespace tf2
 
 template<>
 inline
-void fromMsg(const geometry_msgs::Quaternion& in, iekf::Rotation& out)
+void fromMsg(const geometry_msgs::Quaternion& in, invariant::Rotation& out)
 {
-    iekf::Quaternion temp_q;
+    invariant::Quaternion temp_q;
     tf2::fromMsg(in, temp_q);
     out = temp_q.toRotationMatrix();
 }
 
 // template<>
-// geometry_msgs::Quaternion toMsg(const iekf::Rotation& R)
+// geometry_msgs::Quaternion toMsg(const invariant::Rotation& R)
 // {
-//     geometry_msgs::Quaternion q = tf2::toMsg(iekf::Quaternion(R));
+//     geometry_msgs::Quaternion q = tf2::toMsg(invariant::Quaternion(R));
 //     return q;
 // }
 
 inline
-geometry_msgs::Quaternion& toMsg(const iekf::Rotation& in, geometry_msgs::Quaternion& out)
+geometry_msgs::Quaternion& toMsg(const invariant::Rotation& in, geometry_msgs::Quaternion& out)
 {
-    out = tf2::toMsg(iekf::Quaternion(in));
+    out = tf2::toMsg(invariant::Quaternion(in));
     return out;
 }
 
 // inline
-// geometry_msgs::Vector3& toMsg(const iekf::Vector3& in, geometry_msgs::Vector3& out)
+// geometry_msgs::Vector3& toMsg(const invariant::Vector3& in, geometry_msgs::Vector3& out)
 // {
 //   out.x = in.x();
 //   out.y = in.y();

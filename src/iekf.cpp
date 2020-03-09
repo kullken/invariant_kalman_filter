@@ -5,7 +5,7 @@
 #include "iekf_types.h"
 #include "lie_group.h"
 
-namespace iekf
+namespace invariant
 {
 
 const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};

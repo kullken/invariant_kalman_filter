@@ -2,7 +2,7 @@
 
 #include "iekf_types.h"
 
-namespace iekf
+namespace invariant
 {
 
 class IEKF
