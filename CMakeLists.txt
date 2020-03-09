@@ -11,6 +11,7 @@ find_package(catkin REQUIRED
   sensor_msgs
   tf
   tf2_ros
+  tf2_geometry_msgs
   tf2_eigen
 )
 
