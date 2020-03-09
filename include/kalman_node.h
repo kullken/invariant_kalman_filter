@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "ros/ros.h"
 
@@ -38,10 +39,7 @@ private:
     IEKF m_iekf_filter;
 
     ros::Time m_previous_imu_time;
-
-    bool m_imu_recieved = false;
-    Vector3 m_imu_acc = Vector3::Zero();
-    Vector3 m_imu_ang_vel = Vector3::Zero();
+    std::vector<sensor_msgs::Imu> m_imu_buffer;
 
     bool m_mocap_recieved = false;
     Rotation m_mocap_R = Rotation::Identity();

@@ -22,6 +22,8 @@
 namespace invariant
 {
 
+constexpr size_t k_imu_buffer_capacity = 20;
+
 KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     : m_nh(nh)
     , m_nh_private(nh_private)
@@ -35,6 +37,8 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
 
     const double frequency = m_nh_private.param<double>("frequency", 10.0);
     m_timer = m_nh.createTimer(1.0/frequency, &KalmanNode::timer_cb, this, false, false);
+
+    m_imu_buffer.reserve(k_imu_buffer_capacity);
 
     ros_utils::wait_for_message<sensor_msgs::Imu>(m_imu_sub);
 
@@ -50,7 +54,6 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
 void KalmanNode::start()
 {
     m_previous_imu_time = ros::Time::now();
-    m_imu_recieved = false;
     m_mocap_recieved = false;
     m_timer.start();
     ROS_INFO("Timer started!");
@@ -71,14 +74,14 @@ void KalmanNode::initialise_iekf_filter()
 
 void KalmanNode::timer_cb(const ros::TimerEvent& e)
 {
-    if (m_imu_recieved)
+    for (const auto& imu_msg : m_imu_buffer)
     {
-        // TODO: Create imu msg queue and calculate dt from imu timestamps.
-        const double dt = (e.current_real - m_previous_imu_time).toSec();
-        m_iekf_filter.predict(dt, m_imu_acc, m_imu_ang_vel);
-        m_previous_imu_time = e.current_real;
-        m_imu_recieved = false;
+        const double dt = (imu_msg.header.stamp - m_previous_imu_time).toSec();
+        m_iekf_filter.predict(dt, tf2::fromMsg(imu_msg.linear_acceleration), tf2::fromMsg(imu_msg.angular_velocity));
+        m_previous_imu_time = imu_msg.header.stamp;
     }
+    m_imu_buffer.clear();
+
     if (m_mocap_recieved)
     {
         m_iekf_filter.mocap_update(m_mocap_R, m_mocap_pos);
@@ -92,9 +95,14 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
 
 void KalmanNode::imu_cb(const sensor_msgs::Imu& msg)
 {
-    tf2::fromMsg(msg.linear_acceleration, m_imu_acc);
-    tf2::fromMsg(msg.angular_velocity, m_imu_ang_vel);
-    m_imu_recieved = true;
+    if (m_imu_buffer.size() < k_imu_buffer_capacity)
+    {
+        m_imu_buffer.push_back(msg);
+    }
+    else
+    {
+        ROS_ERROR("IMU buffer is full! Ignoring new IMU messages until buffer has room again.");
+    }
 }
     
 void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
