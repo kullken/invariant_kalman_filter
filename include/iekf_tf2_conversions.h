@@ -42,14 +42,8 @@ invariant::Vector3 fromMsg(const geometry_msgs::Vector3& in)
     return out;
 }
 
-// template<>
-// geometry_msgs::Quaternion toMsg(const invariant::Rotation& R)
-// {
-//     geometry_msgs::Quaternion q = tf2::toMsg(invariant::Quaternion(R));
-//     return q;
-// }
-
 template<>
+inline
 geometry_msgs::Vector3 toMsg(const invariant::Vector3& in)
 {
     geometry_msgs::Vector3 out;
@@ -65,14 +59,5 @@ geometry_msgs::Quaternion& toMsg(const invariant::Rotation& in, geometry_msgs::Q
     out = tf2::toMsg(invariant::Quaternion(in));
     return out;
 }
-
-// inline
-// geometry_msgs::Vector3& toMsg(const invariant::Vector3& in, geometry_msgs::Vector3& out)
-// {
-//   out.x = in.x();
-//   out.y = in.y();
-//   out.z = in.z();
-//   return out;
-// }
 
 }

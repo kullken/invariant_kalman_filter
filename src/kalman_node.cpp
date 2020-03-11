@@ -5,7 +5,6 @@
 
 #include <ros/ros.h>
 
-#include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -79,10 +78,9 @@ void KalmanNode::initialise_iekf_filter()
     const double roll  = m_nh_private.param<double>("init/roll" , 0.0);
     const double pitch = m_nh_private.param<double>("init/pitch", 0.0);
     const double yaw   = m_nh_private.param<double>("init/yaw"  , 0.0);
+    // TODO: Lots of conceptually unneeded conversions. Make nicer somehow.
     tf2::Quaternion quat_tf;
     quat_tf.setRPY(roll, pitch, yaw);
-    // geometry_msgs::Quaternion quat_msg = tf2::toMsg(quat_tf);
-    // const Rotation R0 = tf2::fromMsg(quat_msg);
     const Rotation R0 = tf2::fromMsg(tf2::toMsg(quat_tf));
 
     // TODO: Initilise from launch parameters?
