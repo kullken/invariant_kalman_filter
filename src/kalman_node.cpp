@@ -1,6 +1,7 @@
 #include "kalman_node.h"
 
 #include <string>
+#include <memory>
 
 #include <ros/ros.h>
 
@@ -16,6 +17,8 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
 
+#include "measurement.h"
+
 #include "iekf.h"
 #include "iekf_types.h"
 #include "iekf_tf2_conversions.h"
@@ -25,7 +28,8 @@
 namespace invariant
 {
 
-constexpr size_t k_imu_buffer_capacity = 20;
+static constexpr size_t k_queue_min_size = 5;
+static constexpr size_t k_queue_max_size = 20;
 
 KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     : m_nh(nh)
@@ -40,8 +44,6 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
 
     const double frequency = m_nh_private.param<double>("frequency", 10.0);
     m_timer = m_nh.createTimer(1.0/frequency, &KalmanNode::timer_cb, this, false, false);
-
-    m_imu_buffer.reserve(k_imu_buffer_capacity);
 
     initialise_iekf_filter();
 
@@ -93,22 +95,39 @@ void KalmanNode::initialise_iekf_filter()
 
 void KalmanNode::timer_cb(const ros::TimerEvent& e)
 {
-    for (const auto& imu_msg : m_imu_buffer)
+    if (m_queue.size() > k_queue_max_size)
     {
-        const double dt = (imu_msg.header.stamp - m_previous_imu_time).toSec();
-        if (dt > 0.05)
-        {
-            ROS_WARN("Time between IMU messages is high [dt=%f]. Might result in large discretisation errors.", dt);
-        }
-        m_iekf_filter.predict(dt, tf2::fromMsg(imu_msg.linear_acceleration), tf2::fromMsg(imu_msg.angular_velocity));
-        m_previous_imu_time = imu_msg.header.stamp;
+        ROS_WARN("Measurement queue size [=%lu] exceeds max size [=%zu]! Filter might not be running in real-time.", m_queue.size(), k_queue_max_size);
     }
-    m_imu_buffer.clear();
 
-    if (m_mocap_recieved)
+    while (m_queue.size() > k_queue_min_size)
     {
-        m_iekf_filter.mocap_update(m_mocap_R, m_mocap_pos);
-        m_mocap_recieved = false;
+        auto measurement_ptr = m_queue.top();
+        m_queue.pop();
+
+        switch (measurement_ptr->get_type())
+        {
+            case MeasurementType::imu:
+            {
+                auto imu_measurement_ptr = std::dynamic_pointer_cast<ImuMeasurement>(measurement_ptr);
+                const sensor_msgs::Imu& imu_msg = imu_measurement_ptr->get_data();
+                const double dt = (imu_msg.header.stamp - m_previous_imu_time).toSec();
+                if (dt > 0.05)
+                {
+                    ROS_WARN("Time between IMU messages is high [dt=%f]. Might result in large discretisation errors.", dt);
+                }
+                m_iekf_filter.predict(dt, tf2::fromMsg(imu_msg.linear_acceleration), tf2::fromMsg(imu_msg.angular_velocity));
+                m_previous_imu_time = imu_msg.header.stamp;
+                break;
+            }
+            case MeasurementType::mocap:
+            {
+                auto mocap_measurement_ptr = std::dynamic_pointer_cast<MocapMeasurement>(measurement_ptr);
+                const geometry_msgs::PoseStamped& mocap_msg = mocap_measurement_ptr->get_data();
+                m_iekf_filter.mocap_update(tf2::fromMsg(mocap_msg.pose.orientation), tf2::fromMsg(mocap_msg.pose.position));
+                break;
+            }
+        }
     }
 
     publish_tf(e.current_real);
@@ -118,21 +137,16 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
 
 void KalmanNode::imu_cb(const sensor_msgs::Imu& msg)
 {
-    if (m_imu_buffer.size() < k_imu_buffer_capacity)
-    {
-        m_imu_buffer.push_back(msg);
-    }
-    else
-    {
-        ROS_ERROR("IMU buffer is full! Ignoring new IMU messages until buffer has room again.");
-    }
+    m_queue.push(std::make_shared<ImuMeasurement>(msg));
 }
     
 void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
 {
-    tf2::fromMsg(msg.pose.orientation, m_mocap_R);
-    tf2::fromMsg(msg.pose.position, m_mocap_pos);
-    m_mocap_recieved = true;
+    m_queue.push(std::make_shared<MocapMeasurement>(msg));
+    if (m_queue.size() > k_queue_max_size)
+    {
+        ROS_WARN("Measurement queue exceeds max size [=%zu]! Filter might not be running in real-time.", k_queue_max_size);
+    }
 }
 
 void KalmanNode::publish_tf(const ros::Time& stamp)

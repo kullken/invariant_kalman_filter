@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 
 #include <ros/ros.h>
 
@@ -10,6 +11,8 @@
 
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
+
+#include "measurement.h"
 
 #include "iekf.h"
 #include "iekf_types.h"
@@ -38,12 +41,9 @@ private:
 
     IEKF m_iekf_filter;
 
-    ros::Time m_previous_imu_time;
-    std::vector<sensor_msgs::Imu> m_imu_buffer;
+    std::priority_queue<std::shared_ptr<Measurement>, std::vector<std::shared_ptr<Measurement>>, MeasurementCompare> m_queue;
 
-    bool m_mocap_recieved = false;
-    Rotation m_mocap_R = Rotation::Identity();
-    Vector3 m_mocap_pos = Vector3::Zero();
+    ros::Time m_previous_imu_time;
 
 public:
     KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
