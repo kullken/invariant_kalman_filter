@@ -1,9 +1,8 @@
 #pragma once
 
 #include <tf2/convert.h>
-// #include <tf2_eigen/tf2_eigen.h>
-
-#include <geometry_msgs/Quaternion.h>
+#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include "iekf_types.h"
 
@@ -23,6 +22,14 @@ inline
 invariant::Rotation fromMsg(const geometry_msgs::Quaternion& in)
 {
     invariant::Rotation out;
+    tf2::fromMsg(in, out);
+    return out;
+}
+
+inline
+invariant::Vector3 fromMsg(const geometry_msgs::Point& in)
+{
+    invariant::Vector3 out;
     tf2::fromMsg(in, out);
     return out;
 }
