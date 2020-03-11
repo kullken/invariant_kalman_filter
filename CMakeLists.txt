@@ -75,7 +75,6 @@ add_library(lib${PROJECT_NAME}_iekf
 
 ## Declare a C++ executable
 add_executable(ekf_node src/ekf_node.cpp src/ekf.cpp)
-add_executable(iekf_node src/iekf_node.cpp)
 add_executable(kalman_node src/kalman_node.cpp)
 
 ## Specify libraries to link a library or executable target against
@@ -88,10 +87,6 @@ target_link_libraries(lib${PROJECT_NAME}_iekf
 )
 target_link_libraries(ekf_node
   ${catkin_LIBRARIES}
-)
-target_link_libraries(iekf_node
-  ${catkin_LIBRARIES}
-  lib${PROJECT_NAME}_iekf
 )
 target_link_libraries(kalman_node
   ${catkin_LIBRARIES}
