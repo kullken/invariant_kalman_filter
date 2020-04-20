@@ -3,7 +3,7 @@
 #include <array>
 #include <utility>
 
-namespace invariant::test
+namespace trajectory
 {
 
 template<typename PointType, std::size_t degree>
