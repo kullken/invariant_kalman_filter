@@ -26,9 +26,9 @@ public:
 
     double degree() const { return degree_; }
 
-    PointType pos(double t) const;
-    PointType vel(double t) const;
-    PointType acc(double t) const;
+    PointType pos(double t) const { return calc_value(t); }
+    PointType vel(double t) const { return get_derivative().pos(t); }
+    PointType acc(double t) const { return get_derivative().vel(t); }
 
     Bezier<PointType, degree-1> get_derivative() const;
     Bezier<PointType, degree> get_reversed() const;
