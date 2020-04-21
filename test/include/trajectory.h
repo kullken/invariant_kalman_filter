@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iekf_types.h"
+#include "linear_trajectory.h"
 
 namespace invariant::test
 {
@@ -8,6 +9,7 @@ namespace invariant::test
 class Trajectory
 {
 private:
+    const LinearTrajectory m_linear_trajectory;
 
 public:
     Vector3 get_position(double t) const;
