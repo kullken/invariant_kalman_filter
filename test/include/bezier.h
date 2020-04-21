@@ -31,8 +31,10 @@ public:
     Bezier<PointType, degree-1> get_derivative() const;
     Bezier<PointType, degree> get_reversed() const;
 
-    /// Split Bézier-curve into two new curves at time t.
-    std::pair<Bezier<PointType, degree>, Bezier<PointType, degree>> split(double t) const;
 };
+
+/// Split Bézier-curve into two new curves at time t.
+template<typename PointType, std::size_t degree>
+std::pair<Bezier<PointType, degree>, Bezier<PointType, degree>> split(Bezier<PointType, degree> bezier, double t);
 
 }
