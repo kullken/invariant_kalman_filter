@@ -2,6 +2,7 @@
 
 #include "iekf_types.h"
 #include "linear_trajectory.h"
+#include "angular_trajectory.h"
 
 namespace invariant::test
 {
@@ -10,6 +11,7 @@ class Trajectory
 {
 private:
     const LinearTrajectory m_linear_trajectory;
+    const AngularTrajectory m_angular_trajectory;
 
 public:
     Vector3 get_position(double t) const;
