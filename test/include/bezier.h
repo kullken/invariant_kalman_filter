@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <utility>
+#include <algorithm>
 
 namespace trajectory
 {
@@ -86,7 +87,8 @@ private:
             cj /= std::pow(T_, j);
             coeffs[j] = cj;
         }
-        return std::reverse(coeffs);
+        std::reverse(std::begin(coeffs), std::end(coeffs));
+        return coeffs;
     }
 
 };
