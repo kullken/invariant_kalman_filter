@@ -1,10 +1,16 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 #include <utility>
 
 namespace trajectory
 {
+
+static constexpr unsigned int factorial(unsigned int n)
+{
+    return (n == 1 || n == 0) ? 1 : n * factorial(n - 1);
+}
 
 template<typename PointType, std::size_t degree>
 class Bezier
@@ -33,6 +39,35 @@ public:
 
     Bezier<PointType, degree-1> get_derivative() const;
     Bezier<PointType, degree> get_reversed() const;
+
+private:
+    PointType calc_value(double t) const
+    {
+        // TODO: Use De Casteljau's algorithm for better numerical stability at higher degrees?
+        PointType result{};
+        for (const auto& coeff : calc_coeffs())
+        {
+            result = result*t + coeff;
+        }
+        return result;
+    }
+
+    std::array<PointType, size> calc_coeffs() const
+    {
+        std::array<PointType, size> coeffs;
+        for (int j = 0; j <= degree; ++j)
+        {
+            PointType cj{};
+            for (int i = 0; i <= j; ++i)
+            {
+                cj += std::pow(-1, i+j) * points_[i] / (factorial(i) * factorial(j-i));
+            }
+            cj *= factorial(degree) / factorial(degree - j);
+            cj /= std::pow(T_, j);
+            coeffs[j] = cj;
+        }
+        return std::reverse(coeffs);
+    }
 
 };
 
