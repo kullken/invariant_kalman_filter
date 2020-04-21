@@ -9,19 +9,22 @@ namespace trajectory
 template<typename PointType, std::size_t degree>
 class Bezier
 {
+    static constexpr std::size_t size = degree + 1;
+
 private:
     const double T_ = 1;
-    const std::array<PointType, degree + 1> points_;
+    const std::array<PointType, size> points_;
 
 public:
-    explicit Bezier(std::array<PointType, degree + 1> points) : points_(points)
+    explicit Bezier(std::array<PointType, size> points) : points_(points)
     {
     }
 
-    Bezier(double duration, std::array<PointType, degree + 1> points)
+    Bezier(double duration, std::array<PointType, size> points)
         : T_(duration)
         , points_(points)
     {
+        // TODO: Assert: T_ > 0
     }
 
     PointType pos(double t) const { return calc_value(t); }
