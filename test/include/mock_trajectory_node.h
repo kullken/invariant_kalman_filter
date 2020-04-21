@@ -35,12 +35,8 @@ public:
     void start();
 
 private:
-    void initialise_iekf_filter();
-
-    void timer_cb(const ros::TimerEvent& e);
-
-    void publish_imu(const ros::Time& stamp);
-    void publish_mocap(const ros::Time& stamp);
+    void publish_imu(const ros::TimerEvent& e);
+    void publish_mocap(const ros::TimerEvent& e);
 };
 
 }
