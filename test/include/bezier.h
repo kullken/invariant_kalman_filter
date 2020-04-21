@@ -37,7 +37,16 @@ public:
     PointType vel(double t) const { return get_derivative().pos(t); }
     PointType acc(double t) const { return get_derivative().vel(t); }
 
-    Bezier<PointType, degree-1> get_derivative() const;
+    Bezier<PointType, degree-1> get_derivative() const
+    {
+        std::array<PointType, size-1> derivative_points;
+        for (std::size_t i = 0; i < size-1; ++i)
+        {
+            derivative_points[i] = (points_[i+1] - points_[i]) * degree / T_;
+        }
+        return Bezier{derivative_points};
+    }
+
     Bezier<PointType, degree> get_reversed() const;
 
 private:
