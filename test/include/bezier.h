@@ -59,7 +59,12 @@ public:
         return Bezier{derivative_points};
     }
 
-    Bezier<PointType, degree> get_reversed() const;
+    Bezier<PointType, degree> get_reversed() const
+    {
+        std::array<PointType, size> reverse_points = points_;
+        std::reverse(std::begin(reverse_points), std::end(reverse_points));
+        return Bezier{reverse_points};
+    }
 
 private:
     PointType calc_value(double t) const
