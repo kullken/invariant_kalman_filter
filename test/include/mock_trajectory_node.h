@@ -9,6 +9,8 @@
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 
+#include "trajectory.h"
+
 namespace invariant::test
 {
 
@@ -28,6 +30,8 @@ private:
 
     ros::Timer m_imu_timer;
     ros::Timer m_mocap_timer;
+
+    const Trajectory m_trajectory; 
 
 public:
     MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
