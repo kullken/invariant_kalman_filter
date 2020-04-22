@@ -58,7 +58,7 @@ public:
         {
             derivative_points[i] = (points_[i+1] - points_[i]) * degree / T_;
         }
-        return Bezier{derivative_points};
+        return Bezier<PointType, degree-1>(derivative_points);
     }
 
     Bezier<PointType, degree> get_reversed() const
