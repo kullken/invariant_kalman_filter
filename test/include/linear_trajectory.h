@@ -10,16 +10,20 @@ namespace invariant::test
 
 class LinearTrajectory
 {
-    using LinearTrajectorySegment = trajectory::Bezier<Vector3, 3>;
+    class Segment : public trajectory::Bezier<Vector3, 3>
+    {
+    public:
+        double time_offset;
+    };
 
 private:
     double m_duration = 0;
 
-    std::vector<LinearTrajectorySegment> m_segments = {};
+    std::vector<Segment> m_segments;
 
 public:
     LinearTrajectory() = default;
-    LinearTrajectory(std::vector<LinearTrajectorySegment> segments);
+    LinearTrajectory(std::vector<Segment> segments);
 
     Vector3 get_position(double t) const;
     Vector3 get_velocity(double t) const;
