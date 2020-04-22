@@ -83,10 +83,10 @@ private:
     std::array<PointType, size> calc_coeffs() const
     {
         std::array<PointType, size> coeffs;
-        for (int j = 0; j <= degree; ++j)
+        for (unsigned int j = 0; j <= degree; ++j)
         {
             PointType cj{};
-            for (int i = 0; i <= j; ++i)
+            for (unsigned int i = 0; i <= j; ++i)
             {
                 cj += std::pow(-1, i+j) * points_[i] / (factorial(i) * factorial(j-i));
             }
