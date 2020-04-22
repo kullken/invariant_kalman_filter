@@ -28,6 +28,9 @@ public:
     Vector3 get_position(double t) const;
     Vector3 get_velocity(double t) const;
     Vector3 get_acceleration(double t) const;
+
+private:
+    const Segment& get_segment_at(double t) const;
 };
 
 }
