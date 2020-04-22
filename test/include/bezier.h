@@ -45,6 +45,8 @@ public:
         // TODO: Assert: T_ > 0
     }
 
+    double duration() const { return T_; }
+
     PointType pos(double t) const { return calc_value(t); }
     PointType vel(double t) const { return get_derivative().pos(t); }
     PointType acc(double t) const { return get_derivative().vel(t); }
