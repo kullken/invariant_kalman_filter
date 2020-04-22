@@ -30,7 +30,7 @@ class Bezier
     static constexpr std::size_t size = degree + 1;
 
 private:
-    const double T_ = 1;
+    const double duration_ = 1;
     const std::array<PointType, size> points_;
 
 public:
@@ -39,13 +39,13 @@ public:
     }
 
     Bezier(double duration, std::array<PointType, size> points)
-        : T_(duration)
+        : duration_(duration)
         , points_(points)
     {
-        // TODO: Assert: T_ > 0
+        // TODO: Assert: duration_ > 0
     }
 
-    double duration() const { return T_; }
+    double duration() const { return duration_; }
 
     PointType pos(double t) const { return calc_value(t); }
     PointType vel(double t) const { return get_derivative().pos(t); }
@@ -56,7 +56,7 @@ public:
         std::array<PointType, size-1> derivative_points;
         for (std::size_t i = 0; i < size-1; ++i)
         {
-            derivative_points[i] = (points_[i+1] - points_[i]) * degree / T_;
+            derivative_points[i] = (points_[i+1] - points_[i]) * degree / duration_;
         }
         return Bezier<PointType, degree-1>(derivative_points);
     }
@@ -91,7 +91,7 @@ private:
                 cj += std::pow(-1, i+j) * points_[i] / (factorial(i) * factorial(j-i));
             }
             cj *= factorial(degree) / factorial(degree - j);
-            cj /= std::pow(T_, j);
+            cj /= std::pow(duration_, j);
             coeffs[j] = cj;
         }
         std::reverse(std::begin(coeffs), std::end(coeffs));
