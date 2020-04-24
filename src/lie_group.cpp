@@ -15,8 +15,8 @@ namespace invariant::lie
 
 Quaternion exp(const Quaternion& q)
 {
-    [[maybe_unused]] const double tol = 1e-6;
-    assert(("Imaginary quaternion required.", q.w() < tol));
+    [[maybe_unused]] constexpr double tolerance = 1e-6;
+    assert(("Imaginary quaternion required.", q.w() < tolerance));
     Vector3 u = q.vec();
     double u_norm = u.norm();
     Vector3 v = u.normalized() * std::sin(u_norm);
@@ -25,8 +25,8 @@ Quaternion exp(const Quaternion& q)
 
 Quaternion log(const Quaternion& q)
 {
-    [[maybe_unused]] const double tol = 1e-6;
-    assert(("Unit-norm quaternion required.", std::abs(q.norm() - 1) < tol));
+    [[maybe_unused]] constexpr double tolerance = 1e-6;
+    assert(("Unit-norm quaternion required.", std::abs(q.norm() - 1) < tolerance));
     Vector3 u = q.vec();
     Vector3 v = u.normalized() * std::acos(q.w());
     return Quaternion(0, v.x(), v.y(), v.z());
@@ -43,14 +43,14 @@ Matrix3 skew(const Vector3& w)
 
 Vector3 unskew(const Matrix3& S)
 {
-    const double tol = 1e-6;
+    constexpr double tolerance = 1e-6;
     double trace = S.trace();
-    ROS_WARN_STREAM_COND(trace > tol, "Matrix to unskew has high trace: " << trace);
-    ROS_WARN_STREAM_COND(S(2,1) + S(1,2) > tol, "Matrix to unskew is not skew-symmetric in w(0): " << S(2,1) + S(1,2));
-    ROS_WARN_STREAM_COND(S(0,2) + S(2,0) > tol, "Matrix to unskew is not skew-symmetric in w(0): " << S(0,2) + S(2,0));
-    ROS_WARN_STREAM_COND(S(1,0) + S(0,1) > tol, "Matrix to unskew is not skew-symmetric in w(0): " << S(1,0) + S(0,1));
+    ROS_WARN_STREAM_COND(trace > tolerance, "Matrix to unskew has high trace: " << trace);
+    ROS_WARN_STREAM_COND(S(2,1) + S(1,2) > tolerance, "Matrix to unskew is not skew-symmetric in w(0): " << S(2,1) + S(1,2));
+    ROS_WARN_STREAM_COND(S(0,2) + S(2,0) > tolerance, "Matrix to unskew is not skew-symmetric in w(0): " << S(0,2) + S(2,0));
+    ROS_WARN_STREAM_COND(S(1,0) + S(0,1) > tolerance, "Matrix to unskew is not skew-symmetric in w(0): " << S(1,0) + S(0,1));
 
-    if (trace > tol || S(2,1) + S(1,2) > tol || S(0,2) + S(2,0)  > tol || S(1,0) + S(0,1) > tol)
+    if (trace > tolerance || S(2,1) + S(1,2) > tolerance || S(0,2) + S(2,0)  > tolerance || S(1,0) + S(0,1) > tolerance)
     {
         ROS_WARN_STREAM("Matrix:\n" << S);
     }
