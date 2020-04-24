@@ -23,6 +23,14 @@ using Quaternion = Eigen::Quaternion<double>;
 
 using Jacobian   = Eigen::Matrix<double, 9, 9>;
 
+/// Get identity element of Type. 
+/// Defaults to Type::Identity() used in Eigen.
+template<typename Type>
+Type identity()
+{
+    return Type::Identity();
+}
+
 
 class State : public Matrix<5, 5>
 {
