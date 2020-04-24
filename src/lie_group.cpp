@@ -1,5 +1,6 @@
 #include "lie_group.h"
 
+#include <cassert>
 #include <cmath>
 
 #include <ros/console.h>
@@ -11,6 +12,25 @@
 
 namespace invariant::lie
 {
+
+Quaternion exp(const Quaternion& q)
+{
+    [[maybe_unused]] const double tol = 1e-6;
+    assert(("Imaginary quaternion required.", q.w() < tol));
+    Vector3 u = q.vec();
+    double u_norm = u.norm();
+    Vector3 v = u.normalized() * std::sin(u_norm);
+    return Quaternion(std::cos(u_norm), v.x(), v.y(), v.z());
+}
+
+Quaternion log(const Quaternion& q)
+{
+    [[maybe_unused]] const double tol = 1e-6;
+    assert(("Unit-norm quaternion required.", std::abs(q.norm() - 1) < tol));
+    Vector3 u = q.vec();
+    Vector3 v = u.normalized() * std::acos(q.w());
+    return Quaternion(0, v.x(), v.y(), v.z());
+}
 
 Matrix3 skew(const Vector3& w)
 {

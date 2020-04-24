@@ -20,6 +20,12 @@ Matrix<n,n> logm(const Matrix<n,n>& mat)
     return mat.log();
 }
 
+/// Calculates the exponential of an imaginary-only quaternion.
+Quaternion exp(const Quaternion& q);
+
+/// Calculates the natural logarithm of a unit-norm quaternion.
+Quaternion log(const Quaternion& q);
+
 /// Skew-symmetric cross-product matrix of a 3D vector. 
 /// Map: R^3 -> so(3).
 Matrix3 skew(const Vector3& w);
