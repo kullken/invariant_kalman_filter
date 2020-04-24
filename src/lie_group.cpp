@@ -47,8 +47,8 @@ Vector3 unskew(const Matrix3& S)
     double trace = S.trace();
     ROS_WARN_STREAM_COND(trace > tolerance, "Matrix to unskew has high trace: " << trace);
     ROS_WARN_STREAM_COND(S(2,1) + S(1,2) > tolerance, "Matrix to unskew is not skew-symmetric in w(0): " << S(2,1) + S(1,2));
-    ROS_WARN_STREAM_COND(S(0,2) + S(2,0) > tolerance, "Matrix to unskew is not skew-symmetric in w(0): " << S(0,2) + S(2,0));
-    ROS_WARN_STREAM_COND(S(1,0) + S(0,1) > tolerance, "Matrix to unskew is not skew-symmetric in w(0): " << S(1,0) + S(0,1));
+    ROS_WARN_STREAM_COND(S(0,2) + S(2,0) > tolerance, "Matrix to unskew is not skew-symmetric in w(1): " << S(0,2) + S(2,0));
+    ROS_WARN_STREAM_COND(S(1,0) + S(0,1) > tolerance, "Matrix to unskew is not skew-symmetric in w(2): " << S(1,0) + S(0,1));
 
     if (trace > tolerance || S(2,1) + S(1,2) > tolerance || S(0,2) + S(2,0)  > tolerance || S(1,0) + S(0,1) > tolerance)
     {
