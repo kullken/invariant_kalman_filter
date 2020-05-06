@@ -61,6 +61,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  test/include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
@@ -91,6 +92,15 @@ target_link_libraries(ekf_node
 target_link_libraries(kalman_node
   ${catkin_LIBRARIES}
   lib${PROJECT_NAME}_iekf
+)
+
+## Test trajectories
+add_executable(mock_trajectory_node
+  test/src/mock_trajectory_node.cpp
+)
+target_link_libraries(mock_trajectory_node
+  ${catkin_LIBRARIES}
+  # lib${PROJECT_NAME}_lie_group
 )
 
 #############
