@@ -1,22 +1,27 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(invariant_kalman_filter)
 
-add_compile_options(-std=c++17 -g -Wall -Wextra -pedantic)
+add_compile_options(-std=c++17 -g -Wall -Wextra -Wpedantic -Wno-deprecated-copy)
 
 find_package(catkin REQUIRED 
   COMPONENTS
-  cmake_modules
-  geometry_cpp
-  geometry_msgs
-  roscpp
-  sensor_msgs
-  tf2
-  tf2_ros
-  tf2_geometry_msgs
-  tf2_eigen
+    cmake_modules
+    geometry_cpp
+    geometry_msgs
+    roscpp
+    sensor_msgs
+    tf2
+    tf2_ros
+    tf2_geometry_msgs
+    tf2_eigen
 )
 
 find_package(Eigen3 REQUIRED)
+
+# Remove warning caused by unset variable.
+if (EIGEN3_INCLUDE_DIRS AND NOT Eigen3_INCLUDE_DIRS)
+  set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS})
+endif()
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -101,7 +106,6 @@ add_executable(mock_trajectory_node
 )
 target_link_libraries(mock_trajectory_node
   ${catkin_LIBRARIES}
-  # lib${PROJECT_NAME}_lie_group
 )
 
 #############
