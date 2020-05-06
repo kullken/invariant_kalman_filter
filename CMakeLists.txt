@@ -6,6 +6,7 @@ add_compile_options(-std=c++17 -g -Wall -Wextra -pedantic)
 find_package(catkin REQUIRED 
   COMPONENTS
   cmake_modules
+  geometry_cpp
   geometry_msgs
   roscpp
   sensor_msgs
