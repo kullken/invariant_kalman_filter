@@ -1,26 +1,20 @@
 #pragma once
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include <geometry_cpp/math/vector.h>
+#include <geometry_cpp/math/matrix.h>
+#include <geometry_cpp/math/quaternion.h>
 
 namespace ekf
 {
 
-template<int rows, int cols>
-using Matrix             = Eigen::Matrix<double, rows, cols>;
+using namespace geometry::math;
 
-using Vec3               = Eigen::Matrix<double, 3, 1>;
-using Matrix3            = Eigen::Matrix<double, 3, 3>;
+using State              = Vector<9>;
+using Covariance         = Matrix<9, 9>;
+using Jacobian           = Matrix<9, 9>;
 
-using State              = Eigen::Matrix<double, 9, 1>;
-using Covariance         = Eigen::Matrix<double, 9, 9>;
-using Jacobian           = Eigen::Matrix<double, 9, 9>;
-
-using Position           = Eigen::Matrix<double, 3, 1>;
-using PositionCovariance = Eigen::Matrix<double, 3, 3>;
-using PositionJacobian   = Eigen::Matrix<double, 3, 9>;
-
-using Rotation           = Eigen::Matrix<double, 3, 3>;
-using Quaternion         = Eigen::Quaternion<double>;
+using Position           = Vector<3>;
+using PositionCovariance = Matrix<3, 3>;
+using PositionJacobian   = Matrix<3, 9>;
 
 }

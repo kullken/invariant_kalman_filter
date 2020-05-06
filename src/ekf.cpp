@@ -8,7 +8,7 @@ namespace ekf
 {
 
 /// Skew-symmetric cross-product matrix of a 3D vector.
-Matrix3 S(const Vec3& vec)
+Matrix3 S(const Vector3& vec)
 {
     Matrix3 mat;
     mat << 0.0, -vec(2), vec(1), 
@@ -17,17 +17,17 @@ Matrix3 S(const Vec3& vec)
     return mat;
 }
 
-const Vec3 EKF::s_gravity{0.0, 0.0, -9.82};
+const Vector3 EKF::s_gravity{0.0, 0.0, -9.82};
 
-EKF::EKF(const Vec3& initial_pos, const Vec3& initial_vel, const Rotation& initial_rot, const Covariance& initial_covar)
+EKF::EKF(const Vector3& initial_pos, const Vector3& initial_vel, const Rotation& initial_rot, const Covariance& initial_covar)
     : m_x()
     , m_R_ref(initial_rot)
     , m_P(initial_covar)
 {
-    m_x << initial_pos, initial_vel, Vec3::Zero();
+    m_x << initial_pos, initial_vel, Vector3::Zero();
 }
 
-void EKF::predict(double dt, const Vec3& acc, const Vec3& ang_vel)
+void EKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     const Jacobian A = EKF::state_transition_jac(m_R_ref, dt, acc, ang_vel);
     const Covariance Q = EKF::state_transition_var(dt);
@@ -55,25 +55,25 @@ void EKF::update_with_position(const Position& measurement)
 
 void EKF::reset_attitude_error()
 {
-    const Vec3 delta = m_x.segment<3>(6);
+    const Vector3 delta = m_x.segment<3>(6);
 
     Matrix<9, 9> T = Matrix<9, 9>::Identity();
     T.bottomRightCorner<3,3>() = (-1/2 * S(delta)).exp();
 
     m_P = T * m_P * T.transpose();
     m_R_ref *= (S(delta)).exp();
-    m_x.segment<3>(6) = Vec3::Zero();
+    m_x.segment<3>(6) = Vector3::Zero();
 }
 
 // State transition model without resetting attitude error.
-State EKF::state_transition_model(const State& x, const Rotation& R_ref, double dt, const Vec3& acc, const Vec3& ang_vel)
+State EKF::state_transition_model(const State& x, const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
-    Vec3 pos = x.segment<3>(0);
-    Vec3 vel = x.segment<3>(3);
-    Vec3 delta = x.segment<3>(6);
+    Vector3 pos = x.segment<3>(0);
+    Vector3 vel = x.segment<3>(3);
+    Vector3 delta = x.segment<3>(6);
 
-    // Vec3 rotated_acc = R_ref*S(delta).exp()*acc;                        // Without inversion of R
-    Vec3 rotated_acc = (R_ref*S(delta).exp()).inverse()*acc;            // With inversion of R
+    // Vector3 rotated_acc = R_ref*S(delta).exp()*acc;                        // Without inversion of R
+    Vector3 rotated_acc = (R_ref*S(delta).exp()).inverse()*acc;            // With inversion of R
 
     pos   += dt * vel + dt*dt/2 * (rotated_acc + s_gravity);
     vel   += dt * (rotated_acc + s_gravity);
@@ -85,7 +85,7 @@ State EKF::state_transition_model(const State& x, const Rotation& R_ref, double 
     return x_predicted;
 }
 
-Jacobian EKF::state_transition_jac(const Rotation& R_ref, double dt, const Vec3& acc, const Vec3& ang_vel)
+Jacobian EKF::state_transition_jac(const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     Jacobian jac = Jacobian::Identity();
     jac.block<3,3>(0,3) = dt * Matrix3::Identity();
