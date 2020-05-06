@@ -2,19 +2,16 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
-#include <ugl/math/quaternion.h>
 
 namespace ekf
 {
 
-using namespace ugl::math;
+using State              = ugl::Vector<9>;
+using Covariance         = ugl::Matrix<9, 9>;
+using Jacobian           = ugl::Matrix<9, 9>;
 
-using State              = Vector<9>;
-using Covariance         = Matrix<9, 9>;
-using Jacobian           = Matrix<9, 9>;
-
-using Position           = Vector<3>;
-using PositionCovariance = Matrix<3, 3>;
-using PositionJacobian   = Matrix<3, 9>;
+using Position           = ugl::Vector<3>;
+using PositionCovariance = ugl::Matrix<3, 3>;
+using PositionJacobian   = ugl::Matrix<3, 9>;
 
 }

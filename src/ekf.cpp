@@ -2,10 +2,18 @@
 
 #include <unsupported/Eigen/MatrixFunctions>
 
+#include <ugl/math/vector.h>
+#include <ugl/math/matrix.h>
+#include <ugl/math/quaternion.h>
+
 #include "ekf_types.h"
 
 namespace ekf
 {
+
+using ugl::Vector3;
+using ugl::Matrix3;
+using ugl::Rotation;
 
 /// Skew-symmetric cross-product matrix of a 3D vector.
 Matrix3 S(const Vector3& vec)
@@ -45,7 +53,7 @@ void EKF::update_with_position(const Position& measurement)
 
     const Position y = measurement - EKF::position_measurement_model(m_x);
     const PositionCovariance S = H*m_P*H.transpose() + R;
-    const Matrix<9, 3> K = m_P*H.transpose()*S.inverse();
+    const ugl::Matrix<9, 3> K = m_P*H.transpose()*S.inverse();
 
     m_x = m_x + K*y;
     m_P = (Covariance::Identity() - K*H) * m_P;
@@ -57,7 +65,7 @@ void EKF::reset_attitude_error()
 {
     const Vector3 delta = m_x.segment<3>(6);
 
-    Matrix<9, 9> T = Matrix<9, 9>::Identity();
+    ugl::Matrix<9, 9> T = ugl::Matrix<9, 9>::Identity();
     T.bottomRightCorner<3,3>() = (-1/2 * S(delta)).exp();
 
     m_P = T * m_P * T.transpose();
