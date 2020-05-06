@@ -1,13 +1,13 @@
 #pragma once
 
-#include <geometry_cpp/math/vector.h>
-#include <geometry_cpp/math/matrix.h>
-#include <geometry_cpp/math/quaternion.h>
+#include <ugl/math/vector.h>
+#include <ugl/math/matrix.h>
+#include <ugl/math/quaternion.h>
 
 namespace ekf
 {
 
-using namespace geometry::math;
+using namespace ugl::math;
 
 using State              = Vector<9>;
 using Covariance         = Matrix<9, 9>;

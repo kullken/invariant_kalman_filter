@@ -35,7 +35,6 @@
 
   <build_depend>cmake_modules</build_depend>
   
-  <depend>geometry_cpp</depend>
   <depend>geometry_msgs</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
@@ -43,6 +42,7 @@
   <depend>tf2_ros</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_eigen</depend>
+  <depend>ugl</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

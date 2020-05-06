@@ -6,7 +6,6 @@ add_compile_options(-std=c++17 -g -Wall -Wextra -Wpedantic -Wno-deprecated-copy)
 find_package(catkin REQUIRED 
   COMPONENTS
     cmake_modules
-    geometry_cpp
     geometry_msgs
     roscpp
     sensor_msgs
@@ -14,6 +13,7 @@ find_package(catkin REQUIRED
     tf2_ros
     tf2_geometry_msgs
     tf2_eigen
+    ugl
 )
 
 find_package(Eigen3 REQUIRED)
