@@ -1,38 +1,18 @@
 #pragma once
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include <ugl/math/vector.h>
+#include <ugl/math/matrix.h>
+#include <ugl/math/quaternion.h>
 
 namespace invariant
 {
 
-template<int rows>
-using Vector = Eigen::Matrix<double, rows, 1>;
-
-template<int rows, int cols>
-using Matrix = Eigen::Matrix<double, rows, cols>;
-
 template<int n>
-using Covariance = Eigen::Matrix<double, n, n>;
+using Covariance = ugl::Matrix<n, n>;
 
-using Vector3    = Eigen::Matrix<double, 3, 1>;
-using Matrix3    = Eigen::Matrix<double, 3, 3>;
+using Jacobian   = ugl::Matrix<9, 9>;
 
-using Rotation   = Eigen::Matrix<double, 3, 3>;
-using Quaternion = Eigen::Quaternion<double>;
-
-using Jacobian   = Eigen::Matrix<double, 9, 9>;
-
-/// Get identity element of Type. 
-/// Defaults to Type::Identity() used in Eigen.
-template<typename Type>
-Type identity()
-{
-    return Type::Identity();
-}
-
-
-class State : public Matrix<5, 5>
+class State : public ugl::Matrix<5, 5>
 {
 public:
     State() : Matrix(Matrix::Identity()) {}
@@ -48,16 +28,16 @@ public:
     }
 
     // TODO: Should be possible to return references/views instead of copy. #EigenProblems
-    Rotation get_rot() const { return this->block<3,3>(0, 0); }
-    Vector3  get_pos() const { return this->block<3,1>(0, 3); }
-    Vector3  get_vel() const { return this->block<3,1>(0, 4); }
+    ugl::Rotation get_rot() const { return this->block<3,3>(0, 0); }
+    ugl::Vector3  get_pos() const { return this->block<3,1>(0, 3); }
+    ugl::Vector3  get_vel() const { return this->block<3,1>(0, 4); }
     // const Rotation& get_rot() const { return this->block<3,3>(0, 0); }
     // const Vector3&  get_pos() const { return this->block<3,1>(0, 3); }
     // const Vector3&  get_vel() const { return this->block<3,1>(0, 4); }
 
-    void set_rot(const Rotation& rot) { this->block<3,3>(0, 0) = rot; }
-    void set_pos(const Vector3& pos) { this->block<3,1>(0, 3) = pos; }
-    void set_vel(const Vector3& vel) { this->block<3,1>(0, 4) = vel; }
+    void set_rot(const ugl::Rotation& rot) { this->block<3,3>(0, 0) = rot; }
+    void set_pos(const ugl::Vector3& pos) { this->block<3,1>(0, 3) = pos; }
+    void set_vel(const ugl::Vector3& vel) { this->block<3,1>(0, 4) = vel; }
 };
 
 }

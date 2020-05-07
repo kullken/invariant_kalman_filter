@@ -4,7 +4,6 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
-#include <ugl/math/quaternion.h>
 
 #include "ekf_types.h"
 

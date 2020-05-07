@@ -16,6 +16,9 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
 
+#include <ugl/math/vector.h>
+#include <ugl/math/matrix.h>
+
 #include "measurement.h"
 
 #include "iekf.h"
@@ -68,12 +71,12 @@ void KalmanNode::initialise_iekf_filter()
     const double x0 = m_nh_private.param<double>("init/x", 0.0);
     const double y0 = m_nh_private.param<double>("init/y", 0.0);
     const double z0 = m_nh_private.param<double>("init/z", 0.0);
-    const Vector3 p0{x0, y0, z0};
+    const ugl::Vector3 p0{x0, y0, z0};
 
     const double vx0 = m_nh_private.param<double>("init/vx", 0.0);
     const double vy0 = m_nh_private.param<double>("init/vy", 0.0);
     const double vz0 = m_nh_private.param<double>("init/vz", 0.0);
-    const Vector3 v0{vx0, vy0, vz0};
+    const ugl::Vector3 v0{vx0, vy0, vz0};
 
     const double roll  = m_nh_private.param<double>("init/roll" , 0.0);
     const double pitch = m_nh_private.param<double>("init/pitch", 0.0);
@@ -81,7 +84,7 @@ void KalmanNode::initialise_iekf_filter()
     // TODO: Lots of conceptually unneeded conversions. Make nicer somehow.
     tf2::Quaternion quat_tf;
     quat_tf.setRPY(roll, pitch, yaw);
-    const Rotation R0 = tf2::fromMsg(tf2::toMsg(quat_tf));
+    const ugl::Rotation R0 = tf2::fromMsg(tf2::toMsg(quat_tf));
 
     // TODO: Initilise from launch parameters?
     const Covariance<9> P0 = Covariance<9>::Identity() * 0.1;
@@ -179,7 +182,7 @@ void KalmanNode::publish_velocity(const ros::Time& stamp)
 
     vel.header.stamp    = stamp;
     vel.header.frame_id = m_map_frame;
-    vel.vector = tf2::toMsg<invariant::Vector3, geometry_msgs::Vector3>(m_iekf_filter.get_vel());
+    vel.vector = tf2::toMsg<ugl::Vector3, geometry_msgs::Vector3>(m_iekf_filter.get_vel());
 
     m_velocity_pub.publish(vel);
 }
