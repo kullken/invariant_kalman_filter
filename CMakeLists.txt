@@ -16,13 +16,6 @@ find_package(catkin REQUIRED
     ugl
 )
 
-find_package(Eigen3 REQUIRED)
-
-# Remove warning caused by unset variable.
-if (EIGEN3_INCLUDE_DIRS AND NOT Eigen3_INCLUDE_DIRS)
-  set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS})
-endif()
-
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
@@ -53,10 +46,10 @@ endif()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
+  INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
 #  LIBRARIES localisation
 #  CATKIN_DEPENDS other_catkin_pkg
-  DEPENDS Eigen3
+#  DEPENDS 
 )
 
 ###########
@@ -69,7 +62,6 @@ include_directories(
   include
   test/include
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
