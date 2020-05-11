@@ -138,6 +138,10 @@ target_link_libraries(mock_trajectory_node
 # Add gtest based cpp test target and link libraries
 catkin_add_gtest(${PROJECT_NAME}-test test/src/test_main.cpp)
 if(TARGET ${PROJECT_NAME}-test)
+  target_sources(${PROJECT_NAME}-test
+    PRIVATE
+      test/src/accuracy_test.cpp
+  )
   target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
 endif()
 

@@ -1,9 +1,31 @@
 #include <gtest/gtest.h>
 
 #include <ugl/math/vector.h>
+#include <ugl/trajectory/trajectory.h>
+
+#include "accuracy_test.h"
 
 namespace invariant::test
 {
+
+auto test_trajectories = testing::Values(
+        AccuracyTestConfig{"TestConfig_1", {} },
+        AccuracyTestConfig{"TestConfig_2", {} }
+        );
+
+TEST_P(AccuracyTestParam, noNoiseTest)
+{
+    AccuracyResult result = compute_accuracy(iekf_, trajectory_);
+    RecordProperty("Accuracy", result.final_accuracy);
+}
+
+INSTANTIATE_TEST_CASE_P(
+        AccuracyTestInstantiation,
+        AccuracyTestParam,
+        test_trajectories,
+        [](const testing::TestParamInfo<AccuracyTestParam::ParamType>& info) { return info.param.name; }
+        );
+
 namespace
 {
 
