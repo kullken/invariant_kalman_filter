@@ -142,7 +142,10 @@ if(TARGET ${PROJECT_NAME}-test)
     PRIVATE
       test/src/accuracy_test.cpp
   )
-  target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME}-test
+      lib${PROJECT_NAME}_iekf
+      ${catkin_LIBRARIES}
+  )
 endif()
 
 ## Add folders to be run by python nosetests
