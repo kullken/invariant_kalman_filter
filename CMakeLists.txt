@@ -65,7 +65,7 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(lib${PROJECT_NAME}_iekf
+add_library(${PROJECT_NAME}_iekf
   src/iekf.cpp
 )
 
@@ -73,12 +73,12 @@ add_library(lib${PROJECT_NAME}_iekf
 add_executable(kalman_node src/kalman_node.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(lib${PROJECT_NAME}_iekf
+target_link_libraries(${PROJECT_NAME}_iekf
   ${catkin_LIBRARIES}
 )
 target_link_libraries(kalman_node
   ${catkin_LIBRARIES}
-  lib${PROJECT_NAME}_iekf
+  ${PROJECT_NAME}_iekf
 )
 
 ## Test trajectories
@@ -143,7 +143,7 @@ if(TARGET ${PROJECT_NAME}-test)
       test/src/accuracy_test.cpp
   )
   target_link_libraries(${PROJECT_NAME}-test
-      lib${PROJECT_NAME}_iekf
+      ${PROJECT_NAME}_iekf
       ${catkin_LIBRARIES}
   )
 endif()
