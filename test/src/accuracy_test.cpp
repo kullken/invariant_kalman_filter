@@ -5,9 +5,9 @@
 namespace invariant::test
 {
 
-AccuracyResult compute_accuracy(const IEKF &filter, const ugl::trajectory::Trajectory &traj)
+AccuracyTest::Result compute_accuracy(const IEKF &filter, const ugl::trajectory::Trajectory &traj)
 {
-    AccuracyResult result;
+    AccuracyTest::Result result;
 
     // TODO: How to deal with sensors at different Hz?
     // for (double t : range(0, trajectoty_.duration())) // TODO: Pseudo-code

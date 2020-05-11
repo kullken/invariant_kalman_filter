@@ -11,24 +11,27 @@
 namespace invariant::test
 {
 
-struct AccuracyTestConfig
+class AccuracyTest : public testing::Test
 {
-    std::string name = "";
-    ugl::trajectory::Trajectory trajectory;
-    // TODO: Add filter values and parameters.
-    // TODO: Add sensor model and noise values.
+public:
+    struct Config
+    {
+        std::string name = "";
+        ugl::trajectory::Trajectory trajectory;
+        // TODO: Add filter values and parameters.
+        // TODO: Add sensor model and noise values.
+    };
+
+    struct Result
+    {
+        double final_accuracy = 0;
+        double rmse_over_time = 0;
+        // etc.
+    };
 };
 
-struct AccuracyResult
-{
-    double final_accuracy = 0;
-    double rmse_over_time = 0;
-    // etc.
-};
-
-AccuracyResult compute_accuracy(const IEKF &filter, const ugl::trajectory::Trajectory &traj);
-
-class AccuracyTestParam : public testing::TestWithParam<AccuracyTestConfig>
+class AccuracyTestParam : public AccuracyTest,
+                     public testing::WithParamInterface<AccuracyTest::Config>
 {
 protected:
     ugl::trajectory::Trajectory trajectory_;
@@ -39,5 +42,7 @@ protected:
     {
     }
 };
+
+AccuracyTest::Result compute_accuracy(const IEKF &filter, const ugl::trajectory::Trajectory &traj);
 
 } // namespace invariant::test
