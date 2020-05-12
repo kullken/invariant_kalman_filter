@@ -60,7 +60,6 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
-  test/include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -69,16 +68,16 @@ add_library(${PROJECT_NAME}_iekf
   src/iekf.cpp
 )
 
-## Declare a C++ executable
-add_executable(kalman_node src/kalman_node.cpp)
-
-## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_iekf
   ${catkin_LIBRARIES}
 )
+
+## Declare a C++ executable
+add_executable(kalman_node src/kalman_node.cpp)
+
 target_link_libraries(kalman_node
-  ${catkin_LIBRARIES}
   ${PROJECT_NAME}_iekf
+  ${catkin_LIBRARIES}
 )
 
 ## Test trajectories
@@ -138,10 +137,16 @@ target_link_libraries(mock_trajectory_node
 # Add gtest based cpp test target and link libraries
 catkin_add_gtest(${PROJECT_NAME}-test test/src/test_main.cpp)
 if(TARGET ${PROJECT_NAME}-test)
+  target_include_directories(${PROJECT_NAME}-test
+    PRIVATE
+      test/include  
+  )
+
   target_sources(${PROJECT_NAME}-test
     PRIVATE
       test/src/accuracy_test.cpp
   )
+
   target_link_libraries(${PROJECT_NAME}-test
       ${PROJECT_NAME}_iekf
       ${catkin_LIBRARIES}
