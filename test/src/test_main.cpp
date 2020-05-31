@@ -4,15 +4,12 @@
 #include <ugl/trajectory/trajectory.h>
 
 #include "accuracy_test.h"
+#include "accuracy_test_config.h"
 
 namespace invariant::test
 {
 namespace
 {
-
-auto test_trajectories = testing::Values(
-    AccuracyTest::Config{"TestConfig_1", {}},
-    AccuracyTest::Config{"TestConfig_2", {}});
 
 TEST_P(AccuracyTestParam, noNoiseTest)
 {
@@ -23,7 +20,7 @@ TEST_P(AccuracyTestParam, noNoiseTest)
 INSTANTIATE_TEST_CASE_P(
     AccuracyTestInstantiation,
     AccuracyTestParam,
-    test_trajectories,
+    test_configs,
     [](const testing::TestParamInfo<AccuracyTestParam::ParamType> &info) { return info.param.name; });
 
 } // namespace

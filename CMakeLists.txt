@@ -145,6 +145,7 @@ if(TARGET ${PROJECT_NAME}-test)
   target_sources(${PROJECT_NAME}-test
     PRIVATE
       test/src/accuracy_test.cpp
+      test/src/accuracy_test_config.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}-test
