@@ -18,7 +18,8 @@ public:
     {
         std::string name = "";
         ugl::trajectory::Trajectory trajectory;
-        // TODO: Add filter values and parameters.
+        invariant::IEKF filter;
+        // TODO: Configure filter noise parameters.
         // TODO: Add sensor model and noise values.
     };
 
@@ -34,11 +35,13 @@ class AccuracyTestParam : public AccuracyTest,
                      public testing::WithParamInterface<AccuracyTest::Config>
 {
 protected:
-    ugl::trajectory::Trajectory trajectory_;
-    invariant::IEKF iekf_{};
+    const ugl::trajectory::Trajectory trajectory_;
+    invariant::IEKF filter_;
 
 protected:
-    AccuracyTestParam() : trajectory_(GetParam().trajectory)
+    AccuracyTestParam()
+        : trajectory_(GetParam().trajectory)
+        , filter_(GetParam().filter)
     {
     }
 };

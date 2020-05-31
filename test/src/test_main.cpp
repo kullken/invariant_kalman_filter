@@ -13,7 +13,7 @@ namespace
 
 TEST_P(AccuracyTestParam, noNoiseTest)
 {
-    AccuracyTest::Result result = compute_accuracy(iekf_, trajectory_);
+    AccuracyTest::Result result = compute_accuracy(filter_, trajectory_);
     RecordProperty("Accuracy", result.final_accuracy);
 }
 
