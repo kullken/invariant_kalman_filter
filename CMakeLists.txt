@@ -87,6 +87,10 @@ add_executable(mock_trajectory_node
 target_link_libraries(mock_trajectory_node
   ${catkin_LIBRARIES}
 )
+target_include_directories(mock_trajectory_node
+  PRIVATE
+    test/include  
+)
 
 #############
 ## Install ##
