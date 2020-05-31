@@ -29,6 +29,9 @@ public:
         double rmse_over_time = 0;
         // etc.
     };
+
+protected:
+    AccuracyTest::Result compute_accuracy(IEKF filter, const ugl::trajectory::Trajectory &traj);
 };
 
 class AccuracyTestParam : public AccuracyTest,
@@ -45,7 +48,5 @@ protected:
     {
     }
 };
-
-AccuracyTest::Result compute_accuracy(const IEKF &filter, const ugl::trajectory::Trajectory &traj);
 
 } // namespace invariant::test
