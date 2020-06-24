@@ -11,11 +11,11 @@
 namespace invariant::test
 {
 
-auto test_configs = testing::Values(
+ugl::trajectory::Trajectory getStandStillTrajectory(double duration=1);
+
+const auto test_configs = testing::Values(
     AccuracyTest::Config{"TestConfig_1", getStandStillTrajectory(), {}}
     // AccuracyTest::Config{"TestConfig_2", {}, {}}
     );
-
-ugl::trajectory::Trajectory getStandStillTrajectory(double duration=1);
 
 } // namespace invariant::test
