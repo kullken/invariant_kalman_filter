@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
 #include <gtest/gtest.h>
 
@@ -48,5 +49,10 @@ protected:
     {
     }
 };
+
+inline std::ostream& operator<<(std::ostream& os, const AccuracyTest::Config& config)
+{
+    return os << config.name;
+}
 
 } // namespace invariant::test
