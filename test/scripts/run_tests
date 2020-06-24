@@ -1,0 +1,4 @@
+#!/bin/bash
+
+catkin build --catkin-make-args run_tests -- --no-deps invariant_kalman_filter
+rosrun invariant_kalman_filter invariant_kalman_filter-test
