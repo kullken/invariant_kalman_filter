@@ -1,3 +1,5 @@
+#include <string>
+
 #include <gtest/gtest.h>
 
 #include <ugl/math/vector.h>
@@ -14,7 +16,9 @@ namespace
 TEST_P(AccuracyTestParam, noNoiseTest)
 {
     AccuracyTest::Result result = compute_accuracy(filter_, trajectory_);
-    RecordProperty("Accuracy", result.final_accuracy);
+    RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
+    RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
+    RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
 }
 
 INSTANTIATE_TEST_CASE_P(

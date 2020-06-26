@@ -26,9 +26,9 @@ public:
 
     struct Result
     {
-        double final_accuracy = 0;
-        double rmse_over_time = 0;
-        // etc.
+        double position_rmse = 0;
+        double velocity_rmse = 0;
+        double rotation_rmse = 0;
     };
 
 protected:
