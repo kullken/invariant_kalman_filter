@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
 #include <ostream>
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -29,6 +30,10 @@ public:
         double position_rmse = 0;
         double velocity_rmse = 0;
         double rotation_rmse = 0;
+
+        std::vector<double> position_errors;
+        std::vector<double> velocity_errors;
+        std::vector<double> rotation_errors;
     };
 
 protected:
@@ -54,5 +59,7 @@ inline std::ostream& operator<<(std::ostream& os, const AccuracyTest::Config& co
 {
     return os << config.name;
 }
+
+std::ostream& operator<<(std::ostream& os, const AccuracyTest::Result& result);
 
 } // namespace invariant::test

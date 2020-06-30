@@ -1,7 +1,5 @@
 #include "accuracy_test.h"
 
-#include <iostream>
-
 #include <algorithm>
 #include <iterator>
 #include <numeric>
@@ -40,10 +38,6 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
 {
     AccuracyTest::Result result;
 
-    std::vector<double> position_errors;
-    std::vector<double> velocity_errors;
-    std::vector<double> rotation_errors;
-
     // TODO: How to deal with sensors at different Hz?
 
     const int dt_ms = 10;
@@ -61,8 +55,11 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
         const ugl::Vector3 true_vel = traj.get_velocity(t);
         const ugl::Rotation true_rot = traj.get_rotation(t);
 
+        const ugl::Vector3 imu_acc = traj.get_acceleration(t);
+        const ugl::Vector3 imu_ang_vel = traj.get_angular_velocity(t);
+
         // Update filter
-        filter.predict(dt, traj.get_acceleration(t), traj.get_angular_velocity(t));
+        filter.predict(dt, imu_acc, imu_ang_vel);
         filter.mocap_update(true_rot, true_pos);
 
         const ugl::Vector3 predicted_pos = filter.get_pos();
@@ -73,23 +70,33 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
         const double pos_error = dist(true_pos, predicted_pos);
         const double vel_error = dist(true_vel, predicted_vel);
         const double rot_error = dist(static_cast<ugl::UnitQuaternion>(true_rot), predicted_quat);
-        position_errors.push_back(pos_error);
-        velocity_errors.push_back(vel_error);
-        rotation_errors.push_back(rot_error);
+        result.position_errors.push_back(pos_error);
+        result.velocity_errors.push_back(vel_error);
+        result.rotation_errors.push_back(rot_error);
     }
 
     const auto count = times.size();
     auto square_and_add = [](double sum, double item) { return sum + item*item; };
 
-    result.position_rmse = std::sqrt(std::accumulate(std::cbegin(position_errors), std::cend(position_errors), 0.0, square_and_add) / count);
-    result.velocity_rmse = std::sqrt(std::accumulate(std::cbegin(velocity_errors), std::cend(velocity_errors), 0.0, square_and_add) / count);
-    result.rotation_rmse = std::sqrt(std::accumulate(std::cbegin(rotation_errors), std::cend(rotation_errors), 0.0, square_and_add) / count);
-
-    std::cout << "result.position_rmse : " << result.position_rmse << '\n';
-    std::cout << "result.velocity_rmse : " << result.velocity_rmse << '\n';
-    std::cout << "result.rotation_rmse : " << result.rotation_rmse << '\n';
+    result.position_rmse = std::sqrt(std::accumulate(std::cbegin(result.position_errors), std::cend(result.position_errors), 0.0, square_and_add) / count);
+    result.velocity_rmse = std::sqrt(std::accumulate(std::cbegin(result.velocity_errors), std::cend(result.velocity_errors), 0.0, square_and_add) / count);
+    result.rotation_rmse = std::sqrt(std::accumulate(std::cbegin(result.rotation_errors), std::cend(result.rotation_errors), 0.0, square_and_add) / count);
 
     return result;
+}
+
+std::ostream& operator<<(std::ostream& os, const AccuracyTest::Result& result)
+{
+    constexpr auto delimiter = " ";
+    os << "pos_error" << delimiter << "vel_error" << delimiter << "rot_error" << '\n';
+
+    auto size = std::min({result.position_errors.size(), result.velocity_errors.size(), result.rotation_errors.size()});
+    for (std::size_t i = 0; i < size; ++i)
+    {
+        os << result.position_errors[i] << delimiter << result.velocity_errors[i] << delimiter << result.rotation_errors[i] << '\n';
+    }
+
+    return os;
 }
 
 } // namespace invariant::test
