@@ -1,7 +1,0 @@
-<launch>
-  <arg name="filename"  default="new_data.bag" />
-  <arg name="path"      default="$(find localisation)/test/data" />
-  <arg name="duration"  default="30" />
-  
-  <node pkg="rosbag" type="record" args="--duration=$(arg duration) --output-name=$(arg path)/$(arg filename) /tf /tf_static /cf1/pose /cf1/imu" name="record" output="screen" />
-</launch>
