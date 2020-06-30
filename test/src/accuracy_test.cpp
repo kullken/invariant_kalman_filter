@@ -10,6 +10,8 @@
 #include <ugl/math/quaternion.h>
 #include <ugl/trajectory/trajectory.h>
 
+#include "imu_sensor_model.h"
+
 namespace invariant::test
 {
 
@@ -40,6 +42,8 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
 
     // TODO: How to deal with sensors at different Hz?
 
+    ImuSensorModel imu{traj};
+
     const int dt_ms = 10;
     const int duration_ms = static_cast<int>(traj.duration() * 1000.0);
     const auto times_ms = range(0, duration_ms+dt_ms, dt_ms);
@@ -55,11 +59,8 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
         const ugl::Vector3 true_vel = traj.get_velocity(t);
         const ugl::Rotation true_rot = traj.get_rotation(t);
 
-        const ugl::Vector3 imu_acc = traj.get_acceleration(t);
-        const ugl::Vector3 imu_ang_vel = traj.get_angular_velocity(t);
-
         // Update filter
-        filter.predict(dt, imu_acc, imu_ang_vel);
+        filter.predict(dt, imu.getAccReading(t), imu.getGyroReading(t));
         filter.mocap_update(true_rot, true_pos);
 
         const ugl::Vector3 predicted_pos = filter.get_pos();
