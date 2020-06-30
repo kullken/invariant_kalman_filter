@@ -11,6 +11,7 @@
 #include <ugl/trajectory/trajectory.h>
 
 #include "imu_sensor_model.h"
+#include "mocap_sensor_model.h"
 
 namespace invariant::test
 {
@@ -43,6 +44,7 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
     // TODO: How to deal with sensors at different Hz?
 
     ImuSensorModel imu{traj};
+    MocapSensorModel mocap{traj};
 
     const int dt_ms = 10;
     const int duration_ms = static_cast<int>(traj.duration() * 1000.0);
@@ -55,13 +57,13 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
     
     for (const auto& t : times)
     {
-        const ugl::Vector3 true_pos = traj.get_position(t);
-        const ugl::Vector3 true_vel = traj.get_velocity(t);
-        const ugl::Rotation true_rot = traj.get_rotation(t);
-
         // Update filter
         filter.predict(dt, imu.getAccReading(t), imu.getGyroReading(t));
-        filter.mocap_update(true_rot, true_pos);
+        filter.mocap_update(mocap.getRotReading(t), mocap.getPosReading(t));
+
+        const ugl::Vector3 true_pos = traj.get_position(t);
+        const ugl::Vector3 true_vel = traj.get_velocity(t);
+        const ugl::UnitQuaternion true_quat = static_cast<ugl::UnitQuaternion>(traj.get_rotation(t));
 
         const ugl::Vector3 predicted_pos = filter.get_pos();
         const ugl::Vector3 predicted_vel = filter.get_vel();
@@ -70,7 +72,7 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
         // Save data
         const double pos_error = dist(true_pos, predicted_pos);
         const double vel_error = dist(true_vel, predicted_vel);
-        const double rot_error = dist(static_cast<ugl::UnitQuaternion>(true_rot), predicted_quat);
+        const double rot_error = dist(true_quat, predicted_quat);
         result.position_errors.push_back(pos_error);
         result.velocity_errors.push_back(vel_error);
         result.rotation_errors.push_back(rot_error);
