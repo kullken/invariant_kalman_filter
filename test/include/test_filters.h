@@ -8,15 +8,15 @@
 namespace invariant::test
 {
 
-struct FilterNamed
+struct TestFilter
 {
-    std::string name;
+    std::string description;
     invariant::IEKF filter;
 };
 
-inline std::ostream &operator<<(std::ostream &os, const FilterNamed &param)
+inline std::ostream &operator<<(std::ostream &os, const TestFilter &param)
 {
-    return os << param.name;
+    return os << param.description;
 }
 
 } // namespace invariant::test

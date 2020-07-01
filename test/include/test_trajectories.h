@@ -9,15 +9,15 @@
 namespace invariant::test
 {
 
-struct TrajectoryNamed
+struct TestTrajectory
 {
-    std::string name;
+    std::string description;
     ugl::trajectory::Trajectory traj;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const TrajectoryNamed& param)
+inline std::ostream& operator<<(std::ostream& os, const TestTrajectory& param)
 {
-    return os << param.name;
+    return os << param.description;
 }
 
 ugl::trajectory::Trajectory getStandStillTrajectory(double duration=1.0);

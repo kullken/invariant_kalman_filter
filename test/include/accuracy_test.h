@@ -36,7 +36,7 @@ protected:
 
 class AccuracyTestParam 
     : public AccuracyTest
-    , public testing::WithParamInterface<std::tuple<TrajectoryNamed, FilterNamed>>
+    , public testing::WithParamInterface<std::tuple<TestTrajectory, TestFilter>>
 {
 protected:
     const ugl::trajectory::Trajectory trajectory_;
