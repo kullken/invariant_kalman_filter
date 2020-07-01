@@ -90,7 +90,7 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
 
 std::ostream& operator<<(std::ostream& os, const AccuracyTest::Result& result)
 {
-    constexpr auto delimiter = " ";
+    constexpr auto delimiter = ' ';
     os << "pos_error" << delimiter << "vel_error" << delimiter << "rot_error" << '\n';
 
     auto size = std::min({result.position_errors.size(), result.velocity_errors.size(), result.rotation_errors.size()});
