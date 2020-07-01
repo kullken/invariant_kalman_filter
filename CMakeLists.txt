@@ -130,6 +130,8 @@ if(TARGET ${PROJECT_NAME}-test)
     PRIVATE
       test/src/accuracy_test.cpp
       test/src/accuracy_test_config.cpp
+      test/src/test_trajectories.cpp
+      test/src/test_filters.cpp
       test/src/imu_sensor_model.cpp
       test/src/mocap_sensor_model.cpp
   )
