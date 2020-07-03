@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 
+#include <ugl/math/vector.h>
 #include <ugl/trajectory/trajectory.h>
 
 
@@ -21,5 +22,9 @@ inline std::ostream& operator<<(std::ostream& os, const TestTrajectory& param)
 }
 
 ugl::trajectory::Trajectory getStandStillTrajectory(double duration=1.0);
+
+ugl::trajectory::Trajectory rotate_in_place(double degrees, double duration=1.0);
+
+ugl::trajectory::Trajectory straight_line(ugl::Vector3 delta, double duration=1.0);
 
 } // namespace invariant::test
