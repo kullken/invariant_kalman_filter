@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -15,6 +16,18 @@ namespace invariant::test
 namespace
 {
 
+void save_to_file(const AccuracyTest::Result& result)
+{
+    auto test_info = testing::UnitTest::GetInstance()->current_test_info();
+    std::string file_name = test_info->name();
+    std::replace(std::begin(file_name), std::end(file_name), '/', '_');
+	const std::string result_path{"/home/vk/mav_ws/src/invariant_kalman_filter/test/results/" + file_name + ".csv"};
+
+    std::ofstream csv_file{result_path};
+    csv_file << "# " << test_info->name() << ": " << test_info->value_param() << '\n';
+    csv_file << result;
+}
+
 TEST_P(IekfTestSuite, IekfTestCase)
 {
     const AccuracyTest::Result result = compute_accuracy(filter_, trajectory_);
@@ -27,10 +40,7 @@ TEST_P(IekfTestSuite, IekfTestCase)
     std::cout << "result.velocity_rmse : " << result.velocity_rmse << '\n';
     std::cout << "result.rotation_rmse : " << result.rotation_rmse << '\n';
 
-	const std::string result_path{"/home/vk/mav_ws/src/invariant_kalman_filter/test/results/prototype_data.csv"};
-
-    std::ofstream csv_file{result_path};
-    csv_file << result;
+    save_to_file(result);
 }
 
 INSTANTIATE_TEST_CASE_P(
