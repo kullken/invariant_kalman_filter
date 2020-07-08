@@ -15,7 +15,7 @@ namespace invariant::test
 namespace
 {
 
-TEST_P(AccuracyTestParam, ZeroNoiseTest)
+TEST_P(IekfTestSuite, IekfTestCase)
 {
     const AccuracyTest::Result result = compute_accuracy(filter_, trajectory_);
 
@@ -33,16 +33,9 @@ TEST_P(AccuracyTestParam, ZeroNoiseTest)
     csv_file << result;
 }
 
-// INSTANTIATE_TEST_CASE_P(
-//     AccuracyTestInstantiation,
-//     AccuracyTestParam,
-//     test_configs,
-//     [](const testing::TestParamInfo<AccuracyTestParam::ParamType> &info) { return std::get<0>(info.param).name; }
-// );
-
 INSTANTIATE_TEST_CASE_P(
-    AccuracyTestInstantiation,
-    AccuracyTestParam,
+    AccuracyTestBase,
+    IekfTestSuite,
     test_configs
 );
 

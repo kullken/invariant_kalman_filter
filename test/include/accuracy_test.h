@@ -11,12 +11,17 @@
 #include "iekf.h"
 
 #include "accuracy_test_config.h"
+#include "test_trajectories.h"
+#include "test_filters.h"
 
 namespace invariant::test
 {
 
 class AccuracyTest : public testing::Test
 {
+protected:
+    ugl::trajectory::Trajectory trajectory_;
+
 public:
 
     struct Result
@@ -34,20 +39,18 @@ protected:
     AccuracyTest::Result compute_accuracy(IEKF filter, const ugl::trajectory::Trajectory &traj);
 };
 
-class AccuracyTestParam 
+class IekfTestSuite 
     : public AccuracyTest
     , public testing::WithParamInterface<std::tuple<TestTrajectory, TestFilter>>
 {
 protected:
-    const ugl::trajectory::Trajectory trajectory_;
     invariant::IEKF filter_;
 
 protected:
 
-    AccuracyTestParam()
-        : trajectory_(std::get<0>(GetParam()).traj)
-        , filter_(std::get<1>(GetParam()).filter)
+    IekfTestSuite() : filter_(std::get<1>(GetParam()).filter)
     {
+        trajectory_ = std::get<0>(GetParam()).traj;
     }
 };
 
