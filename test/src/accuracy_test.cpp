@@ -50,12 +50,11 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
     const int duration_ms = static_cast<int>(traj.duration() * 1000.0);
     const auto times_ms = range(0, duration_ms+dt_ms, dt_ms);
 
-    auto ms_to_sec = [](int a){ return a / 1000.0; };
+    auto ms_to_sec = [](int ms){ return ms / 1000.0; };
     const double dt = ms_to_sec(dt_ms);
-    std::vector<double> times;
-    std::transform(std::cbegin(times_ms), std::cend(times_ms), std::back_inserter(times), ms_to_sec);
+    std::transform(std::cbegin(times_ms), std::cend(times_ms), std::back_inserter(result.times), ms_to_sec);
     
-    for (const auto& t : times)
+    for (const auto& t : result.times)
     {
         // Update filter
         filter.predict(dt, imu.getAccReading(t), imu.getGyroReading(t));
@@ -78,7 +77,7 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
         result.rotation_errors.push_back(rot_error);
     }
 
-    const auto count = times.size();
+    const auto count = result.times.size();
     auto square_and_add = [](double sum, double item) { return sum + item*item; };
 
     result.position_rmse = std::sqrt(std::accumulate(std::cbegin(result.position_errors), std::cend(result.position_errors), 0.0, square_and_add) / count);
@@ -91,12 +90,12 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
 std::ostream& operator<<(std::ostream& os, const AccuracyTest::Result& result)
 {
     constexpr auto delimiter = ' ';
-    os << "pos_error" << delimiter << "vel_error" << delimiter << "rot_error" << '\n';
+    os << "time" << delimiter << "pos_error" << delimiter << "vel_error" << delimiter << "rot_error" << '\n';
 
     auto size = std::min({result.position_errors.size(), result.velocity_errors.size(), result.rotation_errors.size()});
     for (std::size_t i = 0; i < size; ++i)
     {
-        os << result.position_errors[i] << delimiter << result.velocity_errors[i] << delimiter << result.rotation_errors[i] << '\n';
+        os << result.times[i] << delimiter << result.position_errors[i] << delimiter << result.velocity_errors[i] << delimiter << result.rotation_errors[i] << '\n';
     }
 
     return os;

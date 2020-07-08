@@ -30,6 +30,7 @@ public:
         double velocity_rmse = 0;
         double rotation_rmse = 0;
 
+        std::vector<double> times;
         std::vector<double> position_errors;
         std::vector<double> velocity_errors;
         std::vector<double> rotation_errors;
