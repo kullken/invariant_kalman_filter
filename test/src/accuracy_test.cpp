@@ -62,7 +62,7 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
 
         const ugl::Vector3 true_pos = traj.get_position(t);
         const ugl::Vector3 true_vel = traj.get_velocity(t);
-        const ugl::UnitQuaternion true_quat = static_cast<ugl::UnitQuaternion>(traj.get_rotation(t));
+        const ugl::UnitQuaternion true_quat = traj.get_quaternion(t);
 
         const ugl::Vector3 predicted_pos = filter.get_pos();
         const ugl::Vector3 predicted_vel = filter.get_vel();
