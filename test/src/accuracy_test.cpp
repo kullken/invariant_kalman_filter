@@ -57,8 +57,8 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
     for (const auto& t : result.times)
     {
         // Update filter
-        filter.predict(dt, imu.getAccReading(t), imu.getGyroReading(t));
-        filter.mocap_update(mocap.getRotReading(t), mocap.getPosReading(t));
+        filter.predict(dt, imu.get_accel_reading(t), imu.get_gyro_reading(t));
+        filter.mocap_update(mocap.get_rot_reading(t), mocap.get_pos_reading(t));
 
         const ugl::Vector3 true_pos = traj.get_position(t);
         const ugl::Vector3 true_vel = traj.get_velocity(t);

@@ -15,10 +15,10 @@ public:
     MocapSensorModel(const ugl::trajectory::Trajectory& trajectory) : trajectory_(trajectory) {}
 
     /// Returns a position reading expressed in inertial frame.
-    ugl::Vector3 getPosReading(double t) const;
+    ugl::Vector3 get_pos_reading(double t) const;
 
     /// Returns a rotation reading expressed in inertial frame.
-    ugl::Rotation getRotReading(double t) const;
+    ugl::Rotation get_rot_reading(double t) const;
 
 private:
     const ugl::trajectory::Trajectory& trajectory_;

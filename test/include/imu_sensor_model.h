@@ -15,10 +15,10 @@ public:
     ImuSensorModel(const ugl::trajectory::Trajectory& trajectory) : trajectory_(trajectory) {}
 
     /// Returns an accelerometer reading expressed in body frame.
-    ugl::Vector3 getAccReading(double t) const;
+    ugl::Vector3 get_accel_reading(double t) const;
 
     /// Returns an gyroscope reading expressed in body frame.
-    ugl::Vector3 getGyroReading(double t) const;
+    ugl::Vector3 get_gyro_reading(double t) const;
 
 private:
     const ugl::trajectory::Trajectory& trajectory_;

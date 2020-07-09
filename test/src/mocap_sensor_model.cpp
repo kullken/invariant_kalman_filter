@@ -6,12 +6,12 @@
 namespace invariant::test
 {
 
-ugl::Vector3 MocapSensorModel::getPosReading(double t) const
+ugl::Vector3 MocapSensorModel::get_pos_reading(double t) const
 {
     return trajectory_.get_position(t);
 }
 
-ugl::Rotation MocapSensorModel::getRotReading(double t) const
+ugl::Rotation MocapSensorModel::get_rot_reading(double t) const
 {
     return trajectory_.get_rotation(t);
 }
