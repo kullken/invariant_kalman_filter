@@ -12,7 +12,15 @@ namespace invariant::test
 class ImuSensorModel
 {
 public:
-    ImuSensorModel(const ugl::trajectory::Trajectory& trajectory) : trajectory_(trajectory) {}
+    ImuSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency)
+        : trajectory_(trajectory) 
+        , period_(1.0/frequency)
+    {}
+
+    double period() 
+    {
+        return period_;
+    }
 
     /// Returns an accelerometer reading expressed in body frame.
     ugl::Vector3 get_accel_reading(double t) const;
@@ -22,6 +30,7 @@ public:
 
 private:
     const ugl::trajectory::Trajectory& trajectory_;
+    const double period_;
 
     static const ugl::Vector3 s_gravity;
 };

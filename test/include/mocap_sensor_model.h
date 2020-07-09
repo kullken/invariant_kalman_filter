@@ -12,7 +12,15 @@ namespace invariant::test
 class MocapSensorModel
 {
 public:
-    MocapSensorModel(const ugl::trajectory::Trajectory& trajectory) : trajectory_(trajectory) {}
+    MocapSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency)
+        : trajectory_(trajectory) 
+        , period_(1.0/frequency)
+    {}
+
+    double period() 
+    {
+        return period_;
+    }
 
     /// Returns a position reading expressed in inertial frame.
     ugl::Vector3 get_pos_reading(double t) const;
@@ -22,6 +30,7 @@ public:
 
 private:
     const ugl::trajectory::Trajectory& trajectory_;
+    const double period_;
 };
 
 }
