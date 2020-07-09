@@ -75,4 +75,13 @@ ugl::trajectory::Trajectory straight_line(ugl::Vector3 delta, double duration)
     return {lin_traj, ang_traj};
 }
 
+ugl::trajectory::Trajectory quadratic_translation(ugl::Vector3 delta, double duration)
+{
+    ugl::trajectory::Bezier<2> lin_traj{duration, {ugl::Vector3::Zero(), ugl::Vector3::Zero(), delta}};
+
+    ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
+
+    return {lin_traj, ang_traj};
+}
+
 } // namespace invariant::test
