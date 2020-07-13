@@ -57,6 +57,10 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
     double next_imu_time = clock[0] + imu.period();
     double next_mocap_time = clock[0] + mocap.period();
     double next_measurement_time = clock[0];
+
+    filter.set_pos(traj.get_position(clock[0]));
+    filter.set_vel(traj.get_velocity(clock[0]));
+    filter.set_rot(traj.get_rotation(clock[0]));
     
     for (const auto& t : clock)
     {
