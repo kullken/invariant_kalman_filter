@@ -27,6 +27,9 @@ if __name__ == "__main__":
     file_ending = ".csv"
     file_path = args.folder + args.file + file_ending
 
+    with open(file_path, 'r') as f:
+        description = f.readline()[2:]
+
     t, pos_errs, vel_errs, rot_errs = np.loadtxt(file_path, skiprows=2, unpack=True)
 
     plt.plot(t, pos_errs, label="Position error [m]")
@@ -35,6 +38,6 @@ if __name__ == "__main__":
 
     plt.xlabel("Time [s]")
     plt.ylabel("Error")
-    plt.title(args.file)
+    plt.title(description)
     plt.legend()
     plt.show()
