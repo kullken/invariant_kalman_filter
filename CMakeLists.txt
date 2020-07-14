@@ -13,8 +13,9 @@ find_package(catkin REQUIRED
     tf2_ros
     tf2_geometry_msgs
     tf2_eigen
-    ugl
 )
+
+find_package(ugl REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -50,6 +51,8 @@ add_library(${PROJECT_NAME}_iekf
 
 target_link_libraries(${PROJECT_NAME}_iekf
   ${catkin_LIBRARIES}
+  ugl::math
+  ugl::lie_group
 )
 
 ## Declare a C++ executable
@@ -66,6 +69,7 @@ add_executable(mock_trajectory_node
 )
 target_link_libraries(mock_trajectory_node
   ${catkin_LIBRARIES}
+  ugl::trajectory
 )
 target_include_directories(mock_trajectory_node
   PRIVATE
@@ -139,5 +143,7 @@ if(TARGET ${PROJECT_NAME}-test)
   target_link_libraries(${PROJECT_NAME}-test
       ${PROJECT_NAME}_iekf
       ${catkin_LIBRARIES}
+      ugl::math
+      ugl::trajectory
   )
 endif()
