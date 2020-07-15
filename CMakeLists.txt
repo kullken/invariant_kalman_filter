@@ -5,7 +5,6 @@ add_compile_options(-std=c++17 -g -Wall -Wextra -Wpedantic -Wno-deprecated-copy)
 
 find_package(catkin REQUIRED 
   COMPONENTS
-    cmake_modules
     geometry_msgs
     roscpp
     sensor_msgs
@@ -63,19 +62,6 @@ target_link_libraries(kalman_node
   ${catkin_LIBRARIES}
 )
 
-## Test trajectories
-add_executable(mock_trajectory_node
-  test/src/mock_trajectory_node.cpp
-)
-target_link_libraries(mock_trajectory_node
-  ${catkin_LIBRARIES}
-  ugl::trajectory
-)
-target_include_directories(mock_trajectory_node
-  PRIVATE
-    test/include  
-)
-
 #############
 ## Install ##
 #############
@@ -122,6 +108,39 @@ target_include_directories(mock_trajectory_node
 ## Testing ##
 #############
 
+## Mock Trajectory Node
+add_executable(mock_trajectory_node
+  test/src/mock_trajectory_node.cpp
+)
+
+target_include_directories(mock_trajectory_node
+  PRIVATE
+    test/include
+)
+
+target_link_libraries(mock_trajectory_node
+  PRIVATE
+    ${catkin_LIBRARIES}
+    ugl::trajectory
+)
+
+## Sensor Models
+add_library(sensor_models
+  test/src/sensor_models/imu_sensor_model.cpp
+  test/src/sensor_models/mocap_sensor_model.cpp
+)
+
+target_include_directories(sensor_models
+  PUBLIC
+    test/include/sensor_models
+)
+
+target_link_libraries(sensor_models
+  PUBLIC
+    ugl::math
+    ugl::trajectory
+)
+
 # Add gtest based cpp test target and link libraries
 catkin_add_gtest(${PROJECT_NAME}-test test/src/test_main.cpp)
 if(TARGET ${PROJECT_NAME}-test)
@@ -136,13 +155,11 @@ if(TARGET ${PROJECT_NAME}-test)
       test/src/accuracy_test_config.cpp
       test/src/test_trajectories.cpp
       test/src/test_filters.cpp
-      test/src/imu_sensor_model.cpp
-      test/src/mocap_sensor_model.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}-test
       ${PROJECT_NAME}_iekf
-      ${catkin_LIBRARIES}
+      sensor_models
       ugl::math
       ugl::trajectory
   )
