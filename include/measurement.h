@@ -17,6 +17,7 @@ enum class MeasurementType
 class Measurement
 {
 public:
+    virtual ~Measurement() = default;
     virtual MeasurementType get_type() const = 0;
     virtual double get_time() const = 0;
 };
