@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(invariant_kalman_filter)
 
-add_compile_options(-std=c++17 -g -Wall -Wextra -Wpedantic -Wno-deprecated-copy)
+# add_compile_options(-std=c++17 -g -Wall -Wextra -Wpedantic -Wno-deprecated-copy)
+add_compile_options(-std=c++17)
+
+add_library(warnings INTERFACE)
+target_compile_options(warnings
+  INTERFACE
+    -Wall -Wextra -Wpedantic
+    -Wno-deprecated-copy
+)
 
 find_package(catkin REQUIRED 
   COMPONENTS
@@ -52,6 +60,7 @@ target_link_libraries(${PROJECT_NAME}_iekf
   ${catkin_LIBRARIES}
   ugl::math
   ugl::lie_group
+  warnings
 )
 
 ## Declare a C++ executable
@@ -60,6 +69,7 @@ add_executable(kalman_node src/kalman_node.cpp)
 target_link_libraries(kalman_node
   ${PROJECT_NAME}_iekf
   ${catkin_LIBRARIES}
+  warnings
 )
 
 #############
@@ -122,6 +132,7 @@ target_link_libraries(mock_trajectory_node
   PRIVATE
     ${catkin_LIBRARIES}
     ugl::trajectory
+    warnings
 )
 
 ## Sensor Models
@@ -139,6 +150,7 @@ target_link_libraries(sensor_models
   PUBLIC
     ugl::math
     ugl::trajectory
+    warnings
 )
 
 # Add gtest based cpp test target and link libraries
@@ -162,5 +174,6 @@ if(TARGET ${PROJECT_NAME}-test)
       sensor_models
       ugl::math
       ugl::trajectory
+      warnings
   )
 endif()
