@@ -8,6 +8,15 @@ add_library(warnings INTERFACE)
 target_compile_options(warnings
   INTERFACE
     -Wall -Wextra -Wpedantic
+    -Wnon-virtual-dtor 
+    -Wcast-align
+    -Wunused
+    -Woverloaded-virtual
+    -Wconversion
+    -Wnull-dereference
+    -Wmisleading-indentation
+    -Wduplicated-cond
+    -Wduplicated-branches
     -Wno-deprecated-copy
 )
 
