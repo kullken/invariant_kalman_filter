@@ -43,7 +43,7 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
 {
     AccuracyTest::Result result;
 
-    ImuSensorModel imu{traj, 100};
+    ImuSensorModel imu{traj, 100, ImuNoiseLevel::Mueller18};
     MocapSensorModel mocap{traj, 100};
     const double measurement_period = 0.01;
 

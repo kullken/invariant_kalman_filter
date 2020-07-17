@@ -12,11 +12,9 @@ target_compile_options(warnings
     -Wcast-align
     -Wunused
     -Woverloaded-virtual
-    -Wconversion
     -Wnull-dereference
     -Wmisleading-indentation
     -Wduplicated-cond
-    -Wduplicated-branches
     -Wno-deprecated-copy
 )
 
@@ -159,6 +157,7 @@ target_link_libraries(sensor_models
   PUBLIC
     ugl::math
     ugl::trajectory
+    ugl::random
     warnings
 )
 

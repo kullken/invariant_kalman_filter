@@ -2,22 +2,28 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/trajectory/trajectory.h>
+#include <ugl/random/normal_distribution.h>
 
 namespace invariant::test
 {
 
+enum class ImuNoiseLevel
+{
+    None,
+    Low,
+    High,
+    Mueller18,
+};
+
 /// A class for representing virtual IMU sensors.
-/// TODO: Add noise and bias.
+/// TODO: Add bias?.
 /// TODO: Enable arbitrary IMU coordinate system.
 class ImuSensorModel
 {
 public:
-    ImuSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency)
-        : trajectory_(trajectory) 
-        , period_(1.0/frequency)
-    {}
+    ImuSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency, ImuNoiseLevel level);
 
-    double period() 
+    double period() const
     {
         return period_;
     }
@@ -32,7 +38,10 @@ private:
     const ugl::trajectory::Trajectory& trajectory_;
     const double period_;
 
+    const ugl::random::NormalDistribution<3> accel_noise_;
+    const ugl::random::NormalDistribution<3> gyro_noise_;
+
     static const ugl::Vector3 s_gravity;
 };
 
-}
+} // namespace invariant::test
