@@ -39,6 +39,12 @@ template<ImuNoiseLevel level>
 static ugl::Matrix3 accel_covar();
 
 template<>
+ugl::Matrix3 accel_covar<ImuNoiseLevel::None>()
+{
+    return ugl::Matrix3::Zero();
+}
+
+template<>
 ugl::Matrix3 accel_covar<ImuNoiseLevel::Mueller18>()
 {
     // Value taken from Mueller et al. (2018).
@@ -51,6 +57,8 @@ static ugl::Matrix3 get_accel_covar(ImuNoiseLevel level)
 {
     switch (level)
     {
+    case ImuNoiseLevel::None:
+        return accel_covar<ImuNoiseLevel::None>();
     case ImuNoiseLevel::Mueller18:
         return accel_covar<ImuNoiseLevel::Mueller18>();
     default:
@@ -60,6 +68,12 @@ static ugl::Matrix3 get_accel_covar(ImuNoiseLevel level)
 
 template<ImuNoiseLevel level>
 static ugl::Matrix3 gyro_covar();
+
+template<>
+ugl::Matrix3 gyro_covar<ImuNoiseLevel::None>()
+{
+    return ugl::Matrix3::Zero();
+}
 
 template<>
 ugl::Matrix3 gyro_covar<ImuNoiseLevel::Mueller18>()
@@ -74,6 +88,8 @@ static ugl::Matrix3 get_gyro_covar(ImuNoiseLevel level)
 {
     switch (level)
     {
+    case ImuNoiseLevel::None:
+        return gyro_covar<ImuNoiseLevel::None>();
     case ImuNoiseLevel::Mueller18:
         return gyro_covar<ImuNoiseLevel::Mueller18>();
     default:
