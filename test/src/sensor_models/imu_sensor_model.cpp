@@ -16,6 +16,7 @@ const ugl::Vector3 ImuSensorModel::s_gravity{0.0, 0.0, -9.82};
 ImuSensorModel::ImuSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency, ImuNoiseLevel level)
     : trajectory_(trajectory) 
     , period_(1.0/frequency)
+    , noise_level_(level)
     , accel_noise_(get_accel_covar(level))
     , gyro_noise_(get_gyro_covar(level))
 {

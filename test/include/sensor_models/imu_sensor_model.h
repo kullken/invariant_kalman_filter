@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 #include <ugl/math/vector.h>
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/normal_distribution.h>
@@ -28,6 +30,11 @@ public:
         return period_;
     }
 
+    ImuNoiseLevel noise_level() const
+    {
+        return noise_level_;
+    }
+
     /// Returns an accelerometer reading expressed in body frame.
     ugl::Vector3 get_accel_reading(double t) const;
 
@@ -38,10 +45,31 @@ private:
     const ugl::trajectory::Trajectory& trajectory_;
     const double period_;
 
+    const ImuNoiseLevel noise_level_;
     const ugl::random::NormalDistribution<3> accel_noise_;
     const ugl::random::NormalDistribution<3> gyro_noise_;
 
     static const ugl::Vector3 s_gravity;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const ImuNoiseLevel& level)
+{
+    switch (level)
+    {
+    case ImuNoiseLevel::None:
+        return os << "None";
+    case ImuNoiseLevel::Low:
+        return os << "Low";
+    case ImuNoiseLevel::High:
+        return os << "High";
+    case ImuNoiseLevel::Mueller18:
+        return os << "Mueller18";
+    }
+}
+
+inline std::ostream& operator<<(std::ostream& os, const ImuSensorModel& model)
+{
+    return os << "IMU Noise: " << model.noise_level();
+}
 
 } // namespace invariant::test
