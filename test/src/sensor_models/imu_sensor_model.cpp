@@ -13,10 +13,18 @@ static ugl::Matrix3 get_gyro_covar(ImuNoiseLevel level);
 
 const ugl::Vector3 ImuSensorModel::s_gravity{0.0, 0.0, -9.82};
 
-ImuSensorModel::ImuSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency, ImuNoiseLevel level)
-    : trajectory_(trajectory) 
+ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency)
+    : noise_level_(level)
     , period_(1.0/frequency)
-    , noise_level_(level)
+    , accel_noise_(get_accel_covar(level))
+    , gyro_noise_(get_gyro_covar(level))
+{
+}
+
+ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency, const ugl::trajectory::Trajectory& trajectory)
+    : noise_level_(level)
+    , period_(1.0/frequency)
+    , trajectory_(trajectory)
     , accel_noise_(get_accel_covar(level))
     , gyro_noise_(get_gyro_covar(level))
 {

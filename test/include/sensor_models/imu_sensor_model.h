@@ -23,7 +23,11 @@ enum class ImuNoiseLevel
 class ImuSensorModel
 {
 public:
-    ImuSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency, ImuNoiseLevel level);
+    ImuSensorModel() : ImuSensorModel(ImuNoiseLevel::None) {}
+
+    explicit ImuSensorModel(ImuNoiseLevel level, double frequency=100.0);
+
+    ImuSensorModel(ImuNoiseLevel level, double frequency, const ugl::trajectory::Trajectory& trajectory);
 
     double period() const
     {
@@ -35,6 +39,11 @@ public:
         return noise_level_;
     }
 
+    void set_trajectory(const ugl::trajectory::Trajectory& trajectory)
+    {
+        trajectory_ = trajectory;
+    }
+
     /// Returns an accelerometer reading expressed in body frame.
     ugl::Vector3 get_accel_reading(double t) const;
 
@@ -42,12 +51,12 @@ public:
     ugl::Vector3 get_gyro_reading(double t) const;
 
 private:
-    const ugl::trajectory::Trajectory& trajectory_;
-    const double period_;
+    ImuNoiseLevel noise_level_;
+    double period_;
+    ugl::trajectory::Trajectory trajectory_;
 
-    const ImuNoiseLevel noise_level_;
-    const ugl::random::NormalDistribution<3> accel_noise_;
-    const ugl::random::NormalDistribution<3> gyro_noise_;
+    ugl::random::NormalDistribution<3> accel_noise_;
+    ugl::random::NormalDistribution<3> gyro_noise_;
 
     static const ugl::Vector3 s_gravity;
 };
