@@ -39,11 +39,10 @@ static std::vector<int> range(int start, int end, int step)
     return values;
 }
 
-AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::trajectory::Trajectory &traj)
+AccuracyTest::Result IekfTestSuite::compute_accuracy(IEKF filter, const ugl::trajectory::Trajectory &traj)
 {
     AccuracyTest::Result result;
 
-    ImuSensorModel imu{traj, 100, ImuNoiseLevel::None};
     MocapSensorModel mocap{traj, 100};
     const double measurement_period = 0.01;
 
@@ -54,7 +53,7 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
     std::vector<double> clock;
     std::transform(std::cbegin(clock_ms), std::cend(clock_ms), std::back_inserter(clock), [](int ms){ return ms / 1000.0; } );
 
-    double next_imu_time = clock[0] + imu.period();
+    double next_imu_time = clock[0] + imu_.period();
     double next_mocap_time = clock[0] + mocap.period();
     double next_measurement_time = clock[0];
 
@@ -66,8 +65,8 @@ AccuracyTest::Result AccuracyTest::compute_accuracy(IEKF filter, const ugl::traj
     {
         if (t >= next_imu_time)
         {
-            filter.predict(imu.period(), imu.get_accel_reading(next_imu_time), imu.get_gyro_reading(next_imu_time));
-            next_imu_time += imu.period();
+            filter.predict(imu_.period(), imu_.get_accel_reading(next_imu_time), imu_.get_gyro_reading(next_imu_time));
+            next_imu_time += imu_.period();
         }
 
         if (t >= next_mocap_time)
