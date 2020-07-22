@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include "test_trajectories.h"
-#include "test_filters.h"
 #include "imu_sensor_model.h"
 
 namespace invariant::test
@@ -33,12 +32,7 @@ const auto test_imus = testing::Values(
     ImuSensorModel{ImuNoiseLevel::Mueller18}
 );
 
-const auto test_filters = testing::Values(
-    TestFilter{"Default IEKF" , invariant::IEKF{}}
-);
-
 const auto test_configs = testing::Combine(
-    test_filters,
     test_trajectories,
     test_imus
 );

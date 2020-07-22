@@ -13,7 +13,6 @@
 
 #include "accuracy_test_config.h"
 #include "test_trajectories.h"
-#include "test_filters.h"
 #include "imu_sensor_model.h"
 
 namespace invariant::test
@@ -40,14 +39,13 @@ public:
 
 class IekfTestSuite 
     : public AccuracyTest
-    , public testing::WithParamInterface<std::tuple<TestFilter, TestTrajectory, ImuSensorModel>>
+    , public testing::WithParamInterface<std::tuple<TestTrajectory, ImuSensorModel>>
 {
 protected:
 
     IekfTestSuite()
-        : filter_(std::get<0>(GetParam()).filter)
-        , trajectory_(std::get<1>(GetParam()).traj)
-        , imu_(std::get<2>(GetParam()))
+        : trajectory_(std::get<0>(GetParam()).traj)
+        , imu_(std::get<1>(GetParam()))
     {
         imu_.set_trajectory(trajectory_);
     }

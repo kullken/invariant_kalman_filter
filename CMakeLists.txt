@@ -174,7 +174,6 @@ if(TARGET ${PROJECT_NAME}-test)
       test/src/accuracy_test.cpp
       test/src/accuracy_test_config.cpp
       test/src/test_trajectories.cpp
-      test/src/test_filters.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}-test
