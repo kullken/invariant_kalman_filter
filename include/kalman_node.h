@@ -10,6 +10,7 @@
 
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 
 #include "measurement.h"
 
@@ -32,6 +33,10 @@ private:
     ros::Publisher m_velocity_pub;
 
     tf2_ros::TransformBroadcaster m_tf_broadcaster;
+
+    geometry_msgs::TransformStamped m_tf_msg;
+    geometry_msgs::PoseStamped m_pose_msg;
+    geometry_msgs::Vector3Stamped m_vel_msg;
 
     const std::string m_base_frame;
     const std::string m_map_frame;

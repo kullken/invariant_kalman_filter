@@ -8,7 +8,6 @@
 
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
 
 #include <ugl/math/vector.h>
@@ -144,35 +143,32 @@ void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
 
 void KalmanNode::publish_tf(const ros::Time& stamp)
 {
-    geometry_msgs::TransformStamped tf;
-    tf.header.stamp = stamp;
-    tf.header.frame_id = m_map_frame;
-    tf.child_frame_id = m_base_frame;
-    tf2::toMsg(m_iekf_filter.get_pos(), tf.transform.translation);
-    tf2::toMsg(m_iekf_filter.get_rot(), tf.transform.rotation);
+    m_tf_msg.header.stamp = stamp;
+    m_tf_msg.header.frame_id = m_map_frame;
+    m_tf_msg.child_frame_id = m_base_frame;
+    tf2::toMsg(m_iekf_filter.get_pos(), m_tf_msg.transform.translation);
+    tf2::toMsg(m_iekf_filter.get_rot(), m_tf_msg.transform.rotation);
 
-    m_tf_broadcaster.sendTransform(tf);
+    m_tf_broadcaster.sendTransform(m_tf_msg);
 }
 
 void KalmanNode::publish_pose(const ros::Time& stamp)
 {
-    geometry_msgs::PoseStamped pose;
-    pose.header.stamp = stamp;
-    pose.header.frame_id = m_map_frame;
-    tf2::toMsg(m_iekf_filter.get_pos(), pose.pose.position);
-    tf2::toMsg(m_iekf_filter.get_quat(), pose.pose.orientation);
+    m_pose_msg.header.stamp = stamp;
+    m_pose_msg.header.frame_id = m_map_frame;
+    tf2::toMsg(m_iekf_filter.get_pos(), m_pose_msg.pose.position);
+    tf2::toMsg(m_iekf_filter.get_quat(), m_pose_msg.pose.orientation);
 
-    m_pose_pub.publish(pose);
+    m_pose_pub.publish(m_pose_msg);
 }
 
 void KalmanNode::publish_velocity(const ros::Time& stamp)
 {
-    geometry_msgs::Vector3Stamped vel;
-    vel.header.stamp = stamp;
-    vel.header.frame_id = m_map_frame;
-    tf2::toMsg(m_iekf_filter.get_vel(), vel.vector);
+    m_vel_msg.header.stamp = stamp;
+    m_vel_msg.header.frame_id = m_map_frame;
+    tf2::toMsg(m_iekf_filter.get_vel(), m_vel_msg.vector);
 
-    m_velocity_pub.publish(vel);
+    m_velocity_pub.publish(m_vel_msg);
 }
 
 }
