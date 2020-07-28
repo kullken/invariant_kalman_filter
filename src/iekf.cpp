@@ -53,12 +53,12 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     A.block<3,3>(6,0) = ugl::lie::skew(acc).transpose();
     A.block<3,3>(3,6) = Matrix3::Identity();
 
-    Covariance<9> Q = Matrix<9,9>::Identity() * 0.1;    // TODO: Set to something smart.
-    Matrix<9,9> D = Matrix<9,9>::Identity();            // TODO: This is only here to make the algorithm clearer in the code.
+    const Covariance<9> Q = Matrix<9,9>::Identity() * 0.1;    // TODO: Set to something smart.
+    const Matrix<9,9> D = Matrix<9,9>::Identity();            // TODO: This is only here to make the algorithm clearer in the code.
 
     // Discretisation method from Hartley et al. (2018)
-    Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));           // TODO: Check if approximation I + (A*dt)^ is accurate enough and faster. 
-    Covariance<9> P_pred = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
+    const Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));           // TODO: Check if approximation I + (A*dt)^ is accurate enough and faster. 
+    const Covariance<9> P_pred = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
 
     m_P = P_pred; // TODO: Self-assignment would likely be faster. Was there some problem with Eigen and self-assignment?
 }
@@ -71,16 +71,16 @@ void IEKF::mocap_update(const Rotation& R_measured, const Vector3& pos_measured)
     Y.block<3,1>(0,3) = pos_measured;
 
     // Measurement noise of mocap.
-    Covariance<6> N = Covariance<6>::Identity() * 0.01; // TODO: Set to something smart.
+    const Covariance<6> N = Covariance<6>::Identity() * 0.01; // TODO: Set to something smart.
 
     // Gain calculation
-    Matrix<6,9> H = Matrix<6,9>::Identity();   
-    Matrix<6,6> S = H * m_P * H.transpose() + N; 
-    Matrix<9,6> L = m_P * H.transpose() * S.inverse();
+    const Matrix<6,9> H = Matrix<6,9>::Identity();   
+    const Matrix<6,6> S = H * m_P * H.transpose() + N; 
+    const Matrix<9,6> L = m_P * H.transpose() * S.inverse();
 
     // State correction
-    Vector<6> innovation = ugl::lie::log_map_SE_3(Matrix<4,5>::Identity() * m_X.inverse() * Y);
-    State dX = ugl::lie::exp_map_SE2_3(L*innovation);
+    const Vector<6> innovation = ugl::lie::log_map_SE_3(Matrix<4,5>::Identity() * m_X.inverse() * Y);
+    const State dX = ugl::lie::exp_map_SE2_3(L*innovation);
     m_X = m_X*dX;
 
     // Error correction
