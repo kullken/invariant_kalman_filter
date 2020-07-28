@@ -1,23 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(invariant_kalman_filter)
 
-# add_compile_options(-std=c++17 -g -Wall -Wextra -Wpedantic -Wno-deprecated-copy)
-add_compile_options(-std=c++17)
-
-add_library(warnings INTERFACE)
-target_compile_options(warnings
-  INTERFACE
-    -Wall -Wextra -Wpedantic
-    -Wnon-virtual-dtor 
-    -Wcast-align
-    -Wunused
-    -Woverloaded-virtual
-    -Wnull-dereference
-    -Wmisleading-indentation
-    -Wduplicated-cond
-    -Wno-deprecated-copy
-)
-
 find_package(catkin REQUIRED 
   COMPONENTS
     geometry_msgs
@@ -30,6 +13,27 @@ find_package(catkin REQUIRED
 )
 
 find_package(ugl REQUIRED)
+
+add_library(project_options INTERFACE)
+target_compile_features(project_options INTERFACE cxx_std_17)
+
+add_library(project_warnings INTERFACE)
+target_compile_options(project_warnings
+  INTERFACE
+    -Wall -Wextra -Wpedantic
+    -Wnon-virtual-dtor 
+    -Wcast-align
+    -Wunused
+    -Woverloaded-virtual
+    -Wnull-dereference
+    -Wmisleading-indentation
+    -Wno-deprecated-copy
+)
+
+include(cmake/StaticAnalyzers.cmake)
+include(cmake/Sanitizers.cmake)
+
+enable_sanitizers(project_options)
 
 ###################################
 ## catkin specific configuration ##
@@ -59,24 +63,30 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME}_iekf
+add_library(${PROJECT_NAME}_iekf SHARED
   src/iekf.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_iekf
-  ${catkin_LIBRARIES}
-  ugl::math
-  ugl::lie_group
-  warnings
+  PUBLIC
+    ${catkin_LIBRARIES}
+    ugl::math
+    ugl::lie_group
+  PRIVATE
+    project_options
+    project_warnings
 )
 
 ## Declare a C++ executable
 add_executable(kalman_node src/kalman_node.cpp)
 
 target_link_libraries(kalman_node
-  ${PROJECT_NAME}_iekf
-  ${catkin_LIBRARIES}
-  warnings
+  PUBLIC
+    ${PROJECT_NAME}_iekf
+    ${catkin_LIBRARIES}
+  PRIVATE
+    project_options
+    project_warnings
 )
 
 #############
@@ -136,14 +146,16 @@ target_include_directories(mock_trajectory_node
 )
 
 target_link_libraries(mock_trajectory_node
-  PRIVATE
+  PUBLIC
     ${catkin_LIBRARIES}
     ugl::trajectory
-    warnings
+  PRIVATE
+    project_options
+    project_warnings
 )
 
 ## Sensor Models
-add_library(sensor_models
+add_library(sensor_models SHARED
   test/src/sensor_models/imu_sensor_model.cpp
   test/src/sensor_models/mocap_sensor_model.cpp
 )
@@ -157,8 +169,11 @@ target_link_libraries(sensor_models
   PUBLIC
     ugl::math
     ugl::trajectory
+    ugl::lie_group
     ugl::random
-    warnings
+  PRIVATE
+    project_options
+    project_warnings
 )
 
 # Add gtest based cpp test target and link libraries
@@ -177,10 +192,11 @@ if(TARGET ${PROJECT_NAME}-test)
   )
 
   target_link_libraries(${PROJECT_NAME}-test
+      project_options
+      project_warnings
       ${PROJECT_NAME}_iekf
       sensor_models
       ugl::math
       ugl::trajectory
-      warnings
   )
 endif()
