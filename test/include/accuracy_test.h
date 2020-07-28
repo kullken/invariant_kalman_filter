@@ -14,6 +14,7 @@
 #include "accuracy_test_config.h"
 #include "test_trajectories.h"
 #include "imu_sensor_model.h"
+#include "mocap_sensor_model.h"
 
 namespace invariant::test
 {
@@ -39,15 +40,17 @@ public:
 
 class IekfTestSuite 
     : public AccuracyTest
-    , public testing::WithParamInterface<std::tuple<TestTrajectory, ImuSensorModel>>
+    , public testing::WithParamInterface<std::tuple<TestTrajectory, ImuSensorModel, MocapSensorModel>>
 {
 protected:
 
     IekfTestSuite()
         : trajectory_(std::get<0>(GetParam()).traj)
         , imu_(std::get<1>(GetParam()))
+        , mocap_(std::get<2>(GetParam()))
     {
         imu_.set_trajectory(trajectory_);
+        mocap_.set_trajectory(trajectory_);
     }
 
     AccuracyTest::Result compute_accuracy(IEKF filter, const ugl::trajectory::Trajectory &traj);
@@ -56,6 +59,7 @@ protected:
     invariant::IEKF filter_;
     ugl::trajectory::Trajectory trajectory_;
     ImuSensorModel imu_;
+    MocapSensorModel mocap_;
 };
 
 std::ostream& operator<<(std::ostream& os, const AccuracyTest::Result& result);

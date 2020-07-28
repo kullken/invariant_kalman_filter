@@ -4,6 +4,7 @@
 
 #include "test_trajectories.h"
 #include "imu_sensor_model.h"
+#include "mocap_sensor_model.h"
 
 namespace invariant::test
 {
@@ -27,14 +28,19 @@ const auto test_trajectories = testing::Values(
     TestTrajectory{"Translate Quadratic x: 10m; 10s", quadratic_translation({10,0,0}, 10)}
 );
 
-const auto test_imus = testing::Values(
+const auto test_imu_models = testing::Values(
     ImuSensorModel{ImuNoiseLevel::None},
     ImuSensorModel{ImuNoiseLevel::Mueller18}
 );
 
+const auto test_mocap_models = testing::Values(
+    MocapSensorModel{MocapNoiseLevel::None}
+);
+
 const auto test_configs = testing::Combine(
     test_trajectories,
-    test_imus
+    test_imu_models,
+    test_mocap_models
 );
 
 } // namespace invariant::test

@@ -3,23 +3,44 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 #include <ugl/trajectory/trajectory.h>
+#include <ugl/random/normal_distribution.h>
 
 namespace invariant::test
 {
 
+enum class MocapNoiseLevel
+{
+    None,
+    Low,
+    High
+};
+
 /// A class for representing virtual Motion-capture sensors.
-/// TODO: Add noise and bias.
+/// TODO: Add bias.
 class MocapSensorModel
 {
 public:
-    MocapSensorModel(const ugl::trajectory::Trajectory& trajectory, double frequency)
-        : trajectory_(trajectory) 
-        , period_(1.0/frequency)
-    {}
+    MocapSensorModel() 
+        : MocapSensorModel(MocapNoiseLevel::None) {}
+
+    explicit MocapSensorModel(MocapNoiseLevel level, double frequency=100.0)
+        : MocapSensorModel(ugl::trajectory::Trajectory{}, level, frequency) {}
+
+    MocapSensorModel(const ugl::trajectory::Trajectory& trajectory, MocapNoiseLevel level, double frequency=100.0);
 
     double period() 
     {
         return period_;
+    }
+
+    MocapNoiseLevel noise_level() const
+    {
+        return noise_level_;
+    }
+
+    void set_trajectory(const ugl::trajectory::Trajectory& trajectory)
+    {
+        trajectory_ = trajectory;
     }
 
     /// Returns a position reading expressed in inertial frame.
@@ -29,8 +50,30 @@ public:
     ugl::Rotation get_rot_reading(double t) const;
 
 private:
-    const ugl::trajectory::Trajectory& trajectory_;
-    const double period_;
+    ugl::trajectory::Trajectory trajectory_;
+    MocapNoiseLevel noise_level_;
+    double period_;
+
+    ugl::random::NormalDistribution<3> position_noise_;
+    ugl::random::NormalDistribution<3> rotation_noise_;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level)
+{
+    switch (level)
+    {
+    case MocapNoiseLevel::None:
+        return os << "None";
+    case MocapNoiseLevel::Low:
+        return os << "Low";
+    case MocapNoiseLevel::High:
+        return os << "High";
+    }
 }
+
+inline std::ostream& operator<<(std::ostream& os, const MocapSensorModel& model)
+{
+    return os << "Mocap Noise: " << model.noise_level();
+}
+
+} // namespace invariant::test

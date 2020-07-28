@@ -43,7 +43,6 @@ AccuracyTest::Result IekfTestSuite::compute_accuracy(IEKF filter, const ugl::tra
 {
     AccuracyTest::Result result;
 
-    MocapSensorModel mocap{traj, 100};
     const double measurement_period = 0.01;
 
     const int dt_ms = 1;
@@ -54,7 +53,7 @@ AccuracyTest::Result IekfTestSuite::compute_accuracy(IEKF filter, const ugl::tra
     std::transform(std::cbegin(clock_ms), std::cend(clock_ms), std::back_inserter(clock), [](int ms){ return ms / 1000.0; } );
 
     double next_imu_time = clock[0] + imu_.period();
-    double next_mocap_time = clock[0] + mocap.period();
+    double next_mocap_time = clock[0] + mocap_.period();
     double next_measurement_time = clock[0];
 
     filter.set_pos(traj.get_position(clock[0]));
@@ -71,8 +70,8 @@ AccuracyTest::Result IekfTestSuite::compute_accuracy(IEKF filter, const ugl::tra
 
         if (t >= next_mocap_time)
         {
-            filter.mocap_update(mocap.get_rot_reading(next_mocap_time), mocap.get_pos_reading(next_mocap_time));
-            next_mocap_time += mocap.period();
+            filter.mocap_update(mocap_.get_rot_reading(next_mocap_time), mocap_.get_pos_reading(next_mocap_time));
+            next_mocap_time += mocap_.period();
         }
 
         if (t >= next_measurement_time)
