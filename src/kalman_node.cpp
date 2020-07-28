@@ -4,12 +4,7 @@
 #include <memory>
 
 #include <ros/ros.h>
-
 #include <tf2_ros/transform_broadcaster.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
-#include <tf2/LinearMath/Quaternion.h>
 
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -19,11 +14,12 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 
+#include <ugl_ros/convert.h>
+
 #include "measurement.h"
 
 #include "iekf.h"
 #include "iekf_types.h"
-#include "iekf_tf2_conversions.h"
 
 #include "ros_utils.h"
 
@@ -36,8 +32,8 @@ static constexpr size_t k_queue_max_size = 20;
 KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     : m_nh(nh)
     , m_nh_private(nh_private)
-    , m_base_frame( [&nh_private]() -> std::string { return nh_private.param<std::string>("base_frame", "base_link"); }() )
-    , m_map_frame(  [&nh_private]() -> std::string { return nh_private.param<std::string>("map_frame", "map"); }() )
+    , m_base_frame(nh_private.param<std::string>("base_frame", "base_link"))
+    , m_map_frame(nh_private.param<std::string>("map_frame", "map"))
 {
     m_imu_sub       = m_nh.subscribe("imu", 10, &KalmanNode::imu_cb, this);
     m_mocap_sub     = m_nh.subscribe("mocap/pose", 10, &KalmanNode::mocap_cb, this);
@@ -153,11 +149,9 @@ void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
 void KalmanNode::publish_tf(const ros::Time& stamp)
 {
     geometry_msgs::TransformStamped tf;
-
-    tf.header.stamp     = stamp;
-    tf.header.frame_id  = m_map_frame;
-    tf.child_frame_id   = m_base_frame;
-
+    tf.header.stamp = stamp;
+    tf.header.frame_id = m_map_frame;
+    tf.child_frame_id = m_base_frame;
     tf2::toMsg(m_iekf_filter.get_pos(), tf.transform.translation);
     tf2::toMsg(m_iekf_filter.get_rot(), tf.transform.rotation);
 
@@ -167,11 +161,10 @@ void KalmanNode::publish_tf(const ros::Time& stamp)
 void KalmanNode::publish_pose(const ros::Time& stamp)
 {
     geometry_msgs::PoseStamped pose;
-
-    pose.header.stamp     = stamp;
-    pose.header.frame_id  = m_map_frame;
-    pose.pose.position    = tf2::toMsg(m_iekf_filter.get_pos());
-    pose.pose.orientation = tf2::toMsg(m_iekf_filter.get_quat());
+    pose.header.stamp = stamp;
+    pose.header.frame_id = m_map_frame;
+    tf2::toMsg(m_iekf_filter.get_pos(), pose.pose.position);
+    tf2::toMsg(m_iekf_filter.get_quat(), pose.pose.orientation);
 
     m_pose_pub.publish(pose);
 }
@@ -179,10 +172,9 @@ void KalmanNode::publish_pose(const ros::Time& stamp)
 void KalmanNode::publish_velocity(const ros::Time& stamp)
 {
     geometry_msgs::Vector3Stamped vel;
-
-    vel.header.stamp    = stamp;
+    vel.header.stamp = stamp;
     vel.header.frame_id = m_map_frame;
-    vel.vector = tf2::toMsg<ugl::Vector3, geometry_msgs::Vector3>(m_iekf_filter.get_vel());
+    tf2::toMsg(m_iekf_filter.get_vel(), vel.vector);
 
     m_velocity_pub.publish(vel);
 }

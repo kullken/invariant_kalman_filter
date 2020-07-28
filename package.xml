@@ -43,6 +43,7 @@
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_eigen</depend>
   <depend>ugl</depend>
+  <depend>ugl_ros</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
