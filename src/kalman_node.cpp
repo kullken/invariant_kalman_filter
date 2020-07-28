@@ -140,10 +140,6 @@ void KalmanNode::imu_cb(const sensor_msgs::Imu& msg)
 void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
 {
     m_queue.push(std::make_shared<MocapMeasurement>(msg));
-    if (m_queue.size() > k_queue_max_size)
-    {
-        ROS_WARN("Measurement queue exceeds max size [=%zu]! Filter might not be running in real-time.", k_queue_max_size);
-    }
 }
 
 void KalmanNode::publish_tf(const ros::Time& stamp)
