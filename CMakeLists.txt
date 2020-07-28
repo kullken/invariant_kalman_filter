@@ -176,9 +176,10 @@ target_link_libraries(sensor_models
     project_warnings
 )
 
-# Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}-test test/src/test_main.cpp)
-if(TARGET ${PROJECT_NAME}-test)
+if (CATKIN_ENABLE_TESTING)
+  # Add gtest based cpp test target and link libraries
+  catkin_add_executable_with_gtest(${PROJECT_NAME}-test test/src/test_main.cpp)
+
   target_include_directories(${PROJECT_NAME}-test
     PRIVATE
       test/include  
