@@ -29,7 +29,8 @@ const auto test_imu_models = testing::Values(
 );
 
 const auto test_mocap_models = testing::Values(
-    MocapSensorModel{MocapNoiseLevel::None}
+    MocapSensorModel{MocapNoiseLevel::None},
+    MocapSensorModel{MocapNoiseLevel::Low}
 );
 
 const auto test_configs = testing::Combine(

@@ -40,12 +40,22 @@ ugl::Matrix3 position_covar<MocapNoiseLevel::None>()
     return ugl::Matrix3::Zero();
 }
 
+template<>
+ugl::Matrix3 position_covar<MocapNoiseLevel::Low>()
+{
+    constexpr double stddev = 0.01;  // [m]
+    constexpr double variance = stddev*stddev;
+    return ugl::Matrix3::Identity() * variance;
+}
+
 static ugl::Matrix3 get_position_covar(MocapNoiseLevel level)
 {
     switch (level)
     {
     case MocapNoiseLevel::None:
         return position_covar<MocapNoiseLevel::None>();
+    case MocapNoiseLevel::Low:
+        return position_covar<MocapNoiseLevel::Low>();
     default:
         throw std::logic_error("The asked for MocapNoiseLevel is not yet implemented.");
     }
@@ -60,12 +70,22 @@ ugl::Matrix3 rotation_covar<MocapNoiseLevel::None>()
     return ugl::Matrix3::Zero();
 }
 
+template<>
+ugl::Matrix3 rotation_covar<MocapNoiseLevel::Low>()
+{
+    constexpr double stddev = 0.01;  // [rad]
+    constexpr double variance = stddev*stddev;
+    return ugl::Matrix3::Identity() * variance;
+}
+
 static ugl::Matrix3 get_rotation_covar(MocapNoiseLevel level)
 {
     switch (level)
     {
     case MocapNoiseLevel::None:
         return rotation_covar<MocapNoiseLevel::None>();
+    case MocapNoiseLevel::Low:
+        return rotation_covar<MocapNoiseLevel::Low>();
     default:
         throw std::logic_error("The asked for MocapNoiseLevel is not yet implemented.");
     }
