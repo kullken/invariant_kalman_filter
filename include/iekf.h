@@ -29,8 +29,8 @@ public:
     void mocap_update(const ugl::Rotation& R_measured, const ugl::Vector3& pos_measured);
 
 private:
-    State m_X;
-    Covariance<9> m_P;
+    State m_X = State::Identity();
+    Covariance<9> m_P = Covariance<9>::Identity();
 
     static const ugl::Vector3 s_gravity;
 };
