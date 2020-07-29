@@ -22,12 +22,12 @@ MocapSensorModel::MocapSensorModel(const ugl::trajectory::Trajectory& trajectory
 
 ugl::Vector3 MocapSensorModel::get_pos_reading(double t) const
 {
-    return trajectory_.get_position(t); // + position_noise_.sample();
+    return trajectory_.get_position(t) + position_noise_.sample();
 }
 
 ugl::Rotation MocapSensorModel::get_rot_reading(double t) const
 {
-    return trajectory_.get_rotation(t); // * ugl::lie::exp_map_SO_3(rotation_noise_.sample());
+    return trajectory_.get_rotation(t) * ugl::lie::exp_map_SO_3(rotation_noise_.sample());
 }
 
 
