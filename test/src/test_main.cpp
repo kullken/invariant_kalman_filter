@@ -46,7 +46,7 @@ TEST_P(IekfTestSuite, IekfTestCase)
 INSTANTIATE_TEST_CASE_P(
     AccuracyTestBase,
     IekfTestSuite,
-    test_configs
+    test_configs,
 );
 
 } // namespace
