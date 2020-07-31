@@ -53,7 +53,7 @@ protected:
         mocap_.set_trajectory(trajectory_);
     }
 
-    AccuracyTest::Result compute_accuracy(IEKF filter, const ugl::trajectory::Trajectory &traj);
+    AccuracyTest::Result compute_accuracy();
 
 protected:
     invariant::IEKF filter_;

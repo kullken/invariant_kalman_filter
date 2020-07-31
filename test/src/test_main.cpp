@@ -30,7 +30,7 @@ void save_to_file(const AccuracyTest::Result& result)
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
-    const AccuracyTest::Result result = compute_accuracy(filter_, trajectory_);
+    const AccuracyTest::Result result = compute_accuracy();
 
     RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));

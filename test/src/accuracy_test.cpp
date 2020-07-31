@@ -39,14 +39,14 @@ static std::vector<int> range(int start, int end, int step)
     return values;
 }
 
-AccuracyTest::Result IekfTestSuite::compute_accuracy(IEKF filter, const ugl::trajectory::Trajectory &traj)
+AccuracyTest::Result IekfTestSuite::compute_accuracy()
 {
     AccuracyTest::Result result;
 
     const double measurement_period = 0.01;
 
     const int dt_ms = 1;
-    const int duration_ms = static_cast<int>(traj.duration() * 1000.0);
+    const int duration_ms = static_cast<int>(trajectory_.duration() * 1000.0);
     const auto clock_ms = range(0, duration_ms+dt_ms, dt_ms);
 
     std::vector<double> clock;
@@ -56,33 +56,33 @@ AccuracyTest::Result IekfTestSuite::compute_accuracy(IEKF filter, const ugl::tra
     double next_mocap_time = clock[0] + mocap_.period();
     double next_measurement_time = clock[0];
 
-    filter.set_pos(traj.get_position(clock[0]));
-    filter.set_vel(traj.get_velocity(clock[0]));
-    filter.set_rot(traj.get_rotation(clock[0]));
+    filter_.set_pos(trajectory_.get_position(clock[0]));
+    filter_.set_vel(trajectory_.get_velocity(clock[0]));
+    filter_.set_rot(trajectory_.get_rotation(clock[0]));
     
     for (const auto& t : clock)
     {
         if (t >= next_imu_time)
         {
-            filter.predict(imu_.period(), imu_.get_accel_reading(next_imu_time), imu_.get_gyro_reading(next_imu_time));
+            filter_.predict(imu_.period(), imu_.get_accel_reading(next_imu_time), imu_.get_gyro_reading(next_imu_time));
             next_imu_time += imu_.period();
         }
 
         if (t >= next_mocap_time)
         {
-            filter.mocap_update(mocap_.get_rot_reading(next_mocap_time), mocap_.get_pos_reading(next_mocap_time));
+            filter_.mocap_update(mocap_.get_rot_reading(next_mocap_time), mocap_.get_pos_reading(next_mocap_time));
             next_mocap_time += mocap_.period();
         }
 
         if (t >= next_measurement_time)
         {
-            const ugl::Vector3 true_pos = traj.get_position(next_measurement_time);
-            const ugl::Vector3 true_vel = traj.get_velocity(next_measurement_time);
-            const ugl::UnitQuaternion true_quat = traj.get_quaternion(next_measurement_time);
+            const ugl::Vector3 true_pos = trajectory_.get_position(next_measurement_time);
+            const ugl::Vector3 true_vel = trajectory_.get_velocity(next_measurement_time);
+            const ugl::UnitQuaternion true_quat = trajectory_.get_quaternion(next_measurement_time);
 
-            const ugl::Vector3 predicted_pos = filter.get_pos();
-            const ugl::Vector3 predicted_vel = filter.get_vel();
-            const ugl::UnitQuaternion predicted_quat = filter.get_quat();
+            const ugl::Vector3 predicted_pos = filter_.get_pos();
+            const ugl::Vector3 predicted_vel = filter_.get_vel();
+            const ugl::UnitQuaternion predicted_quat = filter_.get_quat();
 
             // Save data
             const double pos_error = dist(true_pos, predicted_pos);
