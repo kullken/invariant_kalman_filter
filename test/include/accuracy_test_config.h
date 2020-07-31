@@ -12,9 +12,9 @@ namespace invariant::test
 const auto test_trajectories = testing::Values(
     TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
     TestTrajectory{"Rotate 360 left, 1s", rotate_in_place(360, 1)},
-    TestTrajectory{"Rotate 360 right, 1s", rotate_in_place(360, 1)},
-    TestTrajectory{"Rotate 3600 right, 1s", rotate_in_place(3600, 1)},
-    TestTrajectory{"Rotate 3600 right, 10s", rotate_in_place(3600, 10)},
+    TestTrajectory{"Rotate 360 right, 1s", rotate_in_place(-360, 1)},
+    TestTrajectory{"Rotate 3600 left, 1s", rotate_in_place(3600, 1)},
+    TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
     TestTrajectory{"Translate Linear xy: 10m; 10s", straight_line({10,10,0}, 10)},
     TestTrajectory{"Translate Linear z: 10m; 10s", straight_line({0,0,10}, 10)},
     TestTrajectory{"Translate Quadratic xy: 1m; 1s", quadratic_translation({1,1,0}, 1)},
