@@ -15,12 +15,14 @@ const auto test_trajectories = testing::Values(
     TestTrajectory{"Rotate 360 right, 1s", rotate_in_place(-360, 1)},
     TestTrajectory{"Rotate 3600 left, 1s", rotate_in_place(3600, 1)},
     TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
-    TestTrajectory{"Translate Linear xy: 10m; 10s", straight_line({10,10,0}, 10)},
-    TestTrajectory{"Translate Linear z: 10m; 10s", straight_line({0,0,10}, 10)},
+    TestTrajectory{"ConstantVel xy: 10m; 10s", constant_velocity({1,1,0}, 10)},
+    TestTrajectory{"ConstantVel  z: 10m; 10s", constant_velocity({0,0,1}, 10)},
     TestTrajectory{"Translate Quadratic xy: 1m; 1s", quadratic_translation({1,1,0}, 1)},
     TestTrajectory{"Translate Quadratic z: 1m; 1s", quadratic_translation({0,0,1}, 1)},
     TestTrajectory{"Translate Quadratic x: 10m; 1s", quadratic_translation({10,0,0}, 1)},
-    TestTrajectory{"Translate Quadratic x: 10m; 10s", quadratic_translation({10,0,0}, 10)}
+    TestTrajectory{"Translate Quadratic x: 10m; 10s", quadratic_translation({10,0,0}, 10)},
+    TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)},
+    TestTrajectory{"StartStop: {0,0,1}, 10s", start_stop({0,0,1}, 10)}
 );
 
 const auto test_imu_models = testing::Values(

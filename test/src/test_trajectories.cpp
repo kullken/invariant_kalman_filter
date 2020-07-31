@@ -9,6 +9,7 @@
 
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/trajectory/bezier.h>
+#include <ugl/trajectory/bezier_sequence.h>
 #include <ugl/trajectory/slerp_segment.h>
 #include <ugl/trajectory/slerp_sequence.h>
 
@@ -66,9 +67,9 @@ ugl::trajectory::Trajectory rotate_in_place(double degrees, double duration)
     return {lin_traj, ang_traj};
 }
 
-ugl::trajectory::Trajectory straight_line(ugl::Vector3 delta, double duration)
+ugl::trajectory::Trajectory constant_velocity(ugl::Vector3 velocity, double duration)
 {
-    ugl::trajectory::Bezier<1> lin_traj{duration, {ugl::Vector3::Zero(), delta}};
+    ugl::trajectory::Bezier<1> lin_traj{duration, {ugl::Vector3::Zero(), velocity*duration}};
 
     ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
 
@@ -78,6 +79,21 @@ ugl::trajectory::Trajectory straight_line(ugl::Vector3 delta, double duration)
 ugl::trajectory::Trajectory quadratic_translation(ugl::Vector3 delta, double duration)
 {
     ugl::trajectory::Bezier<2> lin_traj{duration, {ugl::Vector3::Zero(), ugl::Vector3::Zero(), delta}};
+
+    ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
+
+    return {lin_traj, ang_traj};
+}
+
+ugl::trajectory::Trajectory start_stop(ugl::Vector3 acceleration, double duration)
+{
+    const ugl::Vector3 start = ugl::Vector3::Zero();
+    const ugl::Vector3 mid   = std::pow((duration/2), 2) * acceleration / 2;
+    const ugl::Vector3 stop  = 2 * mid;
+
+    const auto part1    = ugl::trajectory::Bezier<2>{duration/2, {start, start, mid}};
+    const auto part2    = ugl::trajectory::Bezier<2>{duration/2, {mid, stop, stop}};
+    const auto lin_traj = ugl::trajectory::BezierSequence<2>{{part1, part2}};
 
     ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
 

@@ -25,8 +25,11 @@ ugl::trajectory::Trajectory getStandStillTrajectory(double duration=1.0);
 
 ugl::trajectory::Trajectory rotate_in_place(double degrees, double duration=1.0);
 
-ugl::trajectory::Trajectory straight_line(ugl::Vector3 delta, double duration=1.0);
+ugl::trajectory::Trajectory constant_velocity(ugl::Vector3 velocity, double duration=1.0);
 
 ugl::trajectory::Trajectory quadratic_translation(ugl::Vector3 delta, double duration=1.0);
+
+/// Start and stop maneuver with constant acceleration like a spacecraft with infinite fuel.
+ugl::trajectory::Trajectory start_stop(ugl::Vector3 acceleration, double duration=1.0);
 
 } // namespace invariant::test
