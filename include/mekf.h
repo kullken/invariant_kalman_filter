@@ -4,12 +4,12 @@
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
 
-#include "ekf_types.h"
+#include "mekf_types.h"
 
-namespace ekf
+namespace mekf
 {
 
-class EKF
+class MEKF
 {
 private:
     State m_x;
@@ -19,8 +19,8 @@ private:
     static const ugl::Vector3 s_gravity;
 
 public:
-    EKF() = default;
-    EKF(const ugl::Vector3& initial_pos, const ugl::Vector3& initial_vel, const ugl::Rotation& initial_rot, const Covariance& initial_covar);
+    MEKF() = default;
+    MEKF(const ugl::Vector3& initial_pos, const ugl::Vector3& initial_vel, const ugl::Rotation& initial_rot, const Covariance& initial_covar);
 
     ugl::Vector3 get_pos() const { return m_x.segment<3>(0); }
     ugl::Vector3 get_vel() const { return m_x.segment<3>(3); }

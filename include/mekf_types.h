@@ -3,7 +3,7 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 
-namespace ekf
+namespace mekf
 {
 
 using State              = ugl::Vector<9>;
