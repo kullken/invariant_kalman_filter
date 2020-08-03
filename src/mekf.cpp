@@ -1,7 +1,5 @@
 #include "mekf.h"
 
-#include <unsupported/Eigen/MatrixFunctions>
-
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 
@@ -26,18 +24,18 @@ Matrix3 S(const Vector3& vec)
 
 const Vector3 MEKF::s_gravity{0.0, 0.0, -9.82};
 
-MEKF::MEKF(const Vector3& initial_pos, const Vector3& initial_vel, const Rotation& initial_rot, const Covariance& initial_covar)
+MEKF::MEKF(const ugl::Rotation& R0, const ugl::Vector3& p0, const ugl::Vector3& v0, const Covariance<9>& P0)
     : m_x()
-    , m_R_ref(initial_rot)
-    , m_P(initial_covar)
+    , m_R_ref(R0)
+    , m_P(P0)
 {
-    m_x << initial_pos, initial_vel, Vector3::Zero();
+    m_x << p0, v0, Vector3::Zero();
 }
 
 void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     const Jacobian A = MEKF::state_transition_jac(m_R_ref, dt, acc, ang_vel);
-    const Covariance Q = MEKF::state_transition_var(dt);
+    const Covariance<9> Q = MEKF::state_transition_var(dt);
 
     m_x = MEKF::state_transition_model(m_x, m_R_ref, dt, acc, ang_vel);
     m_P = A*m_P*A.transpose() + Q;
@@ -45,17 +43,22 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     reset_attitude_error();
 }
 
-void MEKF::update_with_position(const Position& measurement)
+void MEKF::mocap_update(const ugl::Rotation& R_measured, const ugl::Vector3& pos_measured)
+{
+
+}
+
+void MEKF::position_update(const Position& measurement)
 {
     const PositionJacobian H = MEKF::position_measurement_jac();
-    const PositionCovariance R = MEKF::position_measurement_var();
+    const Covariance<3> R = MEKF::position_measurement_var();
 
     const Position y = measurement - MEKF::position_measurement_model(m_x);
-    const PositionCovariance S = H*m_P*H.transpose() + R;
+    const Covariance<3> S = H*m_P*H.transpose() + R;
     const ugl::Matrix<9, 3> K = m_P*H.transpose()*S.inverse();
 
     m_x = m_x + K*y;
-    m_P = (Covariance::Identity() - K*H) * m_P;
+    m_P = (Covariance<9>::Identity() - K*H) * m_P;
 
     reset_attitude_error();
 }
@@ -65,10 +68,10 @@ void MEKF::reset_attitude_error()
     const Vector3 delta = m_x.segment<3>(6);
 
     ugl::Matrix<9, 9> T = ugl::Matrix<9, 9>::Identity();
-    T.bottomRightCorner<3,3>() = (-1/2 * S(delta)).exp();
+    T.bottomRightCorner<3,3>() = (-1/2 * ugl::math::exp(S(delta)));
 
     m_P = T * m_P * T.transpose();
-    m_R_ref *= (S(delta)).exp();
+    m_R_ref *= ugl::math::exp(S(delta));
     m_x.segment<3>(6) = Vector3::Zero();
 }
 
@@ -79,8 +82,9 @@ State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double
     Vector3 vel = x.segment<3>(3);
     Vector3 delta = x.segment<3>(6);
 
-    // Vector3 rotated_acc = R_ref*S(delta).exp()*acc;                        // Without inversion of R
-    Vector3 rotated_acc = (R_ref*S(delta).exp()).inverse()*acc;            // With inversion of R
+    Rotation R_actual = R_ref*S(delta);
+    // Vector3 rotated_acc = ugl::math::exp(R_actual)*acc;                  // Without inversion of R
+    Vector3 rotated_acc = ugl::math::exp(R_actual).inverse()*acc;        // With inversion of R
 
     pos   += dt * vel + dt*dt/2 * (rotated_acc + s_gravity);
     vel   += dt * (rotated_acc + s_gravity);
@@ -103,7 +107,7 @@ Jacobian MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vect
     return jac;
 }
 
-Covariance MEKF::state_transition_var(double dt)
+Covariance<9> MEKF::state_transition_var(double dt)
 {
     // Values directly from Mueller et al. (2018).
     constexpr double sigma_acc  = 5;      // m/s^2
@@ -116,7 +120,7 @@ Covariance MEKF::state_transition_var(double dt)
     const double dt3 = dt2*dt;
     const double dt4 = dt3*dt;
 
-    Covariance Q = Covariance::Zero();
+    Covariance<9> Q = Covariance<9>::Zero();
     Q.block<3,3>(0,0) = Matrix3::Identity() * dt4/4 * sigma_acc_sq;
     Q.block<3,3>(0,3) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
     Q.block<3,3>(3,0) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
@@ -136,10 +140,10 @@ PositionJacobian MEKF::position_measurement_jac()
     return PositionJacobian::Identity();
 }
 
-PositionCovariance MEKF::position_measurement_var()
+Covariance<3> MEKF::position_measurement_var()
 {
     constexpr double sigma_pos = 0.05 * 100;       // m
-    return PositionCovariance::Identity() * sigma_pos*sigma_pos;
+    return Covariance<3>::Identity() * sigma_pos*sigma_pos;
 }
 
 }
