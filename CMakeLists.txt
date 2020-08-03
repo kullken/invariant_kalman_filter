@@ -63,14 +63,13 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-add_library(${PROJECT_NAME}_iekf SHARED
+## IEKF ##
+add_library(iekf SHARED
   src/iekf.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_iekf
+target_link_libraries(iekf
   PUBLIC
-    ${catkin_LIBRARIES}
     ugl::math
     ugl::lie_group
   PRIVATE
@@ -78,12 +77,25 @@ target_link_libraries(${PROJECT_NAME}_iekf
     project_warnings
 )
 
-## Declare a C++ executable
+## MEKF ##
+add_library(mekf SHARED
+  src/mekf.cpp
+)
+
+target_link_libraries(mekf
+  PUBLIC
+    ugl::math
+  PRIVATE
+    project_options
+    project_warnings
+)
+
+## Kalman ROS-node ##
 add_executable(kalman_node src/kalman_node.cpp)
 
 target_link_libraries(kalman_node
   PUBLIC
-    ${PROJECT_NAME}_iekf
+    iekf
     ${catkin_LIBRARIES}
   PRIVATE
     project_options
@@ -196,7 +208,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(${PROJECT_NAME}-test
       project_options
       project_warnings
-      ${PROJECT_NAME}_iekf
+      iekf
       sensor_models
       ugl::math
       ugl::trajectory
