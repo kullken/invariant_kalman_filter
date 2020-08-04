@@ -9,7 +9,6 @@ find_package(catkin REQUIRED
     tf2
     tf2_ros
     tf2_geometry_msgs
-    tf2_eigen
     ugl_ros
 )
 
@@ -209,6 +208,7 @@ if (CATKIN_ENABLE_TESTING)
       project_options
       project_warnings
       iekf
+      mekf
       sensor_models
       ugl::math
       ugl::trajectory
