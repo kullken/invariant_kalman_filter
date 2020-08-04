@@ -16,6 +16,15 @@ namespace invariant::test
 
 class MockTrajectoryNode
 {
+public:
+    MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
+
+    void start();
+
+private:
+    void publish_imu(const ros::TimerEvent& e);
+    void publish_mocap(const ros::TimerEvent& e);
+
 private:
     ros::NodeHandle& m_nh;
     ros::NodeHandle& m_nh_private;
@@ -32,15 +41,6 @@ private:
     ros::Timer m_mocap_timer;
 
     const ugl::trajectory::Trajectory m_trajectory;
-
-public:
-    MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
-
-    void start();
-
-private:
-    void publish_imu(const ros::TimerEvent& e);
-    void publish_mocap(const ros::TimerEvent& e);
 };
 
 }

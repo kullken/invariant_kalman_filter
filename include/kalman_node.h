@@ -22,6 +22,22 @@ namespace invariant
 
 class KalmanNode
 {
+public:
+    KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
+
+    void start();
+
+private:
+    void initialise_iekf_filter();
+
+    void timer_cb(const ros::TimerEvent& e);
+    void imu_cb(const sensor_msgs::Imu& msg);
+    void mocap_cb(const geometry_msgs::PoseStamped& msg);
+
+    void publish_tf(const ros::Time& stamp);
+    void publish_pose(const ros::Time& stamp);
+    void publish_velocity(const ros::Time& stamp);
+    
 private:
     ros::NodeHandle& m_nh;
     ros::NodeHandle& m_nh_private;
@@ -48,22 +64,6 @@ private:
     std::priority_queue<std::shared_ptr<Measurement>, std::vector<std::shared_ptr<Measurement>>, MeasurementCompare> m_queue;
 
     ros::Time m_previous_imu_time;
-
-public:
-    KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
-
-    void start();
-
-private:
-    void initialise_iekf_filter();
-
-    void timer_cb(const ros::TimerEvent& e);
-    void imu_cb(const sensor_msgs::Imu& msg);
-    void mocap_cb(const geometry_msgs::PoseStamped& msg);
-
-    void publish_tf(const ros::Time& stamp);
-    void publish_pose(const ros::Time& stamp);
-    void publish_velocity(const ros::Time& stamp);
 };
 
 }
