@@ -26,6 +26,7 @@ public:
     void set_quat(const ugl::UnitQuaternion& quat) { m_R_ref = static_cast<ugl::Rotation>(quat); }
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
+    void mocap_update(const ugl::Rotation& R_measured, const ugl::Vector3& pos_measured);
     void position_update(const Position& measurement);
 
 private:
