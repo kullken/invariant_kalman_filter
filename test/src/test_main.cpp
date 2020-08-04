@@ -16,7 +16,7 @@ namespace invariant::test
 namespace
 {
 
-void save_to_file(const AccuracyTest::Result& result)
+void save_to_file(const Result& result)
 {
     auto test_info = testing::UnitTest::GetInstance()->current_test_info();
     std::string file_name = test_info->name();
@@ -30,7 +30,7 @@ void save_to_file(const AccuracyTest::Result& result)
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
-    const AccuracyTest::Result result = compute_accuracy();
+    const auto result = compute_accuracy();
 
     RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
