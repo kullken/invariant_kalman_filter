@@ -18,17 +18,20 @@
 namespace invariant::test
 {
 
-static double dist(const ugl::Vector3& a, const ugl::Vector3& b)
+namespace 
+{
+
+double dist(const ugl::Vector3& a, const ugl::Vector3& b)
 {
     return (a - b).norm();
 }
 
-static double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
+double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
 {
     return a.angularDistance(b);
 }
 
-static std::vector<int> range(int start, int end, int step)
+std::vector<int> range(int start, int end, int step)
 {
     int count = (end - start) / step;
     std::vector<int> values(count);
@@ -37,6 +40,8 @@ static std::vector<int> range(int start, int end, int step)
     std::generate_n(std::begin(values), count, [&]{ return value += step; });
 
     return values;
+}
+
 }
 
 AccuracyTest::Result IekfTestSuite::compute_accuracy()
