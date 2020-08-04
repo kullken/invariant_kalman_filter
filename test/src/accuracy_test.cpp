@@ -44,9 +44,10 @@ std::vector<int> range(int start, int end, int step)
 
 }
 
-AccuracyTest::Result IekfTestSuite::compute_accuracy()
+template<typename FilterType>
+Result AccuracyTest<FilterType>::compute_accuracy_impl()
 {
-    AccuracyTest::Result result;
+    Result result;
 
     const double measurement_period = 0.01;
 
@@ -112,7 +113,17 @@ AccuracyTest::Result IekfTestSuite::compute_accuracy()
     return result;
 }
 
-std::ostream& operator<<(std::ostream& os, const AccuracyTest::Result& result)
+Result IekfTestSuite::compute_accuracy()
+{
+    return compute_accuracy_impl();
+}
+
+Result MekfTestSuite::compute_accuracy()
+{
+    return compute_accuracy_impl();
+}
+
+std::ostream& operator<<(std::ostream& os, const Result& result)
 {
     constexpr auto delimiter = ' ';
     os << "time" << delimiter << "pos_error" << delimiter << "vel_error" << delimiter << "rot_error" << '\n';
