@@ -1,6 +1,4 @@
-#include <algorithm>
 #include <iostream>
-#include <fstream>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -13,17 +11,33 @@ namespace invariant::test
 namespace
 {
 
+constexpr auto kNumAverages = 10;
+
 TEST_P(IekfTestSuite, IekfTestCase)
 {
-    const auto result = compute_accuracy();
+    double position_rmse{0};
+    double velocity_rmse{0};
+    double rotation_rmse{0};
 
-    RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
-    RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
-    RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
+    for (int i = 0; i < kNumAverages; ++i)
+    {
+        const auto result = compute_accuracy();
+        position_rmse += result.position_rmse;
+        velocity_rmse += result.velocity_rmse;
+        rotation_rmse += result.rotation_rmse;
+    }
 
-    std::cout << "result.position_rmse : " << result.position_rmse << '\n';
-    std::cout << "result.velocity_rmse : " << result.velocity_rmse << '\n';
-    std::cout << "result.rotation_rmse : " << result.rotation_rmse << '\n';
+    position_rmse /= kNumAverages;
+    velocity_rmse /= kNumAverages;
+    rotation_rmse /= kNumAverages;
+
+    RecordProperty("PositionRMSE", std::to_string(position_rmse));
+    RecordProperty("VelocityRMSE", std::to_string(velocity_rmse));
+    RecordProperty("RotationRMSE", std::to_string(rotation_rmse));
+
+    std::cout << "position_rmse : " << position_rmse << '\n';
+    std::cout << "velocity_rmse : " << velocity_rmse << '\n';
+    std::cout << "rotation_rmse : " << rotation_rmse << '\n';
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -34,15 +48,29 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(MekfTestSuite, MekfTestCase)
 {
-    const Result result = compute_accuracy();
+    double position_rmse{0};
+    double velocity_rmse{0};
+    double rotation_rmse{0};
 
-    RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
-    RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
-    RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
+    for (int i = 0; i < kNumAverages; ++i)
+    {
+        const auto result = compute_accuracy();
+        position_rmse += result.position_rmse;
+        velocity_rmse += result.velocity_rmse;
+        rotation_rmse += result.rotation_rmse;
+    }
 
-    std::cout << "result.position_rmse : " << result.position_rmse << '\n';
-    std::cout << "result.velocity_rmse : " << result.velocity_rmse << '\n';
-    std::cout << "result.rotation_rmse : " << result.rotation_rmse << '\n';
+    position_rmse /= kNumAverages;
+    velocity_rmse /= kNumAverages;
+    rotation_rmse /= kNumAverages;
+
+    RecordProperty("PositionRMSE", std::to_string(position_rmse));
+    RecordProperty("VelocityRMSE", std::to_string(velocity_rmse));
+    RecordProperty("RotationRMSE", std::to_string(rotation_rmse));
+
+    std::cout << "position_rmse : " << position_rmse << '\n';
+    std::cout << "velocity_rmse : " << velocity_rmse << '\n';
+    std::cout << "rotation_rmse : " << rotation_rmse << '\n';
 }
 
 INSTANTIATE_TEST_CASE_P(
