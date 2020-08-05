@@ -9,7 +9,7 @@
 namespace invariant::test
 {
 
-const auto test_trajectories = testing::Values(
+const auto test_trajectories_full = testing::Values(
     TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
     TestTrajectory{"Rotate 360 left, 1s", rotate_in_place(360, 1)},
     TestTrajectory{"Rotate 360 right, 1s", rotate_in_place(-360, 1)},
@@ -25,6 +25,13 @@ const auto test_trajectories = testing::Values(
     TestTrajectory{"StartStop: {0,0,1}, 10s", start_stop({0,0,1}, 10)}
 );
 
+const auto test_trajectories_partial = testing::Values(
+    TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
+    TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
+    TestTrajectory{"ConstantVel xy: 10m; 10s", constant_velocity({1,1,0}, 10)},
+    TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)}
+);
+
 const auto test_imu_models = testing::Values(
     ImuSensorModel{ImuNoiseLevel::None},
     ImuSensorModel{ImuNoiseLevel::Mueller18}
@@ -35,8 +42,14 @@ const auto test_mocap_models = testing::Values(
     MocapSensorModel{MocapNoiseLevel::Low}
 );
 
-const auto test_configs = testing::Combine(
-    test_trajectories,
+const auto test_configs_full = testing::Combine(
+    test_trajectories_full,
+    test_imu_models,
+    test_mocap_models
+);
+
+const auto test_configs_partial = testing::Combine(
+    test_trajectories_partial,
     test_imu_models,
     test_mocap_models
 );

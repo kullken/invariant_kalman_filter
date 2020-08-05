@@ -189,22 +189,45 @@ target_link_libraries(sensor_models
 )
 
 if (CATKIN_ENABLE_TESTING)
-  # Add gtest based cpp test target and link libraries
-  catkin_add_executable_with_gtest(${PROJECT_NAME}-test test/src/test_main.cpp)
+  catkin_add_executable_with_gtest(create_csv_data test/src/create_csv_data.cpp)
 
-  target_include_directories(${PROJECT_NAME}-test
+  target_include_directories(create_csv_data
     PRIVATE
       test/include  
   )
 
-  target_sources(${PROJECT_NAME}-test
+  target_sources(create_csv_data
     PRIVATE
       test/src/accuracy_test.cpp
       test/src/accuracy_test_config.cpp
       test/src/test_trajectories.cpp
   )
 
-  target_link_libraries(${PROJECT_NAME}-test
+  target_link_libraries(create_csv_data
+      project_options
+      project_warnings
+      iekf
+      mekf
+      sensor_models
+      ugl::math
+      ugl::trajectory
+  )
+
+  catkin_add_executable_with_gtest(regression_tests test/src/regression_tests.cpp)
+
+  target_include_directories(regression_tests
+    PRIVATE
+      test/include  
+  )
+
+  target_sources(regression_tests
+    PRIVATE
+      test/src/accuracy_test.cpp
+      test/src/accuracy_test_config.cpp
+      test/src/test_trajectories.cpp
+  )
+
+  target_link_libraries(regression_tests
       project_options
       project_warnings
       iekf

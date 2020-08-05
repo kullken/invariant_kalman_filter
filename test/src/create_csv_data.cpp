@@ -7,6 +7,7 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/trajectory/trajectory.h>
+#include <ugl/random/seed.h>
 
 #include "accuracy_test.h"
 #include "accuracy_test_config.h" 
@@ -30,6 +31,7 @@ void save_to_file(const Result& result)
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
+    ugl::random::set_seed(117);
     const auto result = compute_accuracy();
 
     RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
@@ -44,9 +46,31 @@ TEST_P(IekfTestSuite, IekfTestCase)
 }
 
 INSTANTIATE_TEST_CASE_P(
-    AccuracyTestBase,
+    GenerateCsvData,
     IekfTestSuite,
-    test_configs,
+    test_configs_partial,
+);
+
+TEST_P(MekfTestSuite, MekfTestCase)
+{
+    ugl::random::set_seed(117);
+    const Result result = compute_accuracy();
+
+    RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
+    RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
+    RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
+
+    std::cout << "result.position_rmse : " << result.position_rmse << '\n';
+    std::cout << "result.velocity_rmse : " << result.velocity_rmse << '\n';
+    std::cout << "result.rotation_rmse : " << result.rotation_rmse << '\n';
+
+    save_to_file(result);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    GenerateCsvData,
+    MekfTestSuite,
+    test_configs_partial,
 );
 
 } // namespace
