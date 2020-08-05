@@ -1,3 +1,0 @@
-#!/bin/bash
-
-rosrun invariant_kalman_filter invariant_kalman_filter-test --gtest_output=xml:$(rospack find invariant_kalman_filter)/test/results/

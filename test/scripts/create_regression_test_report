@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rosrun invariant_kalman_filter regression_tests --gtest_output=xml:$(rospack find invariant_kalman_filter)/test/results/
