@@ -1,7 +1,5 @@
 #include "iekf.h"
 
-// #include <ros/console.h>
-
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 #include <ugl/lie_group/mappings.h>

@@ -5,9 +5,6 @@
 
 #include <gtest/gtest.h>
 
-#include <ugl/math/vector.h>
-#include <ugl/trajectory/trajectory.h>
-
 #include "accuracy_test.h"
 #include "accuracy_test_config.h" 
 
