@@ -7,7 +7,6 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/trajectory/trajectory.h>
-#include <ugl/random/seed.h>
 
 #include "accuracy_test.h"
 #include "accuracy_test_config.h" 
@@ -31,7 +30,6 @@ void save_to_file(const Result& result)
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
-    ugl::random::set_seed(117);
     const auto result = compute_accuracy();
 
     RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
@@ -53,7 +51,6 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(MekfTestSuite, MekfTestCase)
 {
-    ugl::random::set_seed(117);
     const Result result = compute_accuracy();
 
     RecordProperty("PositionRMSE", std::to_string(result.position_rmse));

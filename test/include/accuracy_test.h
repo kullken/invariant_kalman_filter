@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include <ugl/trajectory/trajectory.h>
+#include <ugl/random/seed.h>
 
 #include "iekf.h"
 #include "mekf.h"
@@ -44,6 +45,8 @@ protected:
     {
         imu_.set_trajectory(trajectory_);
         mocap_.set_trajectory(trajectory_);
+        
+        ugl::random::set_seed(117);
     }
 
     Result compute_accuracy_impl();
