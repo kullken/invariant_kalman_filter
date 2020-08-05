@@ -43,7 +43,7 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     reset_attitude_error();
 }
 
-void MEKF::mocap_update(const ugl::Rotation& R_measured, const ugl::Vector3& pos_measured)
+void MEKF::mocap_update(const ugl::Rotation&, const ugl::Vector3&)
 {
 
 }

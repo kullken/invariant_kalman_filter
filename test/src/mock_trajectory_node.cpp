@@ -44,7 +44,7 @@ void MockTrajectoryNode::start()
     ROS_INFO("Timer started!");
 }
 
-void MockTrajectoryNode::publish_imu([[maybe_unused]] const ros::TimerEvent& e)
+void MockTrajectoryNode::publish_imu(const ros::TimerEvent&)
 {
     sensor_msgs::Imu imu;
 
@@ -53,7 +53,7 @@ void MockTrajectoryNode::publish_imu([[maybe_unused]] const ros::TimerEvent& e)
     m_imu_pub.publish(imu);
 }
 
-void MockTrajectoryNode::publish_mocap([[maybe_unused]] const ros::TimerEvent& e)
+void MockTrajectoryNode::publish_mocap(const ros::TimerEvent&)
 {
     geometry_msgs::PoseStamped mocap;
 
