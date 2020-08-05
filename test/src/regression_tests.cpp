@@ -60,17 +60,6 @@ INSTANTIATE_TEST_CASE_P(
 } // namespace
 } // namespace invariant::test
 
-// TODO: Move setting of random seed to constructor of test fixture.
-// TODO: Write unit tests for ugl.
-// TODO: Use #ifndef instead of #pragma once header guards.
-// TODO?: Compute average result over ~10 runs.
-// TODO?: Export and plot more data from tests.
-// TODO?: Create more "realistic" test trajectories e.g. combined translation&rotation or sample different trajectories.
-// TODO?: Write comparator script for two results with same format.
-// TODO?: Write mocap model for MEKF or position model for IEKF.
-// TODO?: Create different test configurations e.g. "full" and "partial" (e.g. smaller config for rostest).
-// TODO?: Create tests in ROS environment and compare performance to fully virtual.
-
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
