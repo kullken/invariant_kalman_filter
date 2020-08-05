@@ -14,7 +14,7 @@ def create_arg_parser():
     parser.add_argument(
             "--folder",
             help="Path to where to find file",
-            default="/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data"
+            default="/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/"
     )
 
     return parser
