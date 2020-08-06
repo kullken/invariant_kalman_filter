@@ -42,6 +42,18 @@ std::vector<int> range(int start, int end, int step)
     return values;
 }
 
+std::vector<double> create_clock(double duration)
+{
+    constexpr int dt_ms = 1;
+    const int duration_ms = static_cast<int>(duration * 1000.0);
+    const auto clock_ms = range(0, duration_ms+dt_ms, dt_ms);
+
+    std::vector<double> clock(clock_ms.size());
+    std::transform(std::cbegin(clock_ms), std::cend(clock_ms), std::back_inserter(clock), [](int ms){ return ms / 1000.0; } );
+
+    return clock;
+}
+
 }
 
 template<typename FilterType>
@@ -51,12 +63,7 @@ Result AccuracyTest<FilterType>::compute_accuracy_impl()
 
     const double measurement_period = 0.01;
 
-    const int dt_ms = 1;
-    const int duration_ms = static_cast<int>(trajectory_.duration() * 1000.0);
-    const auto clock_ms = range(0, duration_ms+dt_ms, dt_ms);
-
-    std::vector<double> clock;
-    std::transform(std::cbegin(clock_ms), std::cend(clock_ms), std::back_inserter(clock), [](int ms){ return ms / 1000.0; } );
+    const auto clock = create_clock(trajectory.duration());
 
     double next_imu_time = clock[0] + imu_.period();
     double next_mocap_time = clock[0] + mocap_.period();
