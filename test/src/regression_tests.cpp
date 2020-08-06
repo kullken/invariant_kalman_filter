@@ -11,7 +11,7 @@ namespace invariant::test
 namespace
 {
 
-constexpr auto kNumAverages = 10;
+constexpr int kNumTestRuns = 10;
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
@@ -19,7 +19,7 @@ TEST_P(IekfTestSuite, IekfTestCase)
     double velocity_rmse{0};
     double rotation_rmse{0};
 
-    for (int i = 0; i < kNumAverages; ++i)
+    for (int i = 0; i < kNumTestRuns; ++i)
     {
         const auto result = compute_accuracy();
         position_rmse += result.position_rmse;
@@ -27,9 +27,9 @@ TEST_P(IekfTestSuite, IekfTestCase)
         rotation_rmse += result.rotation_rmse;
     }
 
-    position_rmse /= kNumAverages;
-    velocity_rmse /= kNumAverages;
-    rotation_rmse /= kNumAverages;
+    position_rmse /= kNumTestRuns;
+    velocity_rmse /= kNumTestRuns;
+    rotation_rmse /= kNumTestRuns;
 
     RecordProperty("PositionRMSE", std::to_string(position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(velocity_rmse));
@@ -52,7 +52,7 @@ TEST_P(MekfTestSuite, MekfTestCase)
     double velocity_rmse{0};
     double rotation_rmse{0};
 
-    for (int i = 0; i < kNumAverages; ++i)
+    for (int i = 0; i < kNumTestRuns; ++i)
     {
         const auto result = compute_accuracy();
         position_rmse += result.position_rmse;
@@ -60,9 +60,9 @@ TEST_P(MekfTestSuite, MekfTestCase)
         rotation_rmse += result.rotation_rmse;
     }
 
-    position_rmse /= kNumAverages;
-    velocity_rmse /= kNumAverages;
-    rotation_rmse /= kNumAverages;
+    position_rmse /= kNumTestRuns;
+    velocity_rmse /= kNumTestRuns;
+    rotation_rmse /= kNumTestRuns;
 
     RecordProperty("PositionRMSE", std::to_string(position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(velocity_rmse));
