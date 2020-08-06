@@ -28,7 +28,7 @@ public:
 
     MocapSensorModel(const ugl::trajectory::Trajectory& trajectory, MocapNoiseLevel level, double frequency=100.0);
 
-    double period() 
+    double period() const
     {
         return period_;
     }
