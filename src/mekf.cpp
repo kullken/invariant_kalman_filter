@@ -82,9 +82,9 @@ State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double
     Vector3 vel = x.segment<3>(3);
     Vector3 delta = x.segment<3>(6);
 
-    Rotation R_actual = R_ref*S(delta);
-    // Vector3 rotated_acc = ugl::math::exp(R_actual)*acc;                  // Without inversion of R
-    Vector3 rotated_acc = ugl::math::exp(R_actual).inverse()*acc;        // With inversion of R
+    const Rotation R_actual = R_ref*S(delta);
+    // const Vector3 rotated_acc = ugl::math::exp(R_actual)*acc;                  // Without inversion of R
+    const Vector3 rotated_acc = ugl::math::exp(R_actual).inverse()*acc;        // With inversion of R
 
     pos   += dt * vel + dt*dt/2 * (rotated_acc + s_gravity);
     vel   += dt * (rotated_acc + s_gravity);
