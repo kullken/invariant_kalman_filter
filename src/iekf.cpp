@@ -55,10 +55,8 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const Matrix<9,9> D = Matrix<9,9>::Identity();            // TODO: This is only here to make the algorithm clearer in the code.
 
     // Discretisation method from Hartley et al. (2018)
-    const Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));           // TODO: Check if approximation I + (A*dt)^ is accurate enough and faster. 
-    const Covariance<9> P_pred = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
-
-    m_P = P_pred; // TODO: Self-assignment would likely be faster. Was there some problem with Eigen and self-assignment?
+    const Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));           // TODO: Check if approximation I + (A*dt)^ is accurate enough and faster.
+    m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
 }
 
 void IEKF::mocap_update(const Rotation& R_measured, const Vector3& pos_measured)
