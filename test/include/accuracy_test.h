@@ -49,9 +49,7 @@ protected:
         ugl::random::set_seed(117);
     }
 
-    Result compute_accuracy_impl();
-
-private:
+protected:
     FilterType filter_;
     ugl::trajectory::Trajectory trajectory_;
     ImuSensorModel imu_;

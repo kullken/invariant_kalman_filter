@@ -11,6 +11,7 @@
 #include <ugl/trajectory/trajectory.h>
 
 #include "iekf.h"
+#include "mekf.h"
 
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
@@ -54,48 +55,46 @@ std::vector<double> create_clock(double duration)
     return clock;
 }
 
-}
-
 template<typename FilterType>
-Result AccuracyTest<FilterType>::compute_accuracy_impl()
+Result compute_accuracy_impl(FilterType filter, const ugl::trajectory::Trajectory &trajectory, const ImuSensorModel &imu, const MocapSensorModel &mocap)
 {
     Result result;
 
-    const double measurement_period = 0.01;
-
     const auto clock = create_clock(trajectory.duration());
 
-    double next_imu_time = clock[0] + imu_.period();
-    double next_mocap_time = clock[0] + mocap_.period();
+    double next_imu_time = clock[0] + imu.period();
+    double next_mocap_time = clock[0] + mocap.period();
     double next_measurement_time = clock[0];
 
-    filter_.set_pos(trajectory_.get_position(clock[0]));
-    filter_.set_vel(trajectory_.get_velocity(clock[0]));
-    filter_.set_rot(trajectory_.get_rotation(clock[0]));
-    
+    filter.set_pos(trajectory.get_position(clock[0]));
+    filter.set_vel(trajectory.get_velocity(clock[0]));
+    filter.set_rot(trajectory.get_rotation(clock[0]));
+
+    const double measurement_period = 0.01;
+
     for (const auto& t : clock)
     {
         if (t >= next_imu_time)
         {
-            filter_.predict(imu_.period(), imu_.get_accel_reading(next_imu_time), imu_.get_gyro_reading(next_imu_time));
-            next_imu_time += imu_.period();
+            filter.predict(imu.period(), imu.get_accel_reading(next_imu_time), imu.get_gyro_reading(next_imu_time));
+            next_imu_time += imu.period();
         }
 
         if (t >= next_mocap_time)
         {
-            filter_.mocap_update(mocap_.get_rot_reading(next_mocap_time), mocap_.get_pos_reading(next_mocap_time));
-            next_mocap_time += mocap_.period();
+            filter.mocap_update(mocap.get_rot_reading(next_mocap_time), mocap.get_pos_reading(next_mocap_time));
+            next_mocap_time += mocap.period();
         }
 
         if (t >= next_measurement_time)
         {
-            const ugl::Vector3 true_pos = trajectory_.get_position(next_measurement_time);
-            const ugl::Vector3 true_vel = trajectory_.get_velocity(next_measurement_time);
-            const ugl::UnitQuaternion true_quat = trajectory_.get_quaternion(next_measurement_time);
+            const ugl::Vector3 true_pos = trajectory.get_position(next_measurement_time);
+            const ugl::Vector3 true_vel = trajectory.get_velocity(next_measurement_time);
+            const ugl::UnitQuaternion true_quat = trajectory.get_quaternion(next_measurement_time);
 
-            const ugl::Vector3 predicted_pos = filter_.get_pos();
-            const ugl::Vector3 predicted_vel = filter_.get_vel();
-            const ugl::UnitQuaternion predicted_quat = filter_.get_quat();
+            const ugl::Vector3 predicted_pos = filter.get_pos();
+            const ugl::Vector3 predicted_vel = filter.get_vel();
+            const ugl::UnitQuaternion predicted_quat = filter.get_quat();
 
             // Save data
             const double pos_error = dist(true_pos, predicted_pos);
@@ -120,14 +119,16 @@ Result AccuracyTest<FilterType>::compute_accuracy_impl()
     return result;
 }
 
+}
+
 Result IekfTestSuite::compute_accuracy()
 {
-    return compute_accuracy_impl();
+    return compute_accuracy_impl<invariant::IEKF>(filter_, trajectory_, imu_, mocap_);
 }
 
 Result MekfTestSuite::compute_accuracy()
 {
-    return compute_accuracy_impl();
+    return compute_accuracy_impl<mekf::MEKF>(filter_, trajectory_, imu_, mocap_);
 }
 
 std::ostream& operator<<(std::ostream& os, const Result& result)
