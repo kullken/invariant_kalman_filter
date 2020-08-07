@@ -24,8 +24,8 @@ static constexpr double kDefaultMocapFrequency   = 100.0;
 MockTrajectoryNode::MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     : m_nh(nh)
     , m_nh_private(nh_private)
-    , m_base_frame( [&nh_private]() -> std::string { return nh_private.param<std::string>("base_frame", "base_link"); }() )
-    , m_map_frame(  [&nh_private]() -> std::string { return nh_private.param<std::string>("map_frame", "map"); }() )
+    , m_base_frame(nh_private.param<std::string>("base_frame", "base_link"))
+    , m_map_frame(nh_private.param<std::string>("map_frame", "map"))
 {
     m_imu_pub   = m_nh.advertise<sensor_msgs::Imu>("imu", 10);
     m_mocap_pub = m_nh.advertise<geometry_msgs::PoseStamped>("mocap/pose", 10);
