@@ -18,8 +18,8 @@
 namespace invariant::test
 {
 
-static constexpr double k_default_imu_frequency     = 100.0;
-static constexpr double k_default_mocap_frequency   = 100.0;
+static constexpr double kDefaultImuFrequency     = 100.0;
+static constexpr double kDefaultMocapFrequency   = 100.0;
 
 MockTrajectoryNode::MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     : m_nh(nh)
@@ -30,10 +30,10 @@ MockTrajectoryNode::MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_
     m_imu_pub   = m_nh.advertise<sensor_msgs::Imu>("imu", 10);
     m_mocap_pub = m_nh.advertise<geometry_msgs::PoseStamped>("mocap/pose", 10);
 
-    const double imu_frequency = m_nh_private.param<double>("imu_frequency", k_default_imu_frequency);
+    const double imu_frequency = m_nh_private.param<double>("imu_frequency", kDefaultImuFrequency);
     m_imu_timer = m_nh.createTimer(1.0/imu_frequency, &MockTrajectoryNode::publish_imu, this, false, false);
 
-    const double mocap_frequency = m_nh_private.param<double>("mocap_frequency", k_default_mocap_frequency);
+    const double mocap_frequency = m_nh_private.param<double>("mocap_frequency", kDefaultMocapFrequency);
     m_mocap_timer = m_nh.createTimer(1.0/mocap_frequency, &MockTrajectoryNode::publish_mocap, this, false, false);
 }
 
