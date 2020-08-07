@@ -8,6 +8,7 @@
 
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TransformStamped.h>
 
 #include <ugl/trajectory/trajectory.h>
 
@@ -27,6 +28,7 @@ public:
 private:
     void publish_imu(const ros::TimerEvent& e);
     void publish_mocap(const ros::TimerEvent& e);
+    void publish_ground_truth(const ros::TimerEvent& e);
 
 private:
     ros::NodeHandle& m_nh;
@@ -37,15 +39,18 @@ private:
 
     sensor_msgs::Imu m_imu_msg;
     geometry_msgs::PoseStamped m_mocap_msg;
+    geometry_msgs::TransformStamped m_ground_truth_tf;
 
     tf2_ros::TransformBroadcaster m_tf_broadcaster;
 
     const std::string m_base_frame;
     const std::string m_map_frame;
+    const std::string m_ground_truth_frame;
 
     ros::Time m_t0;
     ros::Timer m_imu_timer;
     ros::Timer m_mocap_timer;
+    ros::Timer m_ground_truth_timer;
 
     const ugl::trajectory::Trajectory m_trajectory;
     ImuSensorModel m_imu_model;
