@@ -5,10 +5,6 @@
 #include <ros/ros.h>
 
 #include <tf2_ros/transform_broadcaster.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
-#include <tf2/LinearMath/Quaternion.h>
 
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -20,8 +16,6 @@
 namespace invariant::test
 {
 
-static constexpr double kDefaultImuFrequency     = 100.0;
-static constexpr double kDefaultMocapFrequency   = 100.0;
 static constexpr double kDefaultGroundTruthFrequency = 100.0;
 
 MockTrajectoryNode::MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
@@ -55,7 +49,7 @@ void MockTrajectoryNode::start()
     m_imu_timer.start();
     m_mocap_timer.start();
     m_ground_truth_timer.start();
-    ROS_INFO("Timer started!");
+    ROS_INFO("Node started!");
 }
 
 void MockTrajectoryNode::publish_imu(const ros::TimerEvent&)

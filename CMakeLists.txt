@@ -8,7 +8,6 @@ find_package(catkin REQUIRED
     sensor_msgs
     tf2
     tf2_ros
-    tf2_geometry_msgs
     ugl_ros
 )
 
@@ -143,9 +142,9 @@ target_link_libraries(kalman_node
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-#############
-## Testing ##
-#############
+#######################
+## Testing Libraries ##
+#######################
 
 ## Sensor Models
 add_library(sensor_models SHARED
@@ -188,6 +187,10 @@ target_link_libraries(mock_trajectory_node
     project_options
     project_warnings
 )
+
+#############
+## Testing ##
+#############
 
 if (CATKIN_ENABLE_TESTING)
   catkin_add_executable_with_gtest(create_csv_data test/src/create_csv_data.cpp)

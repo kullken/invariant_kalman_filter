@@ -26,9 +26,9 @@ public:
     void start();
 
 private:
-    void publish_imu(const ros::TimerEvent& e);
-    void publish_mocap(const ros::TimerEvent& e);
-    void publish_ground_truth(const ros::TimerEvent& e);
+    void publish_imu(const ros::TimerEvent&);
+    void publish_mocap(const ros::TimerEvent&);
+    void publish_ground_truth(const ros::TimerEvent&);
 
 private:
     ros::NodeHandle& m_nh;
@@ -52,7 +52,7 @@ private:
     ros::Timer m_mocap_timer;
     ros::Timer m_ground_truth_timer;
 
-    const ugl::trajectory::Trajectory m_trajectory;
+    ugl::trajectory::Trajectory m_trajectory;
     ImuSensorModel m_imu_model;
     MocapSensorModel m_mocap_model;
 };
