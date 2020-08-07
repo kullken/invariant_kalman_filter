@@ -11,6 +11,9 @@
 
 #include <ugl/trajectory/trajectory.h>
 
+#include "sensor_models/imu_sensor_model.h"
+#include "sensor_models/mocap_sensor_model.h"
+
 namespace invariant::test
 {
 
@@ -41,6 +44,8 @@ private:
     ros::Timer m_mocap_timer;
 
     const ugl::trajectory::Trajectory m_trajectory;
+    ImuSensorModel m_imu_model;
+    MocapSensorModel m_mocap_model;
 };
 
 }

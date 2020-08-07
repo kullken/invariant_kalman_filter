@@ -30,11 +30,11 @@ MockTrajectoryNode::MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_
     m_imu_pub   = m_nh.advertise<sensor_msgs::Imu>("imu", 10);
     m_mocap_pub = m_nh.advertise<geometry_msgs::PoseStamped>("mocap/pose", 10);
 
-    const double imu_frequency = m_nh_private.param<double>("imu_frequency", kDefaultImuFrequency);
-    m_imu_timer = m_nh.createTimer(1.0/imu_frequency, &MockTrajectoryNode::publish_imu, this, false, false);
+    constexpr bool oneshot = false;
+    constexpr bool autostart = false;
 
-    const double mocap_frequency = m_nh_private.param<double>("mocap_frequency", kDefaultMocapFrequency);
-    m_mocap_timer = m_nh.createTimer(1.0/mocap_frequency, &MockTrajectoryNode::publish_mocap, this, false, false);
+    m_imu_timer = m_nh.createTimer(m_imu_model.period(), &MockTrajectoryNode::publish_imu, this, oneshot, autostart);
+    m_mocap_timer = m_nh.createTimer(m_mocap_model.period(), &MockTrajectoryNode::publish_mocap, this, oneshot, autostart);
 }
 
 void MockTrajectoryNode::start()

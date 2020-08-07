@@ -147,25 +147,6 @@ target_link_libraries(kalman_node
 ## Testing ##
 #############
 
-## Mock Trajectory Node
-add_executable(mock_trajectory_node
-  test/src/mock_trajectory_node.cpp
-)
-
-target_include_directories(mock_trajectory_node
-  PRIVATE
-    test/include
-)
-
-target_link_libraries(mock_trajectory_node
-  PUBLIC
-    ${catkin_LIBRARIES}
-    ugl::trajectory
-  PRIVATE
-    project_options
-    project_warnings
-)
-
 ## Sensor Models
 add_library(sensor_models SHARED
   test/src/sensor_models/imu_sensor_model.cpp
@@ -183,6 +164,26 @@ target_link_libraries(sensor_models
     ugl::trajectory
     ugl::lie_group
     ugl::random
+  PRIVATE
+    project_options
+    project_warnings
+)
+
+## Mock Trajectory Node
+add_executable(mock_trajectory_node
+  test/src/mock_trajectory_node.cpp
+)
+
+target_include_directories(mock_trajectory_node
+  PRIVATE
+    test/include
+)
+
+target_link_libraries(mock_trajectory_node
+  PUBLIC
+    sensor_models
+    ugl::trajectory
+    ${catkin_LIBRARIES}
   PRIVATE
     project_options
     project_warnings
