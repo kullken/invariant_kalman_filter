@@ -2,6 +2,7 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
+#include <ugl/math/quaternion.h>
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/normal_distribution.h>
 
@@ -48,6 +49,13 @@ public:
 
     /// Returns a rotation reading expressed in inertial frame.
     ugl::Rotation get_rot_reading(double t) const;
+
+    /// Returns a rotation reading expressed in inertial frame in quaternion format.
+    inline
+    ugl::UnitQuaternion get_quat_reading(double t) const
+    {
+        return ugl::UnitQuaternion{get_rot_reading(t)};
+    }
 
 private:
     ugl::trajectory::Trajectory trajectory_;
