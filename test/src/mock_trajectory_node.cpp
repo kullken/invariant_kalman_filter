@@ -15,6 +15,8 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
 
+#include <ugl_ros/convert_tf2.h>
+
 namespace invariant::test
 {
 
@@ -35,10 +37,14 @@ MockTrajectoryNode::MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_
 
     m_imu_timer = m_nh.createTimer(m_imu_model.period(), &MockTrajectoryNode::publish_imu, this, oneshot, autostart);
     m_mocap_timer = m_nh.createTimer(m_mocap_model.period(), &MockTrajectoryNode::publish_mocap, this, oneshot, autostart);
+
+    m_imu_msg.header.frame_id = m_base_frame;
+    m_mocap_msg.header.frame_id = m_map_frame;
 }
 
 void MockTrajectoryNode::start()
 {
+    m_t0 = ros::Time::now();
     m_imu_timer.start();
     m_mocap_timer.start();
     ROS_INFO("Timer started!");
@@ -46,20 +52,26 @@ void MockTrajectoryNode::start()
 
 void MockTrajectoryNode::publish_imu(const ros::TimerEvent&)
 {
-    sensor_msgs::Imu imu;
+    const ros::Time now = ros::Time::now();
+    const double t = (now - m_t0).toSec();
 
-    // Write stuff to imu message
+    m_imu_msg.linear_acceleration = tf2::toMsg<geometry_msgs::Vector3>(m_imu_model.get_accel_reading(t));
+    m_imu_msg.angular_velocity = tf2::toMsg<geometry_msgs::Vector3>(m_imu_model.get_gyro_reading(t));
 
-    m_imu_pub.publish(imu);
+    m_imu_msg.header.stamp = now;
+    m_imu_pub.publish(m_imu_msg);
 }
 
 void MockTrajectoryNode::publish_mocap(const ros::TimerEvent&)
 {
-    geometry_msgs::PoseStamped mocap;
+    const ros::Time now = ros::Time::now();
+    const double t = (now - m_t0).toSec();
 
-    // Write stuff to mocap message
+    m_mocap_msg.pose.position = tf2::toMsg<geometry_msgs::Point>(m_mocap_model.get_pos_reading(t));
+    m_mocap_msg.pose.orientation = tf2::toMsg(m_mocap_model.get_quat_reading(t));
 
-    m_mocap_pub.publish(mocap);
+    m_mocap_msg.header.stamp = now;
+    m_mocap_pub.publish(m_mocap_msg);
 }
 
 }

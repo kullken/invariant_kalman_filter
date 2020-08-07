@@ -35,11 +35,15 @@ private:
     ros::Publisher m_imu_pub;
     ros::Publisher m_mocap_pub;
 
+    sensor_msgs::Imu m_imu_msg;
+    geometry_msgs::PoseStamped m_mocap_msg;
+
     tf2_ros::TransformBroadcaster m_tf_broadcaster;
 
     const std::string m_base_frame;
     const std::string m_map_frame;
 
+    ros::Time m_t0;
     ros::Timer m_imu_timer;
     ros::Timer m_mocap_timer;
 
