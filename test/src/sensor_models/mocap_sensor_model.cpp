@@ -4,7 +4,7 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
-#include <ugl/lie_group/mappings.h>
+#include <ugl/lie_group/rotation.h>
 
 namespace invariant::test
 {
@@ -27,7 +27,7 @@ ugl::Vector3 MocapSensorModel::get_pos_reading(double t) const
 
 ugl::Rotation MocapSensorModel::get_rot_reading(double t) const
 {
-    return trajectory_.get_rotation(t) * ugl::lie::exp_map_SO_3(rotation_noise_.sample());
+    return trajectory_.get_rotation(t) * ugl::lie::SO3::exp(rotation_noise_.sample());
 }
 
 

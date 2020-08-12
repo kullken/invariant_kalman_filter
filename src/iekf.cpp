@@ -2,7 +2,9 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
-#include <ugl/lie_group/mappings.h>
+#include <ugl/lie_group/rotation.h>
+#include <ugl/lie_group/pose.h>
+#include <ugl/lie_group/extended_pose.h>
 
 #include "iekf_types.h"
 
@@ -35,7 +37,7 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const Vector3  v = m_X.get_vel();
 
     // Discretisation method from Hartley et al. (2018)
-    const Rotation R_pred = R * ugl::lie::exp_map_SO_3(ang_vel*dt);
+    const Rotation R_pred = R * ugl::lie::SO3::exp(ang_vel*dt);
     const Vector3  p_pred = p + v*dt + 0.5*(R*acc + s_gravity)*dt*dt;
     const Vector3  v_pred = v + (R*acc + s_gravity)*dt;
 
@@ -55,7 +57,7 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const Matrix<9,9> D = Matrix<9,9>::Identity();            // TODO: This is only here to make the algorithm clearer in the code.
 
     // Discretisation method from Hartley et al. (2018)
-    const Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));           // TODO: Check if approximation I + (A*dt)^ is accurate enough and faster.
+    const Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));           // TODO: Check if approximation I + A*dt is accurate enough and faster.
     m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
 }
 
@@ -70,13 +72,13 @@ void IEKF::mocap_update(const Rotation& R_measured, const Vector3& pos_measured)
     const Covariance<6> N = Covariance<6>::Identity() * 0.01; // TODO: Set to something smart.
 
     // Gain calculation
-    const Matrix<6,9> H = Matrix<6,9>::Identity();   
-    const Matrix<6,6> S = H * m_P * H.transpose() + N; 
+    const Matrix<6,9> H = Matrix<6,9>::Identity();
+    const Matrix<6,6> S = H * m_P * H.transpose() + N;
     const Matrix<9,6> L = m_P * H.transpose() * S.inverse();
 
     // State correction
-    const Vector<6> innovation = ugl::lie::log_map_SE_3(Matrix<4,5>::Identity() * m_X.inverse() * Y);
-    const State dX = ugl::lie::exp_map_SE2_3(L*innovation);
+    const Vector<6> innovation = ugl::lie::SE_3::log(ugl::lie::SE_3{Matrix<4,5>::Identity() * m_X.inverse() * Y});
+    const State dX = ugl::lie::SE2_3::exp(L*innovation).matrix();
     m_X = m_X*dX;
 
     // Error correction
