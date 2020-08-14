@@ -83,6 +83,7 @@ add_library(mekf SHARED
 target_link_libraries(mekf
   PUBLIC
     ugl::math
+    ugl::lie_group
   PRIVATE
     project_options
     project_warnings

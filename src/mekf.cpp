@@ -13,16 +13,6 @@ using ugl::Vector3;
 using ugl::Matrix3;
 using ugl::lie::Rotation;
 
-/// Skew-symmetric cross-product matrix of a 3D vector.
-Matrix3 S(const Vector3& vec)
-{
-    Matrix3 mat;
-    mat << 0.0, -vec(2), vec(1), 
-           vec(2), 0.0, -vec(0), 
-           -vec(1), vec(0), 0.0;
-    return mat;
-}
-
 const Vector3 MEKF::s_gravity{0.0, 0.0, -9.82};
 
 MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
@@ -69,10 +59,10 @@ void MEKF::reset_attitude_error()
     const Vector3 delta = m_x.segment<3>(6);
 
     ugl::Matrix<9, 9> T = ugl::Matrix<9, 9>::Identity();
-    T.bottomRightCorner<3,3>() = (-1/2 * ugl::math::exp(S(delta)));
+    T.bottomRightCorner<3,3>() = (-1/2 * ugl::lie::SO3::exp(delta).matrix());
 
     m_P = T * m_P * T.transpose();
-    m_R_ref *= ugl::math::exp(S(delta));
+    m_R_ref *= ugl::lie::SO3::exp(delta);
     m_x.segment<3>(6) = Vector3::Zero();
 }
 
@@ -89,7 +79,7 @@ State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double
 
     pos   += dt * vel + dt*dt/2 * (rotated_acc + s_gravity);
     vel   += dt * (rotated_acc + s_gravity);
-    delta += dt * (ang_vel - 1/2 * S(ang_vel)*delta);
+    delta += dt * (ang_vel - 1/2 * ugl::lie::skew(ang_vel)*delta);
 
     State x_predicted;
     x_predicted << pos, vel, delta;
@@ -101,9 +91,9 @@ Jacobian MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vect
 {
     Jacobian jac = Jacobian::Identity();
     jac.block<3,3>(0,3) = dt * Matrix3::Identity();
-    // jac.block<3,3>(3,6) = dt * S(R_ref*acc);                  // Without inversion of R
-    jac.block<3,3>(3,6) = dt * S(R_ref.inverse()*acc);        // With inversion of R
-    jac.block<3,3>(6,6) -= dt * 1/2 * S(ang_vel);
+    // jac.block<3,3>(3,6) = dt * ugl::lie::skew(R_ref*acc);                  // Without inversion of R
+    jac.block<3,3>(3,6) = dt * ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
+    jac.block<3,3>(6,6) -= dt * 1/2 * ugl::lie::skew(ang_vel);
 
     return jac;
 }
