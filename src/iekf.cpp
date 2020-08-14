@@ -19,8 +19,6 @@ using ugl::lie::Rotation;
 using ugl::Vector;
 using ugl::Matrix;
 
-const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
-
 IEKF::IEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
     : m_X(R0, v0, p0)
     , m_P(P0)
@@ -92,5 +90,7 @@ void IEKF::mocap_update(const Rotation& R_measured, const Vector3& pos_measured)
     // Error correction
     m_P = (Covariance<9>::Identity() - L*H) * m_P;     // TODO: Inplace subtraction might be faster (m_P -= L*H*m_P). Test if works with Eigen.
 }
+
+const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
 
 }
