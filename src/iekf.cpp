@@ -66,31 +66,37 @@ void IEKF::mocap_update(const Rotation& R_measured, const Vector3& pos_measured)
     Y.block<3,1>(0,3) = pos_measured;
     Y(4,3) = 1.0;
 
-    // Measurement noise of mocap.
-    const Covariance<6> N = Covariance<6>::Identity() * 0.01; // TODO: Set to something smart.
-
     // Gain calculation
-    Matrix<6,9> H = Matrix<6,9>::Zero();
-    H.block<3,3>(0,0) = Matrix3::Identity();
-    H.block<3,3>(3,6) = Matrix3::Identity();
-
-    const Matrix<6,6> S = H * m_P * H.transpose() + N;
-    const Matrix<9,6> L = m_P * H.transpose() * S.inverse();
-
-    Matrix<5,4> D = Matrix<5,4>::Zero();
-    D.block<3,3>(0,0) = Matrix3::Identity();
-    D(4,3) = 1.0;
-    const Matrix<4,5> D_left_pseudo_inv = (D.transpose() * D).inverse() * D.transpose();
+    const Matrix<6,6> S = s_H * m_P * s_H.transpose() + s_N;
+    const Matrix<9,6> L = m_P * s_H.transpose() * S.inverse();
 
     // State correction
-    const Vector<6> innovation = ugl::lie::SE_3::log(ugl::lie::SE_3{D_left_pseudo_inv * m_X.inverse().matrix() * Y});
+    const Vector<6> innovation = ugl::lie::SE_3::log(ugl::lie::SE_3{s_D_left_pinv * m_X.inverse().matrix() * Y});
     const ugl::lie::ExtendedPose dX = ugl::lie::SE2_3::exp(L*innovation);
     m_X = m_X*dX;
 
     // Error correction
-    m_P = (Covariance<9>::Identity() - L*H) * m_P;     // TODO: Inplace subtraction might be faster (m_P -= L*H*m_P). Test if works with Eigen.
+    m_P = (Covariance<9>::Identity() - L*s_H) * m_P;     // TODO: Inplace subtraction might be faster (m_P -= L*H*m_P). Test if works with Eigen.
 }
+
+const ugl::Matrix<6,9> IEKF::s_H = [](){
+    Matrix<6,9> H = Matrix<6,9>::Zero();
+    H.block<3,3>(0,0) = Matrix3::Identity();
+    H.block<3,3>(3,6) = Matrix3::Identity();
+    return H;
+}();
+
+const ugl::Matrix<5,4> IEKF::s_D = [](){
+    Matrix<5,4> D = Matrix<5,4>::Zero();
+    D.block<3,3>(0,0) = Matrix3::Identity();
+    D(4,3) = 1.0;
+    return D;
+}();
+
+const ugl::Matrix<4,5> IEKF::s_D_left_pinv = (IEKF::s_D.transpose() * IEKF::s_D).inverse() * IEKF::s_D.transpose();
+
+const Covariance<6> IEKF::s_N = Covariance<6>::Identity() * 0.01; // TODO: Set to something smart.
 
 const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
 
-}
+} // namespace invariant

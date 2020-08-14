@@ -35,7 +35,18 @@ private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();
     Covariance<9> m_P = Covariance<9>::Identity();
 
+    // Jacobian-ish of the mocap measurement model.
+    static const ugl::Matrix<6,9> s_H;
+
+    // Measurement operator of the mocap measurement model. Y=XDV.
+    static const ugl::Matrix<5,4> s_D;
+    static const ugl::Matrix<4,5> s_D_left_pinv;
+
+    // Measurement noise of mocap.
+    static const Covariance<6> s_N;
+
+    // Gravitational acceleration
     static const ugl::Vector3 s_gravity;
 };
 
-}
+} // namespace invariant
