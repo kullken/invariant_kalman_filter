@@ -97,6 +97,8 @@ target_link_libraries(kalman_node
     iekf
     ${catkin_LIBRARIES}
   PRIVATE
+    ugl::math
+    ugl::lie_group
     project_options
     project_warnings
 )
