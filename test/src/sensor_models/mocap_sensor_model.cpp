@@ -25,7 +25,7 @@ ugl::Vector3 MocapSensorModel::get_pos_reading(double t) const
     return trajectory_.get_position(t) + position_noise_.sample();
 }
 
-ugl::Rotation MocapSensorModel::get_rot_reading(double t) const
+ugl::lie::Rotation MocapSensorModel::get_rot_reading(double t) const
 {
     return trajectory_.get_rotation(t) * ugl::lie::SO3::exp(rotation_noise_.sample());
 }

@@ -2,6 +2,7 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
+#include <ugl/lie_group/rotation.h>
 
 #include "mekf_types.h"
 
@@ -10,7 +11,7 @@ namespace mekf
 
 using ugl::Vector3;
 using ugl::Matrix3;
-using ugl::Rotation;
+using ugl::lie::Rotation;
 
 /// Skew-symmetric cross-product matrix of a 3D vector.
 Matrix3 S(const Vector3& vec)
@@ -24,7 +25,7 @@ Matrix3 S(const Vector3& vec)
 
 const Vector3 MEKF::s_gravity{0.0, 0.0, -9.82};
 
-MEKF::MEKF(const ugl::Rotation& R0, const ugl::Vector3& p0, const ugl::Vector3& v0, const Covariance<9>& P0)
+MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
     : m_x()
     , m_R_ref(R0)
     , m_P(P0)
@@ -43,7 +44,7 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     reset_attitude_error();
 }
 
-void MEKF::mocap_update(const ugl::Rotation&, const ugl::Vector3&)
+void MEKF::mocap_update(const Rotation&, const Vector3&)
 {
 
 }

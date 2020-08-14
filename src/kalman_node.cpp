@@ -12,6 +12,8 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
+#include <ugl/math/quaternion.h>
+#include <ugl/lie_group/rotation.h>
 
 #include <ugl_ros/convert_tf2.h>
 
@@ -73,13 +75,12 @@ void KalmanNode::initialise_iekf_filter()
     const double vz0 = m_nh_private.param<double>("init/vz", 0.0);
     const ugl::Vector3 v0{vx0, vy0, vz0};
 
-    const double roll  = m_nh_private.param<double>("init/roll" , 0.0);
-    const double pitch = m_nh_private.param<double>("init/pitch", 0.0);
-    const double yaw   = m_nh_private.param<double>("init/yaw"  , 0.0);
-    // TODO: Lots of conceptually unneeded conversions. Make nicer somehow.
-    tf2::Quaternion quat_tf;
-    quat_tf.setRPY(roll, pitch, yaw);
-    const ugl::Rotation R0 = tf2::fromMsg(tf2::toMsg(quat_tf));
+    const double qx = m_nh_private.param<double>("init/qx", 0.0);
+    const double qy = m_nh_private.param<double>("init/qy", 0.0);
+    const double qz = m_nh_private.param<double>("init/qz", 0.0);
+    const double qw = m_nh_private.param<double>("init/qw", 0.0);
+    const ugl::UnitQuaternion q0{qw, qx, qy, qz};
+    const ugl::lie::Rotation R0{q0};
 
     // TODO: Initilise from launch parameters?
     const Covariance<9> P0 = Covariance<9>::Identity() * 0.1;
