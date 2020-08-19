@@ -15,7 +15,6 @@
 #include "measurement.h"
 
 #include "iekf.h"
-#include "iekf_types.h"
 
 namespace invariant
 {
@@ -37,7 +36,7 @@ private:
     void publish_tf(const ros::Time& stamp);
     void publish_pose(const ros::Time& stamp);
     void publish_velocity(const ros::Time& stamp);
-    
+
 private:
     ros::NodeHandle& m_nh;
     ros::NodeHandle& m_nh_private;

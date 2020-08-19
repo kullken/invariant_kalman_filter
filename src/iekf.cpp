@@ -7,8 +7,6 @@
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
 
-#include "iekf_types.h"
-
 namespace invariant
 {
 
@@ -47,8 +45,9 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     A.block<3,3>(3,0) = ugl::lie::skew(acc).transpose();
     A.block<3,3>(6,3) = Matrix3::Identity();
 
-    const Covariance<9> Q = Matrix<9,9>::Identity() * 0.1;    // TODO: Set to something smart.
-    const Matrix<9,9> D = Matrix<9,9>::Identity();            // TODO: This is only here to make the algorithm clearer in the code.
+    // TODO: Set to something smart.
+    const Covariance<9> Q = Covariance<9>::Identity() * 0.1;
+    const Jacobian<9,9> D = Jacobian<9,9>::Identity();
 
     // Discretisation method from Hartley et al. (2018)
     // const Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));
@@ -79,8 +78,8 @@ void IEKF::mocap_update(const Rotation& R_measured, const Vector3& pos_measured)
     m_P = (Covariance<9>::Identity() - L*s_H) * m_P;     // TODO: Inplace subtraction might be faster (m_P -= L*H*m_P). Test if works with Eigen.
 }
 
-const ugl::Matrix<6,9> IEKF::s_H = [](){
-    Matrix<6,9> H = Matrix<6,9>::Zero();
+const IEKF::Jacobian<6,9> IEKF::s_H = [](){
+    IEKF::Jacobian<6,9> H = IEKF::Jacobian<6,9>::Zero();
     H.block<3,3>(0,0) = Matrix3::Identity();
     H.block<3,3>(3,6) = Matrix3::Identity();
     return H;
@@ -95,7 +94,7 @@ const ugl::Matrix<5,4> IEKF::s_D = [](){
 
 const ugl::Matrix<4,5> IEKF::s_D_left_pinv = (IEKF::s_D.transpose() * IEKF::s_D).inverse() * IEKF::s_D.transpose();
 
-const Covariance<6> IEKF::s_N = Covariance<6>::Identity() * 0.01; // TODO: Set to something smart.
+const IEKF::Covariance<6> IEKF::s_N = Covariance<6>::Identity() * 0.01; // TODO: Set to something smart.
 
 const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
 

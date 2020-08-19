@@ -4,8 +4,6 @@
 #include <ugl/math/matrix.h>
 #include <ugl/lie_group/rotation.h>
 
-#include "mekf_types.h"
-
 namespace mekf
 {
 
@@ -25,7 +23,7 @@ MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covar
 
 void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 {
-    const Jacobian A = MEKF::state_transition_jac(m_R_ref, dt, acc, ang_vel);
+    const Jacobian<9,9> A = MEKF::state_transition_jac(m_R_ref, dt, acc, ang_vel);
     const Covariance<9> Q = MEKF::state_transition_var(dt);
 
     m_x = MEKF::state_transition_model(m_x, m_R_ref, dt, acc, ang_vel);
@@ -39,12 +37,12 @@ void MEKF::mocap_update(const Rotation&, const Vector3&)
 
 }
 
-void MEKF::position_update(const Position& measurement)
+void MEKF::position_update(const Vector3& measurement)
 {
-    const PositionJacobian H = MEKF::position_measurement_jac();
+    const Jacobian<3,9> H = MEKF::position_measurement_jac();
     const Covariance<3> R = MEKF::position_measurement_var();
 
-    const Position y = measurement - MEKF::position_measurement_model(m_x);
+    const Vector3 y = measurement - MEKF::position_measurement_model(m_x);
     const Covariance<3> S = H*m_P*H.transpose() + R;
     const ugl::Matrix<9, 3> K = m_P*H.transpose()*S.inverse();
 
@@ -67,7 +65,7 @@ void MEKF::reset_attitude_error()
 }
 
 // State transition model without resetting attitude error.
-State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
+MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     Vector3 pos = x.segment<3>(0);
     Vector3 vel = x.segment<3>(3);
@@ -87,9 +85,9 @@ State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double
     return x_predicted;
 }
 
-Jacobian MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
+MEKF::Jacobian<9,9> MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
-    Jacobian jac = Jacobian::Identity();
+    Jacobian<9,9> jac = Jacobian<9,9>::Identity();
     jac.block<3,3>(0,3) = dt * Matrix3::Identity();
     // jac.block<3,3>(3,6) = dt * ugl::lie::skew(R_ref*acc);                  // Without inversion of R
     jac.block<3,3>(3,6) = dt * ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
@@ -98,7 +96,7 @@ Jacobian MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vect
     return jac;
 }
 
-Covariance<9> MEKF::state_transition_var(double dt)
+MEKF::Covariance<9> MEKF::state_transition_var(double dt)
 {
     // Values directly from Mueller et al. (2018).
     constexpr double sigma_acc  = 5;      // m/s^2
@@ -121,17 +119,17 @@ Covariance<9> MEKF::state_transition_var(double dt)
     return Q;
 }
 
-Position MEKF::position_measurement_model(const State& x)
+Vector3 MEKF::position_measurement_model(const State& x)
 {
     return x.segment<3>(0);
 }
 
-PositionJacobian MEKF::position_measurement_jac()
+MEKF::Jacobian<3,9> MEKF::position_measurement_jac()
 {
-    return PositionJacobian::Identity();
+    return MEKF::Jacobian<3,9>::Identity();
 }
 
-Covariance<3> MEKF::position_measurement_var()
+MEKF::Covariance<3> MEKF::position_measurement_var()
 {
     constexpr double sigma_pos = 0.05 * 100;       // m
     return Covariance<3>::Identity() * sigma_pos*sigma_pos;

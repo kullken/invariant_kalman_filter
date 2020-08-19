@@ -7,13 +7,18 @@
 #include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/extended_pose.h>
 
-#include "iekf_types.h"
-
 namespace invariant
 {
 
 class IEKF
 {
+public:
+    template<int n>
+    using Covariance = ugl::Matrix<n, n>;
+
+    template<int rows, int cols>
+    using Jacobian = ugl::Matrix<rows, cols>;
+
 public:
     IEKF() = default;
     IEKF(const ugl::lie::Rotation& R0, const ugl::Vector3& p0, const ugl::Vector3& v0, const Covariance<9>& P0);
@@ -35,8 +40,7 @@ private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();
     Covariance<9> m_P = Covariance<9>::Identity();
 
-    // Jacobian-ish of the mocap measurement model.
-    static const ugl::Matrix<6,9> s_H;
+    static const Jacobian<6,9> s_H;
 
     // Measurement operator of the mocap measurement model. Y=XDV.
     static const ugl::Matrix<5,4> s_D;

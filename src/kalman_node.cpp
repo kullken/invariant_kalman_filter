@@ -20,7 +20,6 @@
 #include "measurement.h"
 
 #include "iekf.h"
-#include "iekf_types.h"
 
 #include "ros_utils.h"
 
@@ -50,7 +49,7 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
 
     ros_utils::wait_for_message<sensor_msgs::Imu>(m_imu_sub);
 
-    ROS_DEBUG_STREAM("State initialised to:" 
+    ROS_DEBUG_STREAM("State initialised to:"
                     << "\nR = \n" << m_iekf_filter.get_rot()
                     << "\npos = \n" << m_iekf_filter.get_pos()
                     << "\nvel = \n" << m_iekf_filter.get_vel());
@@ -83,7 +82,7 @@ void KalmanNode::initialise_iekf_filter()
     const ugl::lie::Rotation R0{q0};
 
     // TODO: Initilise from launch parameters?
-    const Covariance<9> P0 = Covariance<9>::Identity() * 0.1;
+    const IEKF::Covariance<9> P0 = IEKF::Covariance<9>::Identity() * 0.1;
 
     m_iekf_filter = IEKF(R0, p0, v0, P0);
 
@@ -136,7 +135,7 @@ void KalmanNode::imu_cb(const sensor_msgs::Imu& msg)
 {
     m_queue.push(std::make_shared<ImuMeasurement>(msg));
 }
-    
+
 void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
 {
     m_queue.push(std::make_shared<MocapMeasurement>(msg));

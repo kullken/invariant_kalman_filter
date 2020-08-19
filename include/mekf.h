@@ -5,13 +5,20 @@
 #include <ugl/math/quaternion.h>
 #include <ugl/lie_group/rotation.h>
 
-#include "mekf_types.h"
-
 namespace mekf
 {
 
 class MEKF
 {
+public:
+    using State = ugl::Vector<9>;
+
+    template<int n>
+    using Covariance = ugl::Matrix<n, n>;
+
+    template<int rows, int cols>
+    using Jacobian = ugl::Matrix<rows, cols>;
+
 public:
     MEKF() = default;
     MEKF(const ugl::lie::Rotation& R0, const ugl::Vector3& p0, const ugl::Vector3& v0, const Covariance<9>& P0);
@@ -28,17 +35,17 @@ public:
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     void mocap_update(const ugl::lie::Rotation& R_measured, const ugl::Vector3& pos_measured);
-    void position_update(const Position& measurement);
+    void position_update(const ugl::Vector3& measurement);
 
 private:
     void reset_attitude_error();
 
     static State state_transition_model(const State& x, const ugl::lie::Rotation& R_ref, double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-    static Jacobian state_transition_jac(const ugl::lie::Rotation& R_ref, double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
+    static Jacobian<9,9> state_transition_jac(const ugl::lie::Rotation& R_ref, double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     static Covariance<9> state_transition_var(double dt);
 
-    static Position position_measurement_model(const State& x);
-    static PositionJacobian position_measurement_jac();
+    static ugl::Vector3 position_measurement_model(const State& x);
+    static Jacobian<3,9> position_measurement_jac();
     static Covariance<3> position_measurement_var();
 
 private:
