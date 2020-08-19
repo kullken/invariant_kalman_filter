@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_IMU_SENSOR_MODEL_H
+#define INVARIANT_IMU_SENSOR_MODEL_H
 
 #include <ostream>
 
@@ -82,3 +83,5 @@ inline std::ostream& operator<<(std::ostream& os, const ImuSensorModel& model)
 }
 
 } // namespace invariant::test
+
+#endif // INVARIANT_IMU_SENSOR_MODEL_H

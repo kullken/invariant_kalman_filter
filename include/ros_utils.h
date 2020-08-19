@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_ROS_UTILS_H
+#define INVARIANT_ROS_UTILS_H
 
 #include <string>
 
@@ -8,8 +9,8 @@ namespace ros_utils
 {
 
 template<typename MsgType>
-void wait_for_message(const ros::Subscriber& subscriber, 
-                      ros::Duration interval=ros::Duration(5.0), 
+void wait_for_message(const ros::Subscriber& subscriber,
+                      ros::Duration interval=ros::Duration(5.0),
                       ros::Duration initial_duration=ros::Duration(2.0)
                       )
 {
@@ -43,4 +44,6 @@ void wait_for_message(const ros::Subscriber& subscriber,
     return;
 }
 
-}
+} // namespace ros_utils
+
+#endif // INVARIANT_ROS_UTILS_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_MOCAP_SENSOR_MODEL_H
+#define INVARIANT_MOCAP_SENSOR_MODEL_H
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
@@ -22,7 +23,7 @@ enum class MocapNoiseLevel
 class MocapSensorModel
 {
 public:
-    MocapSensorModel() 
+    MocapSensorModel()
         : MocapSensorModel(MocapNoiseLevel::None) {}
 
     explicit MocapSensorModel(MocapNoiseLevel level, double frequency=100.0)
@@ -86,3 +87,5 @@ inline std::ostream& operator<<(std::ostream& os, const MocapSensorModel& model)
 }
 
 } // namespace invariant::test
+
+#endif // INVARIANT_MOCAP_SENSOR_MODEL_H

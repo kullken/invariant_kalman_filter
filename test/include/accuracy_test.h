@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_ACCURACY_TEST_H
+#define INVARIANT_ACCURACY_TEST_H
 
 #include <ostream>
 #include <tuple>
@@ -45,7 +46,7 @@ protected:
     {
         imu_.set_trajectory(trajectory_);
         mocap_.set_trajectory(trajectory_);
-        
+
         ugl::random::set_seed(117);
     }
 
@@ -79,3 +80,5 @@ protected:
 std::ostream& operator<<(std::ostream& os, const Result& result);
 
 } // namespace invariant::test
+
+#endif // INVARIANT_ACCURACY_TEST_H

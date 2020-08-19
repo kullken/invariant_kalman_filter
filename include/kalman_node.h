@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_KALMAN_NODE_H
+#define INVARIANT_KALMAN_NODE_H
 
 #include <string>
 #include <vector>
@@ -65,4 +66,6 @@ private:
     ros::Time m_previous_imu_time;
 };
 
-}
+} // namespace invariant
+
+#endif // INVARIANT_KALMAN_NODE_H

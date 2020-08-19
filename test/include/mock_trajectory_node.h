@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_MOCK_TRAJECTORY_NODE_H
+#define INVARIANT_MOCK_TRAJECTORY_NODE_H
 
 #include <string>
 
@@ -57,4 +58,6 @@ private:
     MocapSensorModel m_mocap_model;
 };
 
-}
+} // namespace invariant::test
+
+#endif // INVARIANT_MOCK_TRAJECTORY_NODE_H

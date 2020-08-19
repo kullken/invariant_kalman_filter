@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_MEASUREMENT_H
+#define INVARIANT_MEASUREMENT_H
 
 #include <memory>
 
@@ -8,7 +9,7 @@
 namespace invariant
 {
 
-enum class MeasurementType 
+enum class MeasurementType
 {
     imu,
     mocap
@@ -50,4 +51,6 @@ struct MeasurementCompare {
     }
 };
 
-}
+} // namespace invariant
+
+#endif // INVARIANT_MEASUREMENT_H

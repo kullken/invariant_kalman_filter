@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_MEKF_H
+#define INVARIANT_MEKF_H
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
@@ -56,4 +57,6 @@ private:
     static const ugl::Vector3 s_gravity;
 };
 
-}
+} // namespace mekf
+
+#endif // INVARIANT_MEKF_H

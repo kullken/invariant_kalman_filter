@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_TEST_TRAJECTORIES_H
+#define INVARIANT_TEST_TRAJECTORIES_H
 
 #include <iostream>
 #include <string>
@@ -33,3 +34,5 @@ ugl::trajectory::Trajectory quadratic_translation(ugl::Vector3 delta, double dur
 ugl::trajectory::Trajectory start_stop(ugl::Vector3 acceleration, double duration=1.0);
 
 } // namespace invariant::test
+
+#endif // INVARIANT_TEST_TRAJECTORIES_H

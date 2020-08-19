@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_IEKF_H
+#define INVARIANT_IEKF_H
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
@@ -54,3 +55,5 @@ private:
 };
 
 } // namespace invariant
+
+#endif // INVARIANT_IEKF_H

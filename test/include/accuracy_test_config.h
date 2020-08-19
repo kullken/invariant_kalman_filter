@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVARIANT_ACCURACY_TEST_CONFIG_H
+#define INVARIANT_ACCURACY_TEST_CONFIG_H
 
 #include <gtest/gtest.h>
 
@@ -55,3 +56,5 @@ const auto test_configs_partial = testing::Combine(
 );
 
 } // namespace invariant::test
+
+#endif // INVARIANT_ACCURACY_TEST_CONFIG_H
