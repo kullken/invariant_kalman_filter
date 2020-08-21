@@ -32,6 +32,7 @@ static constexpr size_t kQueueMaxSize = 20;
 KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     : m_nh(nh)
     , m_nh_private(nh_private)
+    , m_reset_server(nh_private.advertiseService("reset", &KalmanNode::reset_cb, this))
     , m_base_frame(nh_private.param<std::string>("base_frame", "base_link"))
     , m_map_frame(nh_private.param<std::string>("map_frame", "map"))
 {
@@ -59,7 +60,6 @@ void KalmanNode::start()
 {
     m_previous_imu_time = ros::Time::now();
     m_timer.start();
-    ROS_INFO("Timer started!");
 }
 
 void KalmanNode::initialise_iekf_filter()
@@ -87,6 +87,29 @@ void KalmanNode::initialise_iekf_filter()
     m_iekf_filter = IEKF(R0, p0, v0, P0);
 
     return;
+}
+
+void KalmanNode::imu_cb(const sensor_msgs::Imu& msg)
+{
+    m_queue.push(std::make_shared<ImuMeasurement>(msg));
+}
+
+void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
+{
+    m_queue.push(std::make_shared<MocapMeasurement>(msg));
+}
+
+bool KalmanNode::reset_cb(std_srvs::EmptyRequest&, std_srvs::EmptyResponse&)
+{
+    ROS_INFO("Resetting...");
+    m_timer.stop();
+    initialise_iekf_filter();
+    while (!m_queue.empty()) {
+        m_queue.pop();
+    }
+    start();
+    ROS_INFO("Reset done.");
+    return true;
 }
 
 void KalmanNode::timer_cb(const ros::TimerEvent& e)
@@ -131,16 +154,6 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
     publish_velocity(e.current_real);
 }
 
-void KalmanNode::imu_cb(const sensor_msgs::Imu& msg)
-{
-    m_queue.push(std::make_shared<ImuMeasurement>(msg));
-}
-
-void KalmanNode::mocap_cb(const geometry_msgs::PoseStamped& msg)
-{
-    m_queue.push(std::make_shared<MocapMeasurement>(msg));
-}
-
 void KalmanNode::publish_tf(const ros::Time& stamp)
 {
     m_tf_msg.header.stamp = stamp;
@@ -171,7 +184,7 @@ void KalmanNode::publish_velocity(const ros::Time& stamp)
     m_velocity_pub.publish(m_vel_msg);
 }
 
-}
+} // namespace invariant
 
 int main(int argc, char** argv)
 {

@@ -12,6 +12,7 @@
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
+#include <std_srvs/Empty.h>
 
 #include "measurement.h"
 
@@ -30,9 +31,11 @@ public:
 private:
     void initialise_iekf_filter();
 
-    void timer_cb(const ros::TimerEvent& e);
     void imu_cb(const sensor_msgs::Imu& msg);
     void mocap_cb(const geometry_msgs::PoseStamped& msg);
+    bool reset_cb(std_srvs::EmptyRequest&, std_srvs::EmptyResponse&);
+
+    void timer_cb(const ros::TimerEvent& e);
 
     void publish_tf(const ros::Time& stamp);
     void publish_pose(const ros::Time& stamp);
@@ -49,6 +52,8 @@ private:
     ros::Publisher m_velocity_pub;
 
     tf2_ros::TransformBroadcaster m_tf_broadcaster;
+
+    ros::ServiceServer m_reset_server;
 
     geometry_msgs::TransformStamped m_tf_msg;
     geometry_msgs::PoseStamped m_pose_msg;

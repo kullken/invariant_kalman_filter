@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(invariant_kalman_filter)
 
-find_package(catkin REQUIRED 
+find_package(catkin REQUIRED
   COMPONENTS
     geometry_msgs
     roscpp
     sensor_msgs
+    std_srvs
     tf2
     tf2_ros
     ugl_ros
@@ -20,7 +21,7 @@ add_library(project_warnings INTERFACE)
 target_compile_options(project_warnings
   INTERFACE
     -Wall -Wextra -Wpedantic
-    -Wnon-virtual-dtor 
+    -Wnon-virtual-dtor
     -Wcast-align
     -Wunused
     -Woverloaded-virtual
@@ -47,7 +48,7 @@ catkin_package(
   INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
 #  LIBRARIES localisation
 #  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS 
+#  DEPENDS
 )
 
 ###########
@@ -200,7 +201,7 @@ if (CATKIN_ENABLE_TESTING)
 
   target_include_directories(create_csv_data
     PRIVATE
-      test/include  
+      test/include
   )
 
   target_sources(create_csv_data
@@ -224,7 +225,7 @@ if (CATKIN_ENABLE_TESTING)
 
   target_include_directories(regression_tests
     PRIVATE
-      test/include  
+      test/include
   )
 
   target_sources(regression_tests
