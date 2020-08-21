@@ -50,10 +50,9 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const Jacobian<9,9> D = Jacobian<9,9>::Identity();
 
     // Discretisation method from Hartley et al. (2018)
-    // const Matrix<9,9> Phi = ugl::math::exp(Matrix<9,9>(A*dt));
     const Matrix<9,9> Adt = A*dt;
     const Matrix<9,9> Adt2 = Adt*Adt;
-    const Matrix<9,9> Phi = Matrix<9,9>::Identity() + Adt + Adt2/2 + Adt2*Adt/6 + Adt2*Adt2/24; // Approximates exp(A*dt)
+    const Matrix<9,9> Phi = Matrix<9,9>::Identity() + Adt + Adt2/2 + Adt2*Adt/6 + Adt2*Adt2/24; // Approximates Phi = exp(A*dt)
     m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
 }
 
