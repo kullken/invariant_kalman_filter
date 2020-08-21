@@ -26,8 +26,8 @@
 namespace invariant
 {
 
-static constexpr size_t k_queue_min_size = 5;
-static constexpr size_t k_queue_max_size = 20;
+static constexpr size_t kQueueMinSize = 5;
+static constexpr size_t kQueueMaxSize = 20;
 
 KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
     : m_nh(nh)
@@ -91,12 +91,12 @@ void KalmanNode::initialise_iekf_filter()
 
 void KalmanNode::timer_cb(const ros::TimerEvent& e)
 {
-    if (m_queue.size() > k_queue_max_size)
+    if (m_queue.size() > kQueueMaxSize)
     {
-        ROS_WARN("Measurement queue size [=%lu] exceeds max size [=%zu]! Filter might not be running in real-time.", m_queue.size(), k_queue_max_size);
+        ROS_WARN("Measurement queue size [=%lu] exceeds max size [=%zu]! Filter might not be running in real-time.", m_queue.size(), kQueueMaxSize);
     }
 
-    while (m_queue.size() > k_queue_min_size)
+    while (m_queue.size() > kQueueMinSize)
     {
         auto measurement_ptr = m_queue.top();
         m_queue.pop();
