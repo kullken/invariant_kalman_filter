@@ -45,9 +45,8 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     A.block<3,3>(3,0) = ugl::lie::skew(acc).transpose();
     A.block<3,3>(6,3) = Matrix3::Identity();
 
-    // TODO: Set to something smart.
-    const Covariance<9> Q = Covariance<9>::Identity() * 0.1;
-    const Jacobian<9,9> D = Jacobian<9,9>::Identity();
+    const Covariance<6> Q = Covariance<6>::Identity() * 0.1;
+    const Jacobian<9,6> D = Jacobian<9,6>::Identity();
 
     // Discretisation method from Hartley et al. (2018)
     const Matrix<9,9> Adt = A*dt;
