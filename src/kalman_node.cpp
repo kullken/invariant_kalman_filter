@@ -132,7 +132,7 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
         {
             case MeasurementType::imu:
             {
-                auto imu_measurement_ptr = std::dynamic_pointer_cast<ImuMeasurement>(measurement_ptr);
+                auto imu_measurement_ptr = std::dynamic_pointer_cast<const ImuMeasurement>(measurement_ptr);
                 const sensor_msgs::Imu& imu_msg = imu_measurement_ptr->get_data();
                 const double dt = (imu_msg.header.stamp - m_previous_imu_time).toSec();
                 if (dt > 0.05)
@@ -145,7 +145,7 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
             }
             case MeasurementType::mocap:
             {
-                auto mocap_measurement_ptr = std::dynamic_pointer_cast<MocapMeasurement>(measurement_ptr);
+                auto mocap_measurement_ptr = std::dynamic_pointer_cast<const MocapMeasurement>(measurement_ptr);
                 const geometry_msgs::PoseStamped& mocap_msg = mocap_measurement_ptr->get_data();
                 m_iekf_filter.mocap_update(ugl::lie::Rotation(tf2::fromMsg(mocap_msg.pose.orientation)), tf2::fromMsg(mocap_msg.pose.position));
                 break;

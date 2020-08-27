@@ -22,6 +22,17 @@ namespace invariant
 
 class KalmanNode
 {
+private:
+    using MeasurementPtr = std::shared_ptr<const Measurement>;
+
+    // Lower/earlier time stamp has higher priority.
+    struct MeasurementPriority
+    {
+        bool operator()(const MeasurementPtr& lhs, const MeasurementPtr& rhs) const {
+            return lhs->stamp() > rhs->stamp();
+        }
+    };
+
 public:
     KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
 
@@ -61,7 +72,7 @@ private:
 
     IEKF m_iekf_filter;
 
-    std::priority_queue<std::shared_ptr<Measurement>, std::vector<std::shared_ptr<Measurement>>, MeasurementCompare> m_queue;
+    std::priority_queue<MeasurementPtr, std::vector<MeasurementPtr>, MeasurementPriority> m_queue;
 
     ros::Time m_previous_imu_time;
 };

@@ -62,12 +62,6 @@ private:
     geometry_msgs::PoseStamped m_data;
 };
 
-struct MeasurementCompare {
-    bool operator()(const std::shared_ptr<Measurement> lhs, const std::shared_ptr<Measurement> rhs) const {
-        return lhs->stamp() > rhs->stamp();
-    }
-};
-
 } // namespace invariant
 
 #endif // INVARIANT_MEASUREMENT_H
