@@ -6,9 +6,9 @@
 #include <ros/ros.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-#include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/Vector3Stamped.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
@@ -38,11 +38,15 @@ KalmanNode::KalmanNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
 {
     m_imu_sub       = m_nh.subscribe("imu", 10, &KalmanNode::imu_cb, this);
     m_mocap_sub     = m_nh.subscribe("mocap/pose", 10, &KalmanNode::mocap_cb, this);
-    m_pose_pub      = m_nh.advertise<geometry_msgs::PoseStamped>("pose_filtered", 10);
-    m_velocity_pub  = m_nh.advertise<geometry_msgs::Vector3Stamped>("vel_filtered", 10);
+    m_odom_pub      = m_nh_private.advertise<nav_msgs::Odometry>("odometry", 10);
 
     const double frequency = m_nh_private.param<double>("frequency", 10.0);
     m_timer = m_nh.createTimer(1.0/frequency, &KalmanNode::timer_cb, this, false, false);
+
+    m_tf_msg.header.frame_id = m_map_frame;
+    m_tf_msg.child_frame_id = m_base_frame;
+    m_odom_msg.header.frame_id = m_map_frame;
+    m_odom_msg.child_frame_id = m_base_frame;
 
     initialise_iekf_filter();
 
@@ -150,38 +154,25 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
     }
 
     publish_tf(e.current_real);
-    publish_pose(e.current_real);
-    publish_velocity(e.current_real);
+    publish_odometry(e.current_real);
 }
 
 void KalmanNode::publish_tf(const ros::Time& stamp)
 {
     m_tf_msg.header.stamp = stamp;
-    m_tf_msg.header.frame_id = m_map_frame;
-    m_tf_msg.child_frame_id = m_base_frame;
     tf2::toMsg(m_iekf_filter.get_pos(), m_tf_msg.transform.translation);
     tf2::toMsg(m_iekf_filter.get_rot(), m_tf_msg.transform.rotation);
-
     m_tf_broadcaster.sendTransform(m_tf_msg);
 }
 
-void KalmanNode::publish_pose(const ros::Time& stamp)
+void KalmanNode::publish_odometry(const ros::Time& stamp)
 {
-    m_pose_msg.header.stamp = stamp;
-    m_pose_msg.header.frame_id = m_map_frame;
-    tf2::toMsg(m_iekf_filter.get_pos(), m_pose_msg.pose.position);
-    tf2::toMsg(m_iekf_filter.get_quat(), m_pose_msg.pose.orientation);
-
-    m_pose_pub.publish(m_pose_msg);
-}
-
-void KalmanNode::publish_velocity(const ros::Time& stamp)
-{
-    m_vel_msg.header.stamp = stamp;
-    m_vel_msg.header.frame_id = m_map_frame;
-    tf2::toMsg(m_iekf_filter.get_vel(), m_vel_msg.vector);
-
-    m_velocity_pub.publish(m_vel_msg);
+    // TODO: Set covariance values in odometry message.
+    m_odom_msg.header.stamp = stamp;
+    tf2::toMsg(m_iekf_filter.get_pos(), m_odom_msg.pose.pose.position);
+    tf2::toMsg(m_iekf_filter.get_quat(), m_odom_msg.pose.pose.orientation);
+    tf2::toMsg(m_iekf_filter.get_vel(), m_odom_msg.twist.twist.linear);
+    m_odom_pub.publish(m_odom_msg);
 }
 
 } // namespace invariant

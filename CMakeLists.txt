@@ -4,6 +4,7 @@ project(invariant_kalman_filter)
 find_package(catkin REQUIRED
   COMPONENTS
     geometry_msgs
+    nav_msgs
     roscpp
     sensor_msgs
     std_srvs

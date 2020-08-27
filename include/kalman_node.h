@@ -6,12 +6,11 @@
 #include <queue>
 
 #include <ros/ros.h>
-
 #include <tf2_ros/transform_broadcaster.h>
 
-#include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/Vector3Stamped.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 #include <std_srvs/Empty.h>
 
 #include "measurement.h"
@@ -38,8 +37,7 @@ private:
     void timer_cb(const ros::TimerEvent& e);
 
     void publish_tf(const ros::Time& stamp);
-    void publish_pose(const ros::Time& stamp);
-    void publish_velocity(const ros::Time& stamp);
+    void publish_odometry(const ros::Time& stamp);
 
 private:
     ros::NodeHandle& m_nh;
@@ -48,16 +46,13 @@ private:
     ros::Subscriber m_imu_sub;
     ros::Subscriber m_mocap_sub;
 
-    ros::Publisher m_pose_pub;
-    ros::Publisher m_velocity_pub;
-
+    ros::Publisher m_odom_pub;
     tf2_ros::TransformBroadcaster m_tf_broadcaster;
 
     ros::ServiceServer m_reset_server;
 
     geometry_msgs::TransformStamped m_tf_msg;
-    geometry_msgs::PoseStamped m_pose_msg;
-    geometry_msgs::Vector3Stamped m_vel_msg;
+    nav_msgs::Odometry m_odom_msg;
 
     const std::string m_base_frame;
     const std::string m_map_frame;
