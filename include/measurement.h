@@ -11,18 +11,10 @@
 namespace invariant
 {
 
-enum class MeasurementType
-{
-    imu,
-    mocap
-};
-
 class Measurement
 {
 public:
     virtual ~Measurement() = default;
-    virtual MeasurementType get_type() const = 0;
-
     const ros::Time& stamp() const { return m_stamp; }
 
 protected:
@@ -41,8 +33,8 @@ public:
     {
     }
 
-    MeasurementType get_type() const override { return MeasurementType::imu; }
     const sensor_msgs::Imu& get_data() const { return m_data; }
+
 private:
     sensor_msgs::Imu m_data;
 };
@@ -56,8 +48,8 @@ public:
     {
     }
 
-    MeasurementType get_type() const override { return MeasurementType::mocap; }
     const geometry_msgs::PoseStamped& get_data() const { return m_data; }
+
 private:
     geometry_msgs::PoseStamped m_data;
 };

@@ -128,20 +128,14 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
         auto measurement_ptr = m_queue.top();
         m_queue.pop();
 
-        switch (measurement_ptr->get_type())
-        {
-            case MeasurementType::imu:
-            {
-                auto imu_measurement_ptr = std::dynamic_pointer_cast<const ImuMeasurement>(measurement_ptr);
-                process_imu_measurement(*imu_measurement_ptr);
-                break;
-            }
-            case MeasurementType::mocap:
-            {
-                auto mocap_measurement_ptr = std::dynamic_pointer_cast<const MocapMeasurement>(measurement_ptr);
-                process_mocap_measurement(*mocap_measurement_ptr);
-                break;
-            }
+        if (auto imu_measurement_ptr = std::dynamic_pointer_cast<const ImuMeasurement>(measurement_ptr)) {
+            process_imu_measurement(*imu_measurement_ptr);
+        }
+        else if (auto mocap_measurement_ptr = std::dynamic_pointer_cast<const MocapMeasurement>(measurement_ptr)) {
+            process_mocap_measurement(*mocap_measurement_ptr);
+        }
+        else {
+            ROS_ERROR("Measurement pointer could not be downcasted to any known measurement type. This is a programming logic error.");
         }
     }
 
