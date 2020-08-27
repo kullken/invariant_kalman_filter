@@ -147,7 +147,7 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
             {
                 auto mocap_measurement_ptr = std::dynamic_pointer_cast<MocapMeasurement>(measurement_ptr);
                 const geometry_msgs::PoseStamped& mocap_msg = mocap_measurement_ptr->get_data();
-                m_iekf_filter.mocap_update(tf2::fromMsg(mocap_msg.pose.orientation), tf2::fromMsg(mocap_msg.pose.position));
+                m_iekf_filter.mocap_update(ugl::lie::Rotation(tf2::fromMsg(mocap_msg.pose.orientation)), tf2::fromMsg(mocap_msg.pose.position));
                 break;
             }
         }
