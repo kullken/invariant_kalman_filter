@@ -133,21 +133,13 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
             case MeasurementType::imu:
             {
                 auto imu_measurement_ptr = std::dynamic_pointer_cast<const ImuMeasurement>(measurement_ptr);
-                const sensor_msgs::Imu& imu_msg = imu_measurement_ptr->get_data();
-                const double dt = (imu_msg.header.stamp - m_previous_imu_time).toSec();
-                if (dt > 0.05)
-                {
-                    ROS_WARN("Time between IMU messages is high [dt=%f]. Might result in large discretisation errors.", dt);
-                }
-                m_iekf_filter.predict(dt, tf2::fromMsg(imu_msg.linear_acceleration), tf2::fromMsg(imu_msg.angular_velocity));
-                m_previous_imu_time = imu_msg.header.stamp;
+                process_imu_measurement(*imu_measurement_ptr);
                 break;
             }
             case MeasurementType::mocap:
             {
                 auto mocap_measurement_ptr = std::dynamic_pointer_cast<const MocapMeasurement>(measurement_ptr);
-                const geometry_msgs::PoseStamped& mocap_msg = mocap_measurement_ptr->get_data();
-                m_iekf_filter.mocap_update(ugl::lie::Rotation(tf2::fromMsg(mocap_msg.pose.orientation)), tf2::fromMsg(mocap_msg.pose.position));
+                process_mocap_measurement(*mocap_measurement_ptr);
                 break;
             }
         }
@@ -155,6 +147,23 @@ void KalmanNode::timer_cb(const ros::TimerEvent& e)
 
     publish_tf(e.current_real);
     publish_odometry(e.current_real);
+}
+
+void KalmanNode::process_imu_measurement(const ImuMeasurement& measurement)
+{
+    const double dt = (measurement.stamp() - m_previous_imu_time).toSec();
+    if (dt > 0.05) {
+        ROS_WARN("Time between IMU messages is high [dt=%f]. Might result in large discretisation errors.", dt);
+    }
+    const sensor_msgs::Imu& imu_msg = measurement.get_data();
+    m_iekf_filter.predict(dt, tf2::fromMsg(imu_msg.linear_acceleration), tf2::fromMsg(imu_msg.angular_velocity));
+    m_previous_imu_time = imu_msg.header.stamp;
+}
+
+void KalmanNode::process_mocap_measurement(const MocapMeasurement& measurement)
+{
+    const geometry_msgs::PoseStamped& mocap_msg = measurement.get_data();
+    m_iekf_filter.mocap_update(ugl::lie::Rotation(tf2::fromMsg(mocap_msg.pose.orientation)), tf2::fromMsg(mocap_msg.pose.position));
 }
 
 void KalmanNode::publish_tf(const ros::Time& stamp)

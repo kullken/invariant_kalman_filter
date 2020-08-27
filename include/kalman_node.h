@@ -46,6 +46,8 @@ private:
     bool reset_cb(std_srvs::EmptyRequest&, std_srvs::EmptyResponse&);
 
     void timer_cb(const ros::TimerEvent& e);
+    void process_imu_measurement(const ImuMeasurement& measurement);
+    void process_mocap_measurement(const MocapMeasurement& measurement);
 
     void publish_tf(const ros::Time& stamp);
     void publish_odometry(const ros::Time& stamp);
