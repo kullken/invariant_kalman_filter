@@ -39,10 +39,10 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 
     // Error propagation
     Matrix<9,9> A = Matrix<9,9>::Zero();
-    A.block<3,3>(0,0) = ugl::lie::skew(ang_vel).transpose();
-    A.block<3,3>(3,3) = ugl::lie::skew(ang_vel).transpose();
-    A.block<3,3>(6,6) = ugl::lie::skew(ang_vel).transpose();
-    A.block<3,3>(3,0) = ugl::lie::skew(acc).transpose();
+    A.block<3,3>(0,0) = -ugl::lie::skew(ang_vel);
+    A.block<3,3>(3,3) = -ugl::lie::skew(ang_vel);
+    A.block<3,3>(6,6) = -ugl::lie::skew(ang_vel);
+    A.block<3,3>(3,0) = -ugl::lie::skew(acc);
     A.block<3,3>(6,3) = Matrix3::Identity();
 
     const Covariance<6> Q = Covariance<6>::Identity() * 0.1;
