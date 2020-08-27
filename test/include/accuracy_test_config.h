@@ -10,6 +10,7 @@
 namespace invariant::test
 {
 
+inline
 const auto test_trajectories_full = testing::Values(
     TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
     TestTrajectory{"Rotate 360 left, 1s", rotate_in_place(360, 1)},
@@ -26,6 +27,7 @@ const auto test_trajectories_full = testing::Values(
     TestTrajectory{"StartStop: {0,0,1}, 10s", start_stop({0,0,1}, 10)}
 );
 
+inline
 const auto test_trajectories_partial = testing::Values(
     TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
     TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
@@ -33,22 +35,26 @@ const auto test_trajectories_partial = testing::Values(
     TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)}
 );
 
+inline
 const auto test_imu_models = testing::Values(
     ImuSensorModel{ImuNoiseLevel::None},
     ImuSensorModel{ImuNoiseLevel::Mueller18}
 );
 
+inline
 const auto test_mocap_models = testing::Values(
     MocapSensorModel{MocapNoiseLevel::None},
     MocapSensorModel{MocapNoiseLevel::Low}
 );
 
+inline
 const auto test_configs_full = testing::Combine(
     test_trajectories_full,
     test_imu_models,
     test_mocap_models
 );
 
+inline
 const auto test_configs_partial = testing::Combine(
     test_trajectories_partial,
     test_imu_models,
