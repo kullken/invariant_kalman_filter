@@ -6,6 +6,9 @@
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 
+#include <ugl/math/vector.h>
+#include <ugl/lie_group/rotation.h>
+
 namespace invariant
 {
 
@@ -25,31 +28,33 @@ private:
 class ImuMeasurement: public Measurement
 {
 public:
-    ImuMeasurement(const sensor_msgs::Imu& data)
-        : Measurement(data.header.stamp)
-        , m_data(data)
-    {
-    }
+    ImuMeasurement(const sensor_msgs::Imu& imu_msg);
 
-    const sensor_msgs::Imu& get_data() const { return m_data; }
+    // Acceleration as measured by accelerometer.
+    const ugl::Vector3& acceleration() const { return m_acc; }
+
+    // Angular rate as measured by gyroscope.
+    const ugl::Vector3& angular_rate() const { return m_rate; }
 
 private:
-    sensor_msgs::Imu m_data;
+    ugl::Vector3 m_acc;
+    ugl::Vector3 m_rate;
 };
 
 class MocapMeasurement: public Measurement
 {
 public:
-    MocapMeasurement(const geometry_msgs::PoseStamped& data)
-        : Measurement(data.header.stamp)
-        , m_data(data)
-    {
-    }
+    MocapMeasurement(const geometry_msgs::PoseStamped& pose_msg);
 
-    const geometry_msgs::PoseStamped& get_data() const { return m_data; }
+    // Rotation measured by Mocap-system.
+    const ugl::lie::Rotation& rotation() const { return m_rot; }
+
+    // Position measured by Mocap-system.
+    const ugl::Vector3& position() const { return m_pos; }
 
 private:
-    geometry_msgs::PoseStamped m_data;
+    ugl::lie::Rotation m_rot;
+    ugl::Vector3 m_pos;
 };
 
 } // namespace invariant

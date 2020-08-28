@@ -92,7 +92,10 @@ target_link_libraries(mekf
 )
 
 ## Kalman ROS-node ##
-add_executable(kalman_node src/kalman_node.cpp)
+add_executable(kalman_node
+  src/kalman_node.cpp
+  src/measurement.cpp
+)
 
 target_link_libraries(kalman_node
   PUBLIC
