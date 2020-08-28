@@ -1,8 +1,6 @@
 #ifndef INVARIANT_MEASUREMENT_H
 #define INVARIANT_MEASUREMENT_H
 
-#include <memory>
-
 #include <ros/time.h>
 
 #include <sensor_msgs/Imu.h>
