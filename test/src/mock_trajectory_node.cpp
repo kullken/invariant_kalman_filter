@@ -62,6 +62,15 @@ void MockTrajectoryNode::start()
     ROS_INFO("Node started!");
 }
 
+void MockTrajectoryNode::stop()
+{
+    m_imu_timer.stop();
+    m_mocap_timer.stop();
+    m_ground_truth_timer.stop();
+    // TODO: Stop state estimate subscriber.
+    ROS_INFO("Node stoped!");
+}
+
 void MockTrajectoryNode::publish_imu(const ros::TimerEvent& event)
 {
     const ros::Time now = event.current_real;

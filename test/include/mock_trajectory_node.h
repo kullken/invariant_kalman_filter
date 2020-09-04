@@ -25,6 +25,7 @@ public:
     MockTrajectoryNode(const ugl::trajectory::Trajectory &trajectory, const ImuSensorModel &imu, const MocapSensorModel &mocap);
 
     void start();
+    void stop();
 
 private:
     void publish_imu(const ros::TimerEvent& event);
