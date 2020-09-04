@@ -227,4 +227,20 @@ if (CATKIN_ENABLE_TESTING)
       project_options
       project_warnings
   )
+
+  catkin_add_executable_with_gtest(ros_trajectory_test test/src/ros_trajectory_test.cpp)
+  target_include_directories(ros_trajectory_test
+    PRIVATE
+      test/include
+  )
+  target_sources(ros_trajectory_test
+    PRIVATE
+      test/src/mock_trajectory_node.cpp
+  )
+  target_link_libraries(ros_trajectory_test
+      accuracy_test
+      ${catkin_LIBRARIES}
+      project_options
+      project_warnings
+  )
 endif()
