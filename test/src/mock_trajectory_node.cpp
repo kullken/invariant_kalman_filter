@@ -13,29 +13,39 @@
 
 #include <ugl_ros/convert_tf2.h>
 
+#include <ugl/trajectory/trajectory.h>
+
+#include "sensor_models/imu_sensor_model.h"
+#include "sensor_models/mocap_sensor_model.h"
+
 namespace invariant::test
 {
 
 static constexpr double kDefaultGroundTruthFrequency = 100.0;
 
-MockTrajectoryNode::MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
-    : m_nh(nh)
-    , m_nh_private(nh_private)
-    , m_base_frame(nh_private.param<std::string>("base_frame", "base_link"))
-    , m_map_frame(nh_private.param<std::string>("map_frame", "map"))
-    , m_ground_truth_frame(nh_private.param<std::string>("ground_truth_frame", "base_link_ground_truth"))
+MockTrajectoryNode::MockTrajectoryNode(const ugl::trajectory::Trajectory &trajectory, const ImuSensorModel &imu, const MocapSensorModel &mocap)
+    : m_trajectory(trajectory)
+    , m_imu_model(imu)
+    , m_mocap_model(mocap)
 {
-    m_imu_pub   = m_nh.advertise<sensor_msgs::Imu>("imu", 10);
-    m_mocap_pub = m_nh.advertise<geometry_msgs::PoseStamped>("mocap/pose", 10);
+    ros::NodeHandle nh("");
+    ros::NodeHandle nh_private("~");
+
+    m_imu_pub   = nh.advertise<sensor_msgs::Imu>("imu", 10);
+    m_mocap_pub = nh.advertise<geometry_msgs::PoseStamped>("mocap/pose", 10);
+
+    m_base_frame = nh_private.param<std::string>("base_frame", "base_link");
+    m_map_frame  = nh_private.param<std::string>("map_frame", "map");
+    m_ground_truth_frame = nh_private.param<std::string>("ground_truth_frame", "base_link_ground_truth");
 
     constexpr bool oneshot = false;
     constexpr bool autostart = false;
 
-    m_imu_timer = m_nh.createTimer(m_imu_model.period(), &MockTrajectoryNode::publish_imu, this, oneshot, autostart);
-    m_mocap_timer = m_nh.createTimer(m_mocap_model.period(), &MockTrajectoryNode::publish_mocap, this, oneshot, autostart);
+    m_imu_timer = nh.createTimer(m_imu_model.period(), &MockTrajectoryNode::publish_imu, this, oneshot, autostart);
+    m_mocap_timer = nh.createTimer(m_mocap_model.period(), &MockTrajectoryNode::publish_mocap, this, oneshot, autostart);
 
-    const double ground_truth_frequency = m_nh_private.param<double>("ground_truth_frequency", kDefaultGroundTruthFrequency);
-    m_ground_truth_timer = m_nh.createTimer(1.0/ground_truth_frequency, &MockTrajectoryNode::publish_ground_truth, this, oneshot, autostart);
+    const double ground_truth_frequency = nh_private.param<double>("ground_truth_frequency", kDefaultGroundTruthFrequency);
+    m_ground_truth_timer = nh.createTimer(1.0/ground_truth_frequency, &MockTrajectoryNode::publish_ground_truth, this, oneshot, autostart);
 
     m_imu_msg.header.frame_id = m_base_frame;
     m_mocap_msg.header.frame_id = m_map_frame;

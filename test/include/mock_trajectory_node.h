@@ -22,7 +22,7 @@ namespace invariant::test
 class MockTrajectoryNode
 {
 public:
-    MockTrajectoryNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private);
+    MockTrajectoryNode(const ugl::trajectory::Trajectory &trajectory, const ImuSensorModel &imu, const MocapSensorModel &mocap);
 
     void start();
 
@@ -32,9 +32,6 @@ private:
     void publish_ground_truth(const ros::TimerEvent& event);
 
 private:
-    ros::NodeHandle& m_nh;
-    ros::NodeHandle& m_nh_private;
-
     ros::Publisher m_imu_pub;
     ros::Publisher m_mocap_pub;
 
@@ -44,9 +41,9 @@ private:
 
     tf2_ros::TransformBroadcaster m_tf_broadcaster;
 
-    const std::string m_base_frame;
-    const std::string m_map_frame;
-    const std::string m_ground_truth_frame;
+    std::string m_base_frame;
+    std::string m_map_frame;
+    std::string m_ground_truth_frame;
 
     ros::Time m_t0;
     ros::Timer m_imu_timer;
