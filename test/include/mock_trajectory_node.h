@@ -27,9 +27,9 @@ public:
     void start();
 
 private:
-    void publish_imu(const ros::TimerEvent&);
-    void publish_mocap(const ros::TimerEvent&);
-    void publish_ground_truth(const ros::TimerEvent&);
+    void publish_imu(const ros::TimerEvent& event);
+    void publish_mocap(const ros::TimerEvent& event);
+    void publish_ground_truth(const ros::TimerEvent& event);
 
 private:
     ros::NodeHandle& m_nh;

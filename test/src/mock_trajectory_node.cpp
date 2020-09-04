@@ -52,9 +52,9 @@ void MockTrajectoryNode::start()
     ROS_INFO("Node started!");
 }
 
-void MockTrajectoryNode::publish_imu(const ros::TimerEvent&)
+void MockTrajectoryNode::publish_imu(const ros::TimerEvent& event)
 {
-    const ros::Time now = ros::Time::now();
+    const ros::Time now = event.current_real;
     const double t = (now - m_t0).toSec();
 
     m_imu_msg.linear_acceleration = tf2::toMsg<geometry_msgs::Vector3>(m_imu_model.get_accel_reading(t));
@@ -64,9 +64,9 @@ void MockTrajectoryNode::publish_imu(const ros::TimerEvent&)
     m_imu_pub.publish(m_imu_msg);
 }
 
-void MockTrajectoryNode::publish_mocap(const ros::TimerEvent&)
+void MockTrajectoryNode::publish_mocap(const ros::TimerEvent& event)
 {
-    const ros::Time now = ros::Time::now();
+    const ros::Time now = event.current_real;
     const double t = (now - m_t0).toSec();
 
     m_mocap_msg.pose.position = tf2::toMsg<geometry_msgs::Point>(m_mocap_model.get_pos_reading(t));
@@ -77,9 +77,9 @@ void MockTrajectoryNode::publish_mocap(const ros::TimerEvent&)
 }
 
 // TODO: Publish ground truth odometry information.
-void MockTrajectoryNode::publish_ground_truth(const ros::TimerEvent&)
+void MockTrajectoryNode::publish_ground_truth(const ros::TimerEvent& event)
 {
-    const ros::Time now = ros::Time::now();
+    const ros::Time now = event.current_real;
     const double t = (now - m_t0).toSec();
 
     m_ground_truth_tf.transform.translation = tf2::toMsg<geometry_msgs::Vector3>(m_trajectory.get_position(t));
