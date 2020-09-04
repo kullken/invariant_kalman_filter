@@ -7,12 +7,14 @@
 
 #include <tf2_ros/transform_broadcaster.h>
 
-#include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 
 #include <ugl/trajectory/trajectory.h>
 
+#include "accuracy_test.h"
 #include "sensor_models/imu_sensor_model.h"
 #include "sensor_models/mocap_sensor_model.h"
 
@@ -27,14 +29,20 @@ public:
     void start();
     void stop();
 
+    Result get_result();
+
 private:
     void publish_imu(const ros::TimerEvent& event);
     void publish_mocap(const ros::TimerEvent& event);
     void publish_ground_truth(const ros::TimerEvent& event);
 
+    void odom_filtered_cb(const nav_msgs::Odometry& msg);
+
 private:
     ros::Publisher m_imu_pub;
     ros::Publisher m_mocap_pub;
+
+    ros::Subscriber m_odom_filtered_sub;
 
     sensor_msgs::Imu m_imu_msg;
     geometry_msgs::PoseStamped m_mocap_msg;
@@ -50,6 +58,8 @@ private:
     ros::Timer m_imu_timer;
     ros::Timer m_mocap_timer;
     ros::Timer m_ground_truth_timer;
+
+    Result m_result;
 
     ugl::trajectory::Trajectory m_trajectory;
     ImuSensorModel m_imu_model;
