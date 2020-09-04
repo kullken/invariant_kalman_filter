@@ -176,56 +176,55 @@ target_link_libraries(sensor_models
     project_warnings
 )
 
+## Accuracy Test
+add_library(accuracy_test SHARED
+  test/src/accuracy_test.cpp
+  test/src/accuracy_test_config.cpp
+  test/src/test_trajectories.cpp
+)
+
+target_include_directories(accuracy_test
+  PUBLIC
+    test/include
+)
+
+target_link_libraries(accuracy_test
+  PUBLIC
+    ugl::math
+    ugl::trajectory
+    ugl::random
+    iekf
+    mekf
+    sensor_models
+  PRIVATE
+    project_options
+    project_warnings
+)
+
 #############
 ## Testing ##
 #############
 
 if (CATKIN_ENABLE_TESTING)
   catkin_add_executable_with_gtest(create_csv_data test/src/create_csv_data.cpp)
-
   target_include_directories(create_csv_data
     PRIVATE
       test/include
   )
-
-  target_sources(create_csv_data
-    PRIVATE
-      test/src/accuracy_test.cpp
-      test/src/accuracy_test_config.cpp
-      test/src/test_trajectories.cpp
-  )
-
   target_link_libraries(create_csv_data
+      accuracy_test
       project_options
       project_warnings
-      iekf
-      mekf
-      sensor_models
-      ugl::math
-      ugl::trajectory
   )
 
   catkin_add_executable_with_gtest(regression_tests test/src/regression_tests.cpp)
-
   target_include_directories(regression_tests
     PRIVATE
       test/include
   )
-
-  target_sources(regression_tests
-    PRIVATE
-      test/src/accuracy_test.cpp
-      test/src/accuracy_test_config.cpp
-      test/src/test_trajectories.cpp
-  )
-
   target_link_libraries(regression_tests
+      accuracy_test
       project_options
       project_warnings
-      iekf
-      mekf
-      sensor_models
-      ugl::math
-      ugl::trajectory
   )
 endif()
