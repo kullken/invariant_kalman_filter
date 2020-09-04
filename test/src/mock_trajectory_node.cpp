@@ -90,17 +90,3 @@ void MockTrajectoryNode::publish_ground_truth(const ros::TimerEvent& event)
 }
 
 }
-
-int main(int argc, char** argv)
-{
-    ros::init(argc, argv, "mock_trajectory_node");
-    ros::NodeHandle nh("");
-    ros::NodeHandle nh_private("~");
-
-    ROS_INFO("Initialising node...");
-    invariant::test::MockTrajectoryNode node(nh, nh_private);
-    ROS_INFO("Node initialisation done.");
-
-    node.start();
-    ros::spin();
-}

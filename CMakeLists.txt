@@ -176,26 +176,6 @@ target_link_libraries(sensor_models
     project_warnings
 )
 
-## Mock Trajectory Node
-add_executable(mock_trajectory_node
-  test/src/mock_trajectory_node.cpp
-)
-
-target_include_directories(mock_trajectory_node
-  PRIVATE
-    test/include
-)
-
-target_link_libraries(mock_trajectory_node
-  PUBLIC
-    sensor_models
-    ugl::trajectory
-    ${catkin_LIBRARIES}
-  PRIVATE
-    project_options
-    project_warnings
-)
-
 #############
 ## Testing ##
 #############
