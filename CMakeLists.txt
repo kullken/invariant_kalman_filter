@@ -66,6 +66,7 @@ include_directories(
 ## IEKF ##
 add_library(iekf SHARED
   src/iekf.cpp
+  src/mocap_model.cpp
 )
 
 target_link_libraries(iekf
