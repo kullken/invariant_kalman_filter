@@ -11,15 +11,13 @@ const ugl::lie::Pose MocapModel::s_target = ugl::lie::Pose::Identity();
 
 const ugl::Matrix<6,9> MocapModel::s_H = []() {
     ugl::Matrix<6,9> H = ugl::Matrix<6,9>::Zero();
-    // H.block<3,3>(0,0) = -ugl::Matrix3::Identity();
-    // H.block<3,3>(3,6) = -ugl::Matrix3::Identity();
     H.block<3,3>(0,0) = ugl::Matrix3::Identity();
     H.block<3,3>(3,6) = ugl::Matrix3::Identity();
     return H;
 }();
 
 const ugl::Matrix<6,6> MocapModel::s_G = []() {
-    return -ugl::lie::Pose::adjoint(MocapModel::target());
+    return ugl::lie::Pose::adjoint(MocapModel::target());
 }();
 
 const ugl::Matrix<6,6> MocapModel::s_N = []() {
