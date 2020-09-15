@@ -7,7 +7,7 @@
 #include <geometry_msgs/PoseStamped.h>
 
 #include <ugl/math/vector.h>
-#include <ugl/lie_group/rotation.h>
+#include <ugl/lie_group/pose.h>
 
 namespace invariant
 {
@@ -46,15 +46,11 @@ class MocapMeasurement: public Measurement
 public:
     MocapMeasurement(const geometry_msgs::PoseStamped& pose_msg);
 
-    // Rotation measured by Mocap-system.
-    const ugl::lie::Rotation& rotation() const { return m_rot; }
-
-    // Position measured by Mocap-system.
-    const ugl::Vector3& position() const { return m_pos; }
+    // Pose measured by Mocap-system.
+    const ugl::lie::Pose& pose() const { return m_pose; }
 
 private:
-    ugl::lie::Rotation m_rot;
-    ugl::Vector3 m_pos;
+    ugl::lie::Pose m_pose;
 };
 
 } // namespace invariant

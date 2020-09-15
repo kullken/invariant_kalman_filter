@@ -155,7 +155,7 @@ void KalmanNode::process_imu_measurement(const ImuMeasurement& measurement)
 
 void KalmanNode::process_mocap_measurement(const MocapMeasurement& measurement)
 {
-    m_iekf_filter.mocap_update(measurement.rotation(), measurement.position());
+    m_iekf_filter.mocap_update(measurement.pose());
 }
 
 void KalmanNode::publish_tf(const ros::Time& stamp)

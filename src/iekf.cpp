@@ -57,25 +57,20 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
 }
 
-void IEKF::mocap_update(const Rotation& R_measured, const Vector3& pos_measured)
+void IEKF::mocap_update(const ugl::lie::Pose& y)
 {
     const auto& H = MocapModel::H();
-    const auto& G = MocapModel::G();
+    const auto& E = MocapModel::E();
     const auto& N = MocapModel::N();
 
-    const ugl::lie::Pose y{R_measured, pos_measured};
-
-    // Gain calculation
-    const Matrix<6,6> S = H * m_P * H.transpose() + G * N * G.transpose();
+    const Matrix<6,6> S = H * m_P * H.transpose() + E * N * E.transpose();
     const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
 
-    // State correction
     const ugl::lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * MocapModel::target().inverse();
     const ugl::lie::ExtendedPose dX = ugl::lie::SE2_3::exp(K*ugl::lie::SE_3::log(innovation));
-    m_X = m_X*dX;
 
-    // Error correction
-    m_P = (Covariance<9>::Identity() - K*H) * m_P;     // TODO: Inplace subtraction might be faster (m_P -= K*H*m_P). Test if works with Eigen.
+    m_X = m_X*dX;
+    m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 
 const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};

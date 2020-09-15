@@ -8,6 +8,7 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
+#include <ugl/lie_group/pose.h>
 #include <ugl/trajectory/trajectory.h>
 
 #include "iekf.h"
@@ -19,7 +20,7 @@
 namespace invariant::test
 {
 
-namespace 
+namespace
 {
 
 double dist(const ugl::Vector3& a, const ugl::Vector3& b)
@@ -36,7 +37,7 @@ std::vector<int> range(int start, int end, int step)
 {
     int count = (end - start) / step;
     std::vector<int> values(count);
-    
+
     double value = start - step;
     std::generate_n(std::begin(values), count, [&]{ return value += step; });
 
@@ -82,7 +83,7 @@ Result compute_accuracy_impl(FilterType filter, const ugl::trajectory::Trajector
 
         if (t >= next_mocap_time)
         {
-            filter.mocap_update(mocap.get_rot_reading(next_mocap_time), mocap.get_pos_reading(next_mocap_time));
+            filter.mocap_update(ugl::lie::Pose{mocap.get_rot_reading(next_mocap_time), mocap.get_pos_reading(next_mocap_time)});
             next_mocap_time += mocap.period();
         }
 

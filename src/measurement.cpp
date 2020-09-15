@@ -20,8 +20,7 @@ ImuMeasurement::ImuMeasurement(const sensor_msgs::Imu& imu_msg)
 
 MocapMeasurement::MocapMeasurement(const geometry_msgs::PoseStamped& pose_msg)
     : Measurement(pose_msg.header.stamp)
-    , m_rot(tf2::fromMsg(pose_msg.pose.orientation))
-    , m_pos(tf2::fromMsg(pose_msg.pose.position))
+    , m_pose(tf2::fromMsg(pose_msg.pose.orientation), tf2::fromMsg(pose_msg.pose.position))
 {
 }
 

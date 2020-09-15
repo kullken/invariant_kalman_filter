@@ -5,6 +5,7 @@
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
 #include <ugl/lie_group/rotation.h>
+#include <ugl/lie_group/pose.h>
 
 namespace mekf
 {
@@ -35,7 +36,7 @@ public:
     void set_quat(const ugl::UnitQuaternion& quat) { m_R_ref = ugl::lie::Rotation{quat}; }
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-    void mocap_update(const ugl::lie::Rotation& R_measured, const ugl::Vector3& pos_measured);
+    void mocap_update(const ugl::lie::Pose&);
     void position_update(const ugl::Vector3& measurement);
 
 private:

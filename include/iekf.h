@@ -6,6 +6,7 @@
 #include <ugl/math/quaternion.h>
 
 #include <ugl/lie_group/rotation.h>
+#include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
 
 namespace invariant
@@ -35,7 +36,7 @@ public:
     void set_quat(const ugl::UnitQuaternion& quat) { m_X.set_rotation(ugl::lie::Rotation{quat}); }
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-    void mocap_update(const ugl::lie::Rotation& R_measured, const ugl::Vector3& pos_measured);
+    void mocap_update(const ugl::lie::Pose& y);
 
 private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();
