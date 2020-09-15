@@ -5,9 +5,6 @@
 
 #include <ugl_ros/convert_tf2.h>
 
-#include <ugl/math/vector.h>
-#include <ugl/lie_group/rotation.h>
-
 namespace invariant
 {
 
