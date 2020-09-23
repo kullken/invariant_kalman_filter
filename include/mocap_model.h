@@ -25,21 +25,21 @@ public:
     static const ugl::lie::Pose& target();
 
     /// @brief Error jacobian of measurement model
-    /// @return Const reference to the jacobian
+    /// @return Const reference to the jacobian matrix
     static const ugl::Matrix<6,9>& H();
 
     /// @brief Noise jacobian of measurement model
-    /// @return Const reference to the jacobian
-    static const ugl::Matrix<6,6>& G();
+    /// @return Const reference to the jacobian matrix
+    static const ugl::Matrix<6,6>& E();
 
     /// @brief Noise covariance of measurement model
-    /// @return Const reference to the covariance
+    /// @return Const reference to the covariance matrix
     static const ugl::Matrix<6,6>& N();
 
 private:
     static const ugl::lie::Pose s_target;
     static const ugl::Matrix<6,9> s_H;
-    static const ugl::Matrix<6,6> s_G;
+    static const ugl::Matrix<6,6> s_E;
     static const ugl::Matrix<6,6> s_N;
 };
 

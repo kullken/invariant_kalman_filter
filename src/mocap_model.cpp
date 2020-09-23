@@ -16,7 +16,7 @@ const ugl::Matrix<6,9> MocapModel::s_H = []() {
     return H;
 }();
 
-const ugl::Matrix<6,6> MocapModel::s_G = []() {
+const ugl::Matrix<6,6> MocapModel::s_E = []() {
     return ugl::lie::Pose::adjoint(MocapModel::target());
 }();
 
@@ -39,9 +39,9 @@ const ugl::Matrix<6,9>& MocapModel::H()
     return s_H;
 }
 
-const ugl::Matrix<6,6>& MocapModel::G()
+const ugl::Matrix<6,6>& MocapModel::E()
 {
-    return s_G;
+    return s_E;
 }
 
 const ugl::Matrix<6,6>& MocapModel::N()
