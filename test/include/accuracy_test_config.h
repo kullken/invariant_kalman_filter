@@ -37,14 +37,14 @@ const auto test_trajectories_partial = testing::Values(
 
 inline
 const auto test_imu_models = testing::Values(
-    ImuSensorModel{ImuNoiseLevel::None},
-    ImuSensorModel{ImuNoiseLevel::Mueller18}
+    ImuSensorModel{ImuNoiseLevel::None, 100.0},
+    ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}
 );
 
 inline
 const auto test_mocap_models = testing::Values(
-    MocapSensorModel{MocapNoiseLevel::None},
-    MocapSensorModel{MocapNoiseLevel::Low}
+    MocapSensorModel{MocapNoiseLevel::None, 100.0},
+    MocapSensorModel{MocapNoiseLevel::Low, 100.0}
 );
 
 inline

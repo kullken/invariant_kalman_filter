@@ -44,9 +44,6 @@ protected:
         , imu_(std::get<1>(GetParam()))
         , mocap_(std::get<2>(GetParam()))
     {
-        imu_.set_trajectory(trajectory_);
-        mocap_.set_trajectory(trajectory_);
-
         ugl::random::set_seed(117);
     }
 

@@ -22,15 +22,6 @@ ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency)
 {
 }
 
-ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency, const ugl::trajectory::Trajectory& trajectory)
-    : noise_level_(level)
-    , period_(1.0/frequency)
-    , trajectory_(trajectory)
-    , accel_noise_(get_accel_covar(level))
-    , gyro_noise_(get_gyro_covar(level))
-{
-}
-
 ugl::Vector3 ImuSensorModel::get_accel_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     ugl::Vector3 acc = trajectory.get_acceleration(t);

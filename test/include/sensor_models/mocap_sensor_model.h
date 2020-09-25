@@ -24,13 +24,9 @@ enum class MocapNoiseLevel
 class MocapSensorModel
 {
 public:
-    MocapSensorModel()
-        : MocapSensorModel(MocapNoiseLevel::None) {}
+    MocapSensorModel() = default;
 
-    explicit MocapSensorModel(MocapNoiseLevel level, double frequency=100.0)
-        : MocapSensorModel(ugl::trajectory::Trajectory{}, level, frequency) {}
-
-    MocapSensorModel(const ugl::trajectory::Trajectory& trajectory, MocapNoiseLevel level, double frequency=100.0);
+    MocapSensorModel(MocapNoiseLevel level, double frequency);
 
     double period() const
     {
@@ -40,11 +36,6 @@ public:
     MocapNoiseLevel noise_level() const
     {
         return noise_level_;
-    }
-
-    void set_trajectory(const ugl::trajectory::Trajectory& trajectory)
-    {
-        trajectory_ = trajectory;
     }
 
     /// @return A pose reading expressed in the inertial frame.
@@ -57,9 +48,8 @@ public:
     ugl::lie::Rotation get_rot_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
 private:
-    ugl::trajectory::Trajectory trajectory_;
-    MocapNoiseLevel noise_level_;
-    double period_;
+    MocapNoiseLevel noise_level_ = MocapNoiseLevel::None;
+    double period_ = 0.01;
 
     ugl::random::NormalDistribution<3> position_noise_;
     ugl::random::NormalDistribution<3> rotation_noise_;

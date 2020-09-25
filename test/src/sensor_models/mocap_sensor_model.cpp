@@ -13,9 +13,8 @@ namespace invariant::test
 static ugl::Matrix3 get_position_covar(MocapNoiseLevel level);
 static ugl::Matrix3 get_rotation_covar(MocapNoiseLevel level);
 
-MocapSensorModel::MocapSensorModel(const ugl::trajectory::Trajectory& trajectory, MocapNoiseLevel level, double frequency)
-    : trajectory_(trajectory)
-    , noise_level_(level)
+MocapSensorModel::MocapSensorModel(MocapNoiseLevel level, double frequency)
+    : noise_level_(level)
     , period_(1.0/frequency)
     , position_noise_(get_position_covar(level))
     , rotation_noise_(get_rotation_covar(level))
