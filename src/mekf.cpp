@@ -4,6 +4,7 @@
 #include <ugl/math/matrix.h>
 #include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/pose.h>
+#include <ugl/lie_group/extended_pose.h>
 
 namespace mekf
 {
@@ -20,6 +21,15 @@ MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covar
     , m_P(P0)
 {
     m_x << p0, v0, Vector3::Zero();
+}
+
+ugl::lie::ExtendedPose MEKF::get_state() const
+{
+    const Vector3 pos = m_x.segment<3>(0);
+    const Vector3 vel = m_x.segment<3>(3);
+    const Vector3 delta = m_x.segment<3>(6);
+    const Rotation R = m_R_ref * ugl::lie::SO3::exp(delta);
+    return ugl::lie::ExtendedPose{R, vel, pos};
 }
 
 void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)

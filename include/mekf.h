@@ -6,6 +6,7 @@
 #include <ugl/math/quaternion.h>
 #include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/pose.h>
+#include <ugl/lie_group/extended_pose.h>
 
 namespace mekf
 {
@@ -29,6 +30,7 @@ public:
     ugl::Vector3 get_vel() const { return m_x.segment<3>(3); }
     ugl::lie::Rotation get_rot() const { return m_R_ref; }
     ugl::UnitQuaternion get_quat() const { return m_R_ref.to_quaternion(); }
+    ugl::lie::ExtendedPose get_state() const;
 
     void set_pos(const ugl::Vector3& pos) { m_x.segment<3>(0) = pos; }
     void set_vel(const ugl::Vector3& vel) { m_x.segment<3>(3) = vel; }

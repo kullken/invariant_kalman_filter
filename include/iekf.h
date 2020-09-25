@@ -29,6 +29,7 @@ public:
     ugl::Vector3 get_vel() const { return m_X.velocity(); }
     ugl::lie::Rotation get_rot() const { return m_X.rotation(); }
     ugl::UnitQuaternion get_quat() const { return m_X.rotation().to_quaternion(); }
+    const ugl::lie::ExtendedPose& get_state() const { return m_X; }
 
     void set_pos(const ugl::Vector3& pos) { m_X.set_position(pos); }
     void set_vel(const ugl::Vector3& vel) { m_X.set_velocity(vel); }
