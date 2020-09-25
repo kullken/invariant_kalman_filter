@@ -1,7 +1,7 @@
 #ifndef INVARIANT_IMU_SENSOR_MODEL_H
 #define INVARIANT_IMU_SENSOR_MODEL_H
 
-#include <ostream>
+#include <iosfwd>
 
 #include <ugl/math/vector.h>
 #include <ugl/trajectory/trajectory.h>
@@ -54,25 +54,9 @@ private:
     static const ugl::Vector3 s_gravity;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ImuNoiseLevel& level)
-{
-    switch (level)
-    {
-    case ImuNoiseLevel::None:
-        return os << "None";
-    case ImuNoiseLevel::Low:
-        return os << "Low";
-    case ImuNoiseLevel::High:
-        return os << "High";
-    case ImuNoiseLevel::Mueller18:
-        return os << "Mueller18";
-    }
-}
+std::ostream& operator<<(std::ostream& os, const ImuNoiseLevel& level);
 
-inline std::ostream& operator<<(std::ostream& os, const ImuSensorModel& model)
-{
-    return os << "IMU Noise: " << model.noise_level();
-}
+std::ostream& operator<<(std::ostream& os, const ImuSensorModel& model);
 
 } // namespace invariant::test
 

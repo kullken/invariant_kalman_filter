@@ -1,6 +1,8 @@
 #ifndef INVARIANT_MOCAP_SENSOR_MODEL_H
 #define INVARIANT_MOCAP_SENSOR_MODEL_H
 
+#include <iosfwd>
+
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
@@ -55,23 +57,9 @@ private:
     ugl::random::NormalDistribution<3> rotation_noise_;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level)
-{
-    switch (level)
-    {
-    case MocapNoiseLevel::None:
-        return os << "None";
-    case MocapNoiseLevel::Low:
-        return os << "Low";
-    case MocapNoiseLevel::High:
-        return os << "High";
-    }
-}
+std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level);
 
-inline std::ostream& operator<<(std::ostream& os, const MocapSensorModel& model)
-{
-    return os << "Mocap Noise: " << model.noise_level();
-}
+std::ostream& operator<<(std::ostream& os, const MocapSensorModel& model);
 
 } // namespace invariant::test
 

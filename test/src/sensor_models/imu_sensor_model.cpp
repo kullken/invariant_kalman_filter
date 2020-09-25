@@ -1,6 +1,7 @@
 #include "imu_sensor_model.h"
 
 #include <exception>
+#include <ostream>
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
@@ -34,6 +35,26 @@ ugl::Vector3 ImuSensorModel::get_gyro_reading(double t, const ugl::trajectory::T
     ugl::Vector3 gyro = trajectory.get_angular_velocity(t);
     ugl::lie::Rotation R_inv = trajectory.get_rotation(t).inverse();
     return R_inv * gyro  + gyro_noise_.sample();
+}
+
+std::ostream& operator<<(std::ostream& os, const ImuNoiseLevel& level)
+{
+    switch (level)
+    {
+    case ImuNoiseLevel::None:
+        return os << "None";
+    case ImuNoiseLevel::Low:
+        return os << "Low";
+    case ImuNoiseLevel::High:
+        return os << "High";
+    case ImuNoiseLevel::Mueller18:
+        return os << "Mueller18";
+    }
+}
+
+std::ostream& operator<<(std::ostream& os, const ImuSensorModel& model)
+{
+    return os << "IMU Noise: " << model.noise_level();
 }
 
 template<ImuNoiseLevel level>

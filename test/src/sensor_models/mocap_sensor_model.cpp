@@ -1,6 +1,7 @@
 #include "mocap_sensor_model.h"
 
 #include <exception>
+#include <ostream>
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
@@ -34,6 +35,24 @@ ugl::Vector3 MocapSensorModel::get_pos_reading(double t, const ugl::trajectory::
 ugl::lie::Rotation MocapSensorModel::get_rot_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     return trajectory.get_rotation(t) * ugl::lie::SO3::exp(rotation_noise_.sample());
+}
+
+std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level)
+{
+    switch (level)
+    {
+    case MocapNoiseLevel::None:
+        return os << "None";
+    case MocapNoiseLevel::Low:
+        return os << "Low";
+    case MocapNoiseLevel::High:
+        return os << "High";
+    }
+}
+
+std::ostream& operator<<(std::ostream& os, const MocapSensorModel& model)
+{
+    return os << "Mocap Noise: " << model.noise_level();
 }
 
 template<MocapNoiseLevel level>
