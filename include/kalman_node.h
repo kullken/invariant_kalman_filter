@@ -1,6 +1,7 @@
 #ifndef INVARIANT_KALMAN_NODE_H
 #define INVARIANT_KALMAN_NODE_H
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <queue>
