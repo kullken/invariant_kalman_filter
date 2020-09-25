@@ -5,6 +5,7 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 #include <ugl/lie_group/rotation.h>
+#include <ugl/lie_group/pose.h>
 
 namespace invariant::test
 {
@@ -13,23 +14,28 @@ static ugl::Matrix3 get_position_covar(MocapNoiseLevel level);
 static ugl::Matrix3 get_rotation_covar(MocapNoiseLevel level);
 
 MocapSensorModel::MocapSensorModel(const ugl::trajectory::Trajectory& trajectory, MocapNoiseLevel level, double frequency)
-        : trajectory_(trajectory)
-        , noise_level_(level)
-        , period_(1.0/frequency)
-        , position_noise_(get_position_covar(level))
-        , rotation_noise_(get_rotation_covar(level))
-    {}
-
-ugl::Vector3 MocapSensorModel::get_pos_reading(double t) const
+    : trajectory_(trajectory)
+    , noise_level_(level)
+    , period_(1.0/frequency)
+    , position_noise_(get_position_covar(level))
+    , rotation_noise_(get_rotation_covar(level))
 {
-    return trajectory_.get_position(t) + position_noise_.sample();
 }
 
-ugl::lie::Rotation MocapSensorModel::get_rot_reading(double t) const
+ugl::lie::Pose MocapSensorModel::get_pose_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    return trajectory_.get_rotation(t) * ugl::lie::SO3::exp(rotation_noise_.sample());
+    return ugl::lie::Pose{get_rot_reading(t, trajectory), get_pos_reading(t, trajectory)};
 }
 
+ugl::Vector3 MocapSensorModel::get_pos_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
+{
+    return trajectory.get_position(t) + position_noise_.sample();
+}
+
+ugl::lie::Rotation MocapSensorModel::get_rot_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
+{
+    return trajectory.get_rotation(t) * ugl::lie::SO3::exp(rotation_noise_.sample());
+}
 
 template<MocapNoiseLevel level>
 static ugl::Matrix3 position_covar();

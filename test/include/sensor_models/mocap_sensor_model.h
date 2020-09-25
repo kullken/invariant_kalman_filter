@@ -5,6 +5,7 @@
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
 #include <ugl/lie_group/rotation.h>
+#include <ugl/lie_group/pose.h>
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/normal_distribution.h>
 
@@ -46,18 +47,14 @@ public:
         trajectory_ = trajectory;
     }
 
-    /// Returns a position reading expressed in inertial frame.
-    ugl::Vector3 get_pos_reading(double t) const;
+    /// @return A pose reading expressed in the inertial frame.
+    ugl::lie::Pose get_pose_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
-    /// Returns a rotation reading expressed in inertial frame.
-    ugl::lie::Rotation get_rot_reading(double t) const;
+    /// @return A position reading expressed in the inertial frame.
+    ugl::Vector3 get_pos_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
-    /// Returns a rotation reading expressed in inertial frame in quaternion format.
-    inline
-    ugl::UnitQuaternion get_quat_reading(double t) const
-    {
-        return get_rot_reading(t).to_quaternion();
-    }
+    /// @return A rotation reading expressed in the inertial frame.
+    ugl::lie::Rotation get_rot_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
 private:
     ugl::trajectory::Trajectory trajectory_;

@@ -46,6 +46,7 @@ target_link_libraries(accuracy_test
     sensor_models
   PRIVATE
     ugl::lie_group
+    ${catkin_LIBRARIES}
     project_options
     project_warnings
 )

@@ -91,8 +91,8 @@ void MockTrajectoryNode::publish_imu(const ros::TimerEvent& event)
     const ros::Time now = event.current_real;
     const double t = (now - m_t0).toSec();
 
-    m_imu_msg.linear_acceleration = tf2::toMsg<geometry_msgs::Vector3>(m_imu_model.get_accel_reading(t));
-    m_imu_msg.angular_velocity = tf2::toMsg<geometry_msgs::Vector3>(m_imu_model.get_gyro_reading(t));
+    m_imu_msg.linear_acceleration = tf2::toMsg<geometry_msgs::Vector3>(m_imu_model.get_accel_reading(t, m_trajectory));
+    m_imu_msg.angular_velocity = tf2::toMsg<geometry_msgs::Vector3>(m_imu_model.get_gyro_reading(t, m_trajectory));
 
     m_imu_msg.header.stamp = now;
     m_imu_pub.publish(m_imu_msg);
@@ -103,8 +103,7 @@ void MockTrajectoryNode::publish_mocap(const ros::TimerEvent& event)
     const ros::Time now = event.current_real;
     const double t = (now - m_t0).toSec();
 
-    m_mocap_msg.pose.position = tf2::toMsg<geometry_msgs::Point>(m_mocap_model.get_pos_reading(t));
-    m_mocap_msg.pose.orientation = tf2::toMsg(m_mocap_model.get_quat_reading(t));
+    m_mocap_msg.pose = tf2::toMsg<geometry_msgs::Pose>(m_mocap_model.get_pose_reading(t, m_trajectory));
 
     m_mocap_msg.header.stamp = now;
     m_mocap_pub.publish(m_mocap_msg);

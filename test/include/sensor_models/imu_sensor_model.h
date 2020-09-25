@@ -45,11 +45,11 @@ public:
         trajectory_ = trajectory;
     }
 
-    /// Returns an accelerometer reading expressed in body frame.
-    ugl::Vector3 get_accel_reading(double t) const;
+    /// @return An accelerometer reading expressed in the body frame.
+    ugl::Vector3 get_accel_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
-    /// Returns an gyroscope reading expressed in body frame.
-    ugl::Vector3 get_gyro_reading(double t) const;
+    /// @return An gyroscope reading expressed in the body frame.
+    ugl::Vector3 get_gyro_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
 private:
     ImuNoiseLevel noise_level_;

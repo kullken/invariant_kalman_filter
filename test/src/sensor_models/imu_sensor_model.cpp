@@ -31,17 +31,17 @@ ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency, const ugl:
 {
 }
 
-ugl::Vector3 ImuSensorModel::get_accel_reading(double t) const
+ugl::Vector3 ImuSensorModel::get_accel_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    ugl::Vector3 acc = trajectory_.get_acceleration(t);
-    ugl::lie::Rotation R_inv = trajectory_.get_rotation(t).inverse();
+    ugl::Vector3 acc = trajectory.get_acceleration(t);
+    ugl::lie::Rotation R_inv = trajectory.get_rotation(t).inverse();
     return R_inv * (acc - s_gravity) + accel_noise_.sample();
 }
 
-ugl::Vector3 ImuSensorModel::get_gyro_reading(double t) const
+ugl::Vector3 ImuSensorModel::get_gyro_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    ugl::Vector3 gyro = trajectory_.get_angular_velocity(t);
-    ugl::lie::Rotation R_inv = trajectory_.get_rotation(t).inverse();
+    ugl::Vector3 gyro = trajectory.get_angular_velocity(t);
+    ugl::lie::Rotation R_inv = trajectory.get_rotation(t).inverse();
     return R_inv * gyro  + gyro_noise_.sample();
 }
 

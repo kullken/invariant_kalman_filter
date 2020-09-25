@@ -2,12 +2,17 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <numeric>
 #include <vector>
+
+#include <ros/time.h>
+#include <ros/duration.h>
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
+#include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/pose.h>
 #include <ugl/trajectory/trajectory.h>
 
@@ -33,81 +38,179 @@ double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
     return a.angularDistance(b);
 }
 
-std::vector<int> range(int start, int end, int step)
+template<typename FilterType>
+class Event
 {
-    int count = (end - start) / step;
-    std::vector<int> values(count);
+public:
+    virtual ~Event() = default;
 
-    double value = start - step;
-    std::generate_n(std::begin(values), count, [&]{ return value += step; });
+    const ros::Time& time() const { return m_time; }
 
-    return values;
-}
+    virtual void update_filter(FilterType& filter) const = 0;
 
-std::vector<double> create_clock(double duration)
-{
-    constexpr int dt_ms = 1;
-    const int duration_ms = static_cast<int>(duration * 1000.0);
-    const auto clock_ms = range(0, duration_ms+dt_ms, dt_ms);
+protected:
+    Event(const ros::Time& time) : m_time(time) {}
 
-    std::vector<double> clock(clock_ms.size());
-    std::transform(std::cbegin(clock_ms), std::cend(clock_ms), std::back_inserter(clock), [](int ms){ return ms / 1000.0; } );
-
-    return clock;
-}
+private:
+    ros::Time m_time;
+};
 
 template<typename FilterType>
-Result compute_accuracy_impl(FilterType filter, const ugl::trajectory::Trajectory &trajectory, const ImuSensorModel &imu, const MocapSensorModel &mocap)
+class ImuEvent: public Event<FilterType>
 {
-    Result result;
-
-    const auto clock = create_clock(trajectory.duration());
-
-    double next_imu_time = clock[0] + imu.period();
-    double next_mocap_time = clock[0] + mocap.period();
-    double next_measurement_time = clock[0];
-
-    filter.set_pos(trajectory.get_position(clock[0]));
-    filter.set_vel(trajectory.get_velocity(clock[0]));
-    filter.set_rot(trajectory.get_rotation(clock[0]));
-
-    const double measurement_period = 0.01;
-
-    for (const auto& t : clock)
+public:
+    ImuEvent(const ros::Time& time, double dt, ugl::Vector3 acc, ugl::Vector3 rate)
+        : Event<FilterType>(time)
+        , m_dt(dt)
+        , m_acc(acc)
+        , m_rate(rate)
     {
-        if (t >= next_imu_time)
+    }
+
+    void update_filter(FilterType& filter) const override
+    {
+        filter.predict(m_dt, m_acc, m_rate);
+    }
+
+private:
+    double m_dt;
+    ugl::Vector3 m_acc;
+    ugl::Vector3 m_rate;
+};
+
+template<typename FilterType>
+class MocapEvent: public Event<FilterType>
+{
+public:
+    MocapEvent(const ros::Time& time, ugl::lie::Pose pose)
+        : Event<FilterType>(time)
+        , m_pose(pose)
+    {
+    }
+
+    void update_filter(FilterType& filter) const override
+    {
+        filter.mocap_update(m_pose);
+    }
+
+private:
+    ugl::lie::Pose m_pose;
+};
+
+template<typename FilterType>
+using EventPtr = std::shared_ptr<Event<FilterType>>;
+
+template<typename FilterType>
+using Events = std::vector<EventPtr<FilterType>>;
+
+struct Estimate
+{
+    ros::Time timestamp;
+    ugl::lie::ExtendedPose state;
+
+    Estimate() = default;
+
+    Estimate(const ros::Time& t_timestamp, const ugl::lie::ExtendedPose t_state)
+        : timestamp(t_timestamp)
+        , state(t_state)
+    {
+    }
+};
+
+/// @brief Generate data-events from a virtual trajectory
+/// @param imu the IMU sensor model used to generate IMU data
+/// @param mocap the motion-capture sensor model used to generate motion-capture data
+/// @return Vector of data-events
+template<typename FilterType>
+Events<FilterType> generate_events(const ugl::trajectory::Trajectory& trajectory,
+                                   const ImuSensorModel& imu,
+                                   const MocapSensorModel& mocap)
+{
+    Events<FilterType> events{};
+
+    const ros::Time start_time{0.0};
+    const ros::Time end_time{trajectory.duration()};
+    const ros::Duration dt{0.001};
+
+    const ros::Duration imu_period{imu.period()};
+    const ros::Duration mocap_period{mocap.period()};
+    ros::Time next_imu_time = start_time + imu_period;
+    ros::Time next_mocap_time = start_time + mocap_period;
+
+    for (ros::Time time = start_time; time <= end_time; time += dt)
+    {
+        if (time >= next_imu_time)
         {
-            filter.predict(imu.period(), imu.get_accel_reading(next_imu_time), imu.get_gyro_reading(next_imu_time));
-            next_imu_time += imu.period();
+            const double t = next_imu_time.toSec();
+            events.push_back(std::make_shared<ImuEvent<FilterType>>(next_imu_time, imu.period(),
+                                                                    imu.get_accel_reading(t, trajectory),
+                                                                    imu.get_gyro_reading(t, trajectory)));
+            next_imu_time += imu_period;
         }
 
-        if (t >= next_mocap_time)
+        if (time >= next_mocap_time)
         {
-            filter.mocap_update(ugl::lie::Pose{mocap.get_rot_reading(next_mocap_time), mocap.get_pos_reading(next_mocap_time)});
-            next_mocap_time += mocap.period();
+            const double t = next_mocap_time.toSec();
+            events.push_back(std::make_shared<MocapEvent<FilterType>>(next_mocap_time,
+                                                                      mocap.get_pose_reading(t, trajectory)));
+            next_mocap_time += mocap_period;
         }
+    }
 
-        if (t >= next_measurement_time)
+    return events;
+}
+
+/// @brief Run filter on collection of data-events
+/// @param filter the filter to use (copied before use)
+/// @param events the collection of events (assumed chronologically ordered)
+/// @return Vector of timestamps and estimated states
+template<typename FilterType>
+std::vector<Estimate> run_filter(FilterType filter, const Events<FilterType>& events)
+{
+    std::vector<Estimate> estimates{};
+
+    const ros::Time start_time{0.0};
+    const ros::Time end_time = events.back()->time();
+    const ros::Duration dt{0.01};
+
+    auto event_it = std::cbegin(events);
+    for (ros::Time time = start_time; time <= end_time; time += dt)
+    {
+        while (event_it != std::cend(events) && (*event_it)->time() <= time)
         {
-            const ugl::Vector3 true_pos = trajectory.get_position(next_measurement_time);
-            const ugl::Vector3 true_vel = trajectory.get_velocity(next_measurement_time);
-            const ugl::UnitQuaternion true_quat = trajectory.get_quaternion(next_measurement_time);
-
-            const ugl::Vector3 predicted_pos = filter.get_pos();
-            const ugl::Vector3 predicted_vel = filter.get_vel();
-            const ugl::UnitQuaternion predicted_quat = filter.get_quat();
-
-            // Save data
-            const double pos_error = dist(true_pos, predicted_pos);
-            const double vel_error = dist(true_vel, predicted_vel);
-            const double rot_error = dist(true_quat, predicted_quat);
-            result.position_errors.push_back(pos_error);
-            result.velocity_errors.push_back(vel_error);
-            result.rotation_errors.push_back(rot_error);
-            result.times.push_back(next_measurement_time);
-
-            next_measurement_time += measurement_period;
+            (*event_it)->update_filter(filter);
+            ++event_it;
         }
+        estimates.emplace_back(time, filter.get_state());
+    }
+
+    return estimates;
+}
+
+/// @brief Compares recorded estimates with ground truth trajectory
+/// @param estimates the estimates from the filter
+/// @param trajectory the ground truth trajectory
+/// @return Result of the comparision
+template<typename FilterType>
+Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std::vector<Estimate>& estimates)
+{
+    Result result{};
+
+    for (const auto& estimate : estimates)
+    {
+        const double t = estimate.timestamp.toSec();
+        const ugl::Vector3 true_pos = trajectory.get_position(t);
+        const ugl::Vector3 true_vel = trajectory.get_velocity(t);
+        const ugl::UnitQuaternion true_quat = trajectory.get_quaternion(t);
+
+        const ugl::Vector3 predicted_pos = estimate.state.position();
+        const ugl::Vector3 predicted_vel = estimate.state.velocity();
+        const ugl::UnitQuaternion predicted_quat = estimate.state.rotation().to_quaternion();
+
+        result.position_errors.push_back(dist(true_pos, predicted_pos));
+        result.velocity_errors.push_back(dist(true_vel, predicted_vel));
+        result.rotation_errors.push_back(dist(true_quat, predicted_quat));
+        result.times.push_back(t);
     }
 
     const auto count = result.times.size();
@@ -120,16 +223,26 @@ Result compute_accuracy_impl(FilterType filter, const ugl::trajectory::Trajector
     return result;
 }
 
-}
+} // namespace
 
 Result IekfTestSuite::compute_accuracy()
 {
-    return compute_accuracy_impl<invariant::IEKF>(filter_, trajectory_, imu_, mocap_);
+    filter_.set_pos(trajectory_.get_position(0.0));
+    filter_.set_vel(trajectory_.get_velocity(0.0));
+    filter_.set_rot(trajectory_.get_rotation(0.0));
+    auto events = generate_events<invariant::IEKF>(trajectory_, imu_, mocap_);
+    auto estimates = run_filter<invariant::IEKF>(filter_, events);
+    return calculate_result<invariant::IEKF>(trajectory_, estimates);
 }
 
 Result MekfTestSuite::compute_accuracy()
 {
-    return compute_accuracy_impl<mekf::MEKF>(filter_, trajectory_, imu_, mocap_);
+    filter_.set_pos(trajectory_.get_position(0.0));
+    filter_.set_vel(trajectory_.get_velocity(0.0));
+    filter_.set_rot(trajectory_.get_rotation(0.0));
+    auto events = generate_events<mekf::MEKF>(trajectory_, imu_, mocap_);
+    auto estimates = run_filter<mekf::MEKF>(filter_, events);
+    return calculate_result<mekf::MEKF>(trajectory_, estimates);
 }
 
 std::ostream& operator<<(std::ostream& os, const Result& result)
