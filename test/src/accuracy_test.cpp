@@ -38,38 +38,16 @@ double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
     return a.angularDistance(b);
 }
 
-class ImuEvent
+struct ImuData
 {
-public:
-    ImuEvent(double dt, ugl::Vector3 acc, ugl::Vector3 rate)
-        : m_dt(dt)
-        , m_acc(acc)
-        , m_rate(rate)
-    {
-    }
-
-    const auto& dt() const { return m_dt; }
-    const auto& acc() const { return m_acc; }
-    const auto& rate() const { return m_rate; }
-
-private:
-    double m_dt;
-    ugl::Vector3 m_acc;
-    ugl::Vector3 m_rate;
+    double dt;
+    ugl::Vector3 acc;
+    ugl::Vector3 rate;
 };
 
-class MocapEvent
+struct MocapData
 {
-public:
-    MocapEvent(ugl::lie::Pose pose)
-        : m_pose(pose)
-    {
-    }
-
-    const auto& pose() const { return m_pose; }
-
-private:
-    ugl::lie::Pose m_pose;
+    ugl::lie::Pose pose;
 };
 
 class SensorEvent
@@ -89,10 +67,10 @@ public:
     {
         auto visitor = [&](auto&& event) {
             using T = std::decay_t<decltype(event)>;
-            if constexpr (std::is_same_v<T, ImuEvent>)
-                filter.predict(event.dt(), event.acc(), event.rate());
-            else if constexpr (std::is_same_v<T, MocapEvent>)
-                filter.mocap_update(event.pose());
+            if constexpr (std::is_same_v<T, ImuData>)
+                filter.predict(event.dt, event.acc, event.rate);
+            else if constexpr (std::is_same_v<T, MocapData>)
+                filter.mocap_update(event.pose);
             else
                 static_assert(always_false_v<T>, "Visitor does not handle all sensor types!");
         };
@@ -102,7 +80,7 @@ public:
 
 private:
     ros::Time m_time;
-    std::variant<ImuEvent, MocapEvent> m_data;
+    std::variant<ImuData, MocapData> m_data;
 
     template<typename>
     [[maybe_unused]] inline static
@@ -147,7 +125,7 @@ std::vector<SensorEvent> generate_events(const ugl::trajectory::Trajectory& traj
         if (time >= next_imu_time)
         {
             const double t = next_imu_time.toSec();
-            const ImuEvent event{imu.period(), imu.get_accel_reading(t, trajectory), imu.get_gyro_reading(t, trajectory)};
+            const ImuData event{imu.period(), imu.get_accel_reading(t, trajectory), imu.get_gyro_reading(t, trajectory)};
             events.emplace_back(next_imu_time, event);
             next_imu_time += imu_period;
         }
@@ -155,7 +133,7 @@ std::vector<SensorEvent> generate_events(const ugl::trajectory::Trajectory& traj
         if (time >= next_mocap_time)
         {
             const double t = next_mocap_time.toSec();
-            events.emplace_back(next_mocap_time, MocapEvent(mocap.get_pose_reading(t, trajectory)));
+            events.emplace_back(next_mocap_time, MocapData{mocap.get_pose_reading(t, trajectory)});
             next_mocap_time += mocap_period;
         }
     }
