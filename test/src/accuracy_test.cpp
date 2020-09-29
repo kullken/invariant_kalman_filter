@@ -1,11 +1,9 @@
 #include "accuracy_test.h"
 
 #include <algorithm>
-#include <exception>
 #include <iterator>
-#include <memory>
 #include <numeric>
-#include <typeinfo>
+#include <variant>
 #include <vector>
 
 #include <ros/time.h>
@@ -40,34 +38,19 @@ double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
     return a.angularDistance(b);
 }
 
-class SensorEvent
+class ImuEvent
 {
 public:
-    virtual ~SensorEvent() = default;
-
-    const auto& time() const { return m_time; }
-
-protected:
-    SensorEvent(const ros::Time& time) : m_time(time) {}
-
-private:
-    ros::Time m_time;
-};
-
-class ImuEvent: public SensorEvent
-{
-public:
-    ImuEvent(const ros::Time& time, double dt, ugl::Vector3 acc, ugl::Vector3 rate)
-        : SensorEvent(time)
-        , m_dt(dt)
+    ImuEvent(double dt, ugl::Vector3 acc, ugl::Vector3 rate)
+        : m_dt(dt)
         , m_acc(acc)
         , m_rate(rate)
     {
     }
 
-    const auto& dt() { return m_dt; }
-    const auto& acc() { return m_acc; }
-    const auto& rate() { return m_rate; }
+    const auto& dt() const { return m_dt; }
+    const auto& acc() const { return m_acc; }
+    const auto& rate() const { return m_rate; }
 
 private:
     double m_dt;
@@ -75,24 +58,56 @@ private:
     ugl::Vector3 m_rate;
 };
 
-class MocapEvent: public SensorEvent
+class MocapEvent
 {
 public:
-    MocapEvent(const ros::Time& time, ugl::lie::Pose pose)
-        : SensorEvent(time)
-        , m_pose(pose)
+    MocapEvent(ugl::lie::Pose pose)
+        : m_pose(pose)
     {
     }
 
-    const auto& pose() { return m_pose; }
+    const auto& pose() const { return m_pose; }
 
 private:
     ugl::lie::Pose m_pose;
 };
 
-using EventPtr = std::shared_ptr<SensorEvent>;
+class SensorEvent
+{
+public:
+    template<typename DataType>
+    SensorEvent(const ros::Time& time, const DataType& data)
+        : m_time(time)
+        , m_data(data)
+    {
+    }
 
-using Events = std::vector<EventPtr>;
+    const auto& time() const { return m_time; }
+
+    template<typename FilterType>
+    void update_filter(FilterType& filter) const
+    {
+        auto visitor = [&](auto&& event) {
+            using T = std::decay_t<decltype(event)>;
+            if constexpr (std::is_same_v<T, ImuEvent>)
+                filter.predict(event.dt(), event.acc(), event.rate());
+            else if constexpr (std::is_same_v<T, MocapEvent>)
+                filter.mocap_update(event.pose());
+            else
+                static_assert(always_false_v<T>, "Visitor does not handle all sensor types!");
+        };
+
+        std::visit(visitor, m_data);
+    }
+
+private:
+    ros::Time m_time;
+    std::variant<ImuEvent, MocapEvent> m_data;
+
+    template<typename>
+    [[maybe_unused]] inline static
+    constexpr bool always_false_v = false;
+};
 
 struct Estimate
 {
@@ -112,11 +127,11 @@ struct Estimate
 /// @param imu the IMU sensor model used to generate IMU data
 /// @param mocap the motion-capture sensor model used to generate motion-capture data
 /// @return Vector of data-events
-Events generate_events(const ugl::trajectory::Trajectory& trajectory,
+std::vector<SensorEvent> generate_events(const ugl::trajectory::Trajectory& trajectory,
                        const ImuSensorModel& imu,
                        const MocapSensorModel& mocap)
 {
-    Events events{};
+    std::vector<SensorEvent> events{};
 
     const ros::Time start_time{0.0};
     const ros::Time end_time{trajectory.duration()};
@@ -132,17 +147,15 @@ Events generate_events(const ugl::trajectory::Trajectory& trajectory,
         if (time >= next_imu_time)
         {
             const double t = next_imu_time.toSec();
-            events.push_back(std::make_shared<ImuEvent>(next_imu_time, imu.period(),
-                                                        imu.get_accel_reading(t, trajectory),
-                                                        imu.get_gyro_reading(t, trajectory)));
+            const ImuEvent event{imu.period(), imu.get_accel_reading(t, trajectory), imu.get_gyro_reading(t, trajectory)};
+            events.emplace_back(next_imu_time, event);
             next_imu_time += imu_period;
         }
 
         if (time >= next_mocap_time)
         {
             const double t = next_mocap_time.toSec();
-            events.push_back(std::make_shared<MocapEvent>(next_mocap_time,
-                                                          mocap.get_pose_reading(t, trajectory)));
+            events.emplace_back(next_mocap_time, MocapEvent(mocap.get_pose_reading(t, trajectory)));
             next_mocap_time += mocap_period;
         }
     }
@@ -150,47 +163,25 @@ Events generate_events(const ugl::trajectory::Trajectory& trajectory,
     return events;
 }
 
-/// @brief Updates a filter with a sensor event
-/// @param filter [in,out] the filter to update
-/// @param event [in] the sensor event
-template<typename FilterType>
-void update_filter(FilterType& filter, const SensorEvent& event)
-{
-    if (typeid(event) == typeid(ImuEvent))
-    {
-        auto imu_event = dynamic_cast<const ImuEvent&>(event);
-        filter.predict(imu_event.dt(), imu_event.acc(), imu_event.rate());
-        return;
-    }
-    else if (typeid(event) == typeid(MocapEvent))
-    {
-        auto mocap_event = dynamic_cast<const MocapEvent&>(event);
-        filter.mocap_update(mocap_event.pose());
-        return;
-    }
-
-    throw std::logic_error("Sensor event could not be downcasted to any known sensor type.");
-}
-
 /// @brief Run filter on collection of data-events
 /// @param filter the filter to use (copied before use)
 /// @param events the collection of events (assumed chronologically ordered)
 /// @return Vector of timestamps and estimated states
 template<typename FilterType>
-std::vector<Estimate> run_filter(FilterType filter, const Events& events)
+std::vector<Estimate> run_filter(FilterType filter, const std::vector<SensorEvent>& events)
 {
     std::vector<Estimate> estimates{};
 
     const ros::Time start_time{0.0};
-    const ros::Time end_time = events.back()->time();
+    const ros::Time end_time = events.back().time();
     const ros::Duration dt{0.01};
 
     auto event_it = std::cbegin(events);
     for (ros::Time time = start_time; time <= end_time; time += dt)
     {
-        while (event_it != std::cend(events) && (*event_it)->time() <= time)
+        while (event_it != std::cend(events) && event_it->time() <= time)
         {
-            update_filter(filter, **event_it);
+            event_it->update_filter(filter);
             ++event_it;
         }
         estimates.emplace_back(time, filter.get_state());
