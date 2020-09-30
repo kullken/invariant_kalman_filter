@@ -94,7 +94,7 @@ struct Estimate
 
     Estimate() = default;
 
-    Estimate(const ros::Time& t_timestamp, const ugl::lie::ExtendedPose t_state)
+    Estimate(const ros::Time& t_timestamp, const ugl::lie::ExtendedPose& t_state)
         : timestamp(t_timestamp)
         , state(t_state)
     {
