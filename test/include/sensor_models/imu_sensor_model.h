@@ -45,6 +45,12 @@ public:
         return noise_level_;
     }
 
+    /// @brief Generate sensor data from a trajectory
+    /// @param t the time at which to generate data
+    /// @param trajectory the trajectory from which to generate data
+    /// @return The sensor data
+    ImuData get_data(double t, const ugl::trajectory::Trajectory& trajectory) const;
+
     /// @return An accelerometer reading expressed in the body frame.
     ugl::Vector3 get_accel_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 

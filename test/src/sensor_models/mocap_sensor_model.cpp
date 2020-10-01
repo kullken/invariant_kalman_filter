@@ -22,6 +22,11 @@ MocapSensorModel::MocapSensorModel(MocapNoiseLevel level, double frequency)
 {
 }
 
+MocapData MocapSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
+{
+    return MocapData{get_pose_reading(t, trajectory)};
+}
+
 ugl::lie::Pose MocapSensorModel::get_pose_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     return ugl::lie::Pose{get_rot_reading(t, trajectory), get_pos_reading(t, trajectory)};

@@ -70,15 +70,14 @@ std::vector<SensorEvent> generate_events(
     for (ros::Time time = start_time+imu_period; time <= end_time; time += imu_period)
     {
         const double t = time.toSec();
-        const ImuData event{imu.period(), imu.get_accel_reading(t, trajectory), imu.get_gyro_reading(t, trajectory)};
-        events.emplace_back(t, event);
+        events.emplace_back(t, imu.get_data(t, trajectory));
     }
 
     const ros::Duration mocap_period{mocap.period()};
     for (ros::Time time = start_time+mocap_period; time <= end_time; time += mocap_period)
     {
         const double t = time.toSec();
-        events.emplace_back(t, MocapData{mocap.get_pose_reading(t, trajectory)});
+        events.emplace_back(t, mocap.get_data(t, trajectory));
     }
 
     // Using stable sort to guarantee deterministic ordering across compiler implementations.

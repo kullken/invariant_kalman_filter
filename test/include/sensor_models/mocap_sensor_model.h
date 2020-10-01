@@ -45,6 +45,12 @@ public:
         return noise_level_;
     }
 
+    /// @brief Generate sensor data from a trajectory
+    /// @param t the time at which to generate data
+    /// @param trajectory the trajectory from which to generate data
+    /// @return The sensor data
+    MocapData get_data(double t, const ugl::trajectory::Trajectory& trajectory) const;
+
     /// @return A pose reading expressed in the inertial frame.
     ugl::lie::Pose get_pose_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
