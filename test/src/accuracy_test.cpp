@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <iterator>
 #include <numeric>
-#include <variant>
 #include <vector>
 
 #include <ros/time.h>
@@ -12,13 +11,13 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
-#include <ugl/lie_group/rotation.h>
-#include <ugl/lie_group/pose.h>
+#include <ugl/lie_group/extended_pose.h>
 #include <ugl/trajectory/trajectory.h>
 
 #include "iekf.h"
 #include "mekf.h"
 
+#include "sensor_event.h"
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
 
@@ -37,55 +36,6 @@ double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
 {
     return a.angularDistance(b);
 }
-
-struct ImuData
-{
-    double dt;
-    ugl::Vector3 acc;
-    ugl::Vector3 rate;
-};
-
-struct MocapData
-{
-    ugl::lie::Pose pose;
-};
-
-class SensorEvent
-{
-public:
-    template<typename DataType>
-    SensorEvent(const ros::Time& time, const DataType& data)
-        : m_time(time)
-        , m_data(data)
-    {
-    }
-
-    const auto& time() const { return m_time; }
-
-    template<typename FilterType>
-    void update_filter(FilterType& filter) const
-    {
-        auto visitor = [&](auto&& event) {
-            using T = std::decay_t<decltype(event)>;
-            if constexpr (std::is_same_v<T, ImuData>)
-                filter.predict(event.dt, event.acc, event.rate);
-            else if constexpr (std::is_same_v<T, MocapData>)
-                filter.mocap_update(event.pose);
-            else
-                static_assert(always_false_v<T>, "Visitor does not handle all sensor types!");
-        };
-
-        std::visit(visitor, m_data);
-    }
-
-private:
-    ros::Time m_time;
-    std::variant<ImuData, MocapData> m_data;
-
-    template<typename>
-    [[maybe_unused]] inline static
-    constexpr bool always_false_v = false;
-};
 
 struct Estimate
 {
@@ -121,14 +71,14 @@ std::vector<SensorEvent> generate_events(
     {
         const double t = time.toSec();
         const ImuData event{imu.period(), imu.get_accel_reading(t, trajectory), imu.get_gyro_reading(t, trajectory)};
-        events.emplace_back(time, event);
+        events.emplace_back(t, event);
     }
 
     const ros::Duration mocap_period{mocap.period()};
     for (ros::Time time = start_time+mocap_period; time <= end_time; time += mocap_period)
     {
         const double t = time.toSec();
-        events.emplace_back(time, MocapData{mocap.get_pose_reading(t, trajectory)});
+        events.emplace_back(t, MocapData{mocap.get_pose_reading(t, trajectory)});
     }
 
     // Using stable sort to guarantee deterministic ordering across compiler implementations.
@@ -146,13 +96,13 @@ std::vector<Estimate> run_filter(FilterType filter, const std::vector<SensorEven
     std::vector<Estimate> estimates{};
 
     const ros::Time start_time{0.0};
-    const ros::Time end_time = events.back().time();
+    const ros::Time end_time{events.back().time()};
     const ros::Duration dt{0.01};
 
     auto event_it = std::cbegin(events);
     for (ros::Time time = start_time; time <= end_time; time += dt)
     {
-        while (event_it != std::cend(events) && event_it->time() <= time)
+        while (event_it != std::cend(events) && event_it->time() <= time.toSec())
         {
             event_it->update_filter(filter);
             ++event_it;

@@ -14,6 +14,11 @@
 namespace invariant::test
 {
 
+struct MocapData
+{
+    ugl::lie::Pose pose;
+};
+
 enum class MocapNoiseLevel
 {
     None,

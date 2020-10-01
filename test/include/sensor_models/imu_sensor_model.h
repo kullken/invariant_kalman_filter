@@ -10,6 +10,13 @@
 namespace invariant::test
 {
 
+struct ImuData
+{
+    double dt;
+    ugl::Vector3 acc;
+    ugl::Vector3 rate;
+};
+
 enum class ImuNoiseLevel
 {
     None,
