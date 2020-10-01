@@ -101,43 +101,38 @@ struct Estimate
     }
 };
 
-/// @brief Generate data-events from a virtual trajectory
+/// @brief Generate sensor events from a virtual trajectory
+/// @param trajectory the ground truth trajectory
 /// @param imu the IMU sensor model used to generate IMU data
 /// @param mocap the motion-capture sensor model used to generate motion-capture data
-/// @return Vector of data-events
-std::vector<SensorEvent> generate_events(const ugl::trajectory::Trajectory& trajectory,
-                       const ImuSensorModel& imu,
-                       const MocapSensorModel& mocap)
+/// @return A sorted vector of sensor events
+std::vector<SensorEvent> generate_events(
+        const ugl::trajectory::Trajectory& trajectory,
+        const ImuSensorModel& imu,
+        const MocapSensorModel& mocap)
 {
     std::vector<SensorEvent> events{};
 
     const ros::Time start_time{0.0};
     const ros::Time end_time{trajectory.duration()};
-    const ros::Duration dt{0.001};
 
     const ros::Duration imu_period{imu.period()};
-    const ros::Duration mocap_period{mocap.period()};
-    ros::Time next_imu_time = start_time + imu_period;
-    ros::Time next_mocap_time = start_time + mocap_period;
-
-    for (ros::Time time = start_time; time <= end_time; time += dt)
+    for (ros::Time time = start_time+imu_period; time <= end_time; time += imu_period)
     {
-        if (time >= next_imu_time)
-        {
-            const double t = next_imu_time.toSec();
-            const ImuData event{imu.period(), imu.get_accel_reading(t, trajectory), imu.get_gyro_reading(t, trajectory)};
-            events.emplace_back(next_imu_time, event);
-            next_imu_time += imu_period;
-        }
-
-        if (time >= next_mocap_time)
-        {
-            const double t = next_mocap_time.toSec();
-            events.emplace_back(next_mocap_time, MocapData{mocap.get_pose_reading(t, trajectory)});
-            next_mocap_time += mocap_period;
-        }
+        const double t = time.toSec();
+        const ImuData event{imu.period(), imu.get_accel_reading(t, trajectory), imu.get_gyro_reading(t, trajectory)};
+        events.emplace_back(time, event);
     }
 
+    const ros::Duration mocap_period{mocap.period()};
+    for (ros::Time time = start_time+mocap_period; time <= end_time; time += mocap_period)
+    {
+        const double t = time.toSec();
+        events.emplace_back(time, MocapData{mocap.get_pose_reading(t, trajectory)});
+    }
+
+    // Using stable sort to guarantee deterministic ordering across compiler implementations.
+    std::stable_sort(std::begin(events), std::end(events), [](const SensorEvent& a, const SensorEvent& b) { return a.time() < b.time(); });
     return events;
 }
 
