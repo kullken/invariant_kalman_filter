@@ -1,14 +1,8 @@
 #ifndef INVARIANT_TEST_SENSOR_EVENT_H
 #define INVARIANT_TEST_SENSOR_EVENT_H
 
-#include <algorithm>
-#include <iterator>
+#include <type_traits>
 #include <variant>
-#include <vector>
-
-#include <ugl/math/vector.h>
-#include <ugl/lie_group/pose.h>
-#include <ugl/trajectory/trajectory.h>
 
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
