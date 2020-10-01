@@ -17,6 +17,7 @@
 #include "iekf.h"
 #include "mekf.h"
 
+#include "virtual_sensor.h"
 #include "sensor_event.h"
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
@@ -53,31 +54,25 @@ struct Estimate
 
 /// @brief Generate sensor events from a virtual trajectory
 /// @param trajectory the ground truth trajectory
-/// @param imu the IMU sensor model used to generate IMU data
-/// @param mocap the motion-capture sensor model used to generate motion-capture data
+/// @param sensors vector of virtual sensors used to generate events
 /// @return A sorted vector of sensor events
 std::vector<SensorEvent> generate_events(
         const ugl::trajectory::Trajectory& trajectory,
-        const ImuSensorModel& imu,
-        const MocapSensorModel& mocap)
+        const std::vector<VirtualSensor>& sensors)
 {
     std::vector<SensorEvent> events{};
 
     const ros::Time start_time{0.0};
     const ros::Time end_time{trajectory.duration()};
 
-    const ros::Duration imu_period{imu.period()};
-    for (ros::Time time = start_time+imu_period; time <= end_time; time += imu_period)
+    for (const auto& sensor: sensors)
     {
-        const double t = time.toSec();
-        events.emplace_back(t, imu.get_data(t, trajectory));
-    }
-
-    const ros::Duration mocap_period{mocap.period()};
-    for (ros::Time time = start_time+mocap_period; time <= end_time; time += mocap_period)
-    {
-        const double t = time.toSec();
-        events.emplace_back(t, mocap.get_data(t, trajectory));
+        const ros::Duration period{sensor.period()};
+        for (ros::Time time = start_time+period; time <= end_time; time += period)
+        {
+            const double t = time.toSec();
+            events.push_back(sensor.generate_event(t, trajectory));
+        }
     }
 
     // Using stable sort to guarantee deterministic ordering across compiler implementations.
@@ -154,7 +149,10 @@ Result IekfTestSuite::compute_accuracy()
     filter_.set_pos(trajectory_.get_position(0.0));
     filter_.set_vel(trajectory_.get_velocity(0.0));
     filter_.set_rot(trajectory_.get_rotation(0.0));
-    auto events = generate_events(trajectory_, imu_, mocap_);
+
+    const std::vector<VirtualSensor> sensors{imu_, mocap_};
+
+    auto events = generate_events(trajectory_, sensors);
     auto estimates = run_filter<invariant::IEKF>(filter_, events);
     return calculate_result(trajectory_, estimates);
 }
@@ -164,7 +162,10 @@ Result MekfTestSuite::compute_accuracy()
     filter_.set_pos(trajectory_.get_position(0.0));
     filter_.set_vel(trajectory_.get_velocity(0.0));
     filter_.set_rot(trajectory_.get_rotation(0.0));
-    auto events = generate_events(trajectory_, imu_, mocap_);
+
+    const std::vector<VirtualSensor> sensors{imu_, mocap_};
+
+    auto events = generate_events(trajectory_, sensors);
     auto estimates = run_filter<mekf::MEKF>(filter_, events);
     return calculate_result(trajectory_, estimates);
 }
