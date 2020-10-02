@@ -19,8 +19,6 @@
 
 #include "virtual_sensor.h"
 #include "sensor_event.h"
-#include "imu_sensor_model.h"
-#include "mocap_sensor_model.h"
 
 namespace invariant::test
 {
@@ -146,10 +144,6 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
 
 Result IekfTestSuite::compute_accuracy()
 {
-    filter_.set_pos(trajectory_.get_position(0.0));
-    filter_.set_vel(trajectory_.get_velocity(0.0));
-    filter_.set_rot(trajectory_.get_rotation(0.0));
-
     const std::vector<VirtualSensor> sensors{imu_, mocap_};
 
     auto events = generate_events(trajectory_, sensors);
@@ -159,10 +153,6 @@ Result IekfTestSuite::compute_accuracy()
 
 Result MekfTestSuite::compute_accuracy()
 {
-    filter_.set_pos(trajectory_.get_position(0.0));
-    filter_.set_vel(trajectory_.get_velocity(0.0));
-    filter_.set_rot(trajectory_.get_rotation(0.0));
-
     const std::vector<VirtualSensor> sensors{imu_, mocap_};
 
     auto events = generate_events(trajectory_, sensors);

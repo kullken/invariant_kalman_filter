@@ -48,17 +48,24 @@ const auto test_mocap_models = testing::Values(
 );
 
 inline
+const auto test_initial_errors = testing::Values(
+    ugl::lie::ExtendedPose::Identity()
+);
+
+inline
 const auto test_configs_full = testing::Combine(
     test_trajectories_full,
     test_imu_models,
-    test_mocap_models
+    test_mocap_models,
+    test_initial_errors
 );
 
 inline
 const auto test_configs_partial = testing::Combine(
     test_trajectories_partial,
     test_imu_models,
-    test_mocap_models
+    test_mocap_models,
+    test_initial_errors
 );
 
 } // namespace invariant::test

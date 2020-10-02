@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 
+#include <ugl/lie_group/extended_pose.h>
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/seed.h>
 
@@ -35,7 +36,7 @@ struct Result
 };
 
 template<typename FilterType>
-class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, ImuSensorModel, MocapSensorModel>>
+class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, ImuSensorModel, MocapSensorModel, ugl::lie::ExtendedPose>>
 {
 protected:
     AccuracyTest()
@@ -45,6 +46,10 @@ protected:
         , mocap_(std::get<2>(GetParam()))
     {
         ugl::random::set_seed(117);
+
+        const auto initial_error = std::get<3>(GetParam());
+        const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
+        filter_.set_state(initial_state);
     }
 
 protected:

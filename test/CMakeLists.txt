@@ -42,12 +42,12 @@ target_link_libraries(accuracy_test
   PUBLIC
     ugl::math
     ugl::trajectory
+    ugl::lie_group
     ugl::random
     iekf
     mekf
     sensor_models
   PRIVATE
-    ugl::lie_group
     ${catkin_LIBRARIES}
     project_options
     project_warnings
