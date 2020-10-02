@@ -36,6 +36,7 @@ public:
     void set_vel(const ugl::Vector3& vel) { m_x.segment<3>(3) = vel; }
     void set_rot(const ugl::lie::Rotation& rot) { m_R_ref = rot; }
     void set_quat(const ugl::UnitQuaternion& quat) { m_R_ref = ugl::lie::Rotation{quat}; }
+    void set_state(const ugl::lie::ExtendedPose& state);
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     void mocap_update(const ugl::lie::Pose&);

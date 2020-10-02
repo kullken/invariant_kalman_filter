@@ -32,6 +32,14 @@ ugl::lie::ExtendedPose MEKF::get_state() const
     return ugl::lie::ExtendedPose{R, vel, pos};
 }
 
+void MEKF::set_state(const ugl::lie::ExtendedPose& state)
+{
+    m_x.segment<3>(0) = state.position();
+    m_x.segment<3>(3) = state.velocity();
+    m_x.segment<3>(6) = ugl::Vector3::Zero();
+    m_R_ref = state.rotation();
+}
+
 void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     const Jacobian<9,9> A = MEKF::state_transition_jac(m_R_ref, dt, acc, ang_vel);
