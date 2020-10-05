@@ -69,7 +69,7 @@ protected:
     Result compute_accuracy();
 };
 
-class MekfTestSuite : public AccuracyTest<mekf::MEKF>
+class MekfTestSuite : public AccuracyTest<invariant::MEKF>
 {
 protected:
     MekfTestSuite() : AccuracyTest()

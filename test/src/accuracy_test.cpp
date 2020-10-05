@@ -156,7 +156,7 @@ Result MekfTestSuite::compute_accuracy()
     const std::vector<VirtualSensor> sensors{imu_, mocap_};
 
     auto events = generate_events(trajectory_, sensors);
-    auto estimates = run_filter<mekf::MEKF>(filter_, events);
+    auto estimates = run_filter<invariant::MEKF>(filter_, events);
     return calculate_result(trajectory_, estimates);
 }
 
