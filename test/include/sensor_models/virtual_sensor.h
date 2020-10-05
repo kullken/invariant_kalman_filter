@@ -8,6 +8,7 @@
 #include "sensor_event.h"
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
+#include "gps_sensor_model.h"
 
 namespace invariant::test
 {
@@ -26,7 +27,7 @@ public:
     SensorEvent generate_event(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
 private:
-    std::variant<ImuSensorModel, MocapSensorModel> m_sensor;
+    std::variant<ImuSensorModel, MocapSensorModel, GpsSensorModel> m_sensor;
 };
 
 } // namespace invariant::test

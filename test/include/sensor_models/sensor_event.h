@@ -6,6 +6,7 @@
 
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
+#include "gps_sensor_model.h"
 
 namespace invariant::test
 {
@@ -31,6 +32,8 @@ public:
                 filter.predict(data.dt, data.acc, data.rate);
             else if constexpr (std::is_same_v<T, MocapData>)
                 filter.mocap_update(data.pose);
+            else if constexpr (std::is_same_v<T, GpsData>)
+                filter.gps_update(data.position);
             else
                 static_assert(always_false_v<T>, "Visitor does not handle all sensor types!");
         };
@@ -40,7 +43,7 @@ public:
 
 private:
     double m_time;
-    std::variant<ImuData, MocapData> m_data;
+    std::variant<ImuData, MocapData, GpsData> m_data;
 
     template<typename>
     [[maybe_unused]] inline static

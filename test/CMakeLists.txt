@@ -8,6 +8,7 @@ add_library(sensor_models SHARED
   src/sensor_models/sensor_event.cpp
   src/sensor_models/imu_sensor_model.cpp
   src/sensor_models/mocap_sensor_model.cpp
+  src/sensor_models/gps_sensor_model.cpp
 )
 
 target_include_directories(sensor_models
