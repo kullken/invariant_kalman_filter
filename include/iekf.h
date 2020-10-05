@@ -39,6 +39,7 @@ public:
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     void mocap_update(const ugl::lie::Pose& y);
+    void gps_update(const ugl::Vector3& y);
 
 private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();

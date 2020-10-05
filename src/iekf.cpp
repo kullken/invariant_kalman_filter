@@ -8,6 +8,7 @@
 #include <ugl/lie_group/extended_pose.h>
 
 #include "mocap_model.h"
+#include "gps_model.h"
 
 namespace invariant
 {
@@ -68,6 +69,22 @@ void IEKF::mocap_update(const ugl::lie::Pose& y)
 
     const ugl::lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * MocapModel::target().inverse();
     const ugl::lie::ExtendedPose dX = ugl::lie::SE2_3::exp(K*ugl::lie::SE_3::log(innovation));
+
+    m_X = m_X*dX;
+    m_P = (Covariance<9>::Identity() - K*H) * m_P;
+}
+
+void IEKF::gps_update(const ugl::Vector3& y)
+{
+    const auto& H = GpsModel::error_jacobian();
+    const auto& E = GpsModel::noise_jacobian();
+    const auto& N = GpsModel::noise_covariance();
+
+    const Matrix<3,3> S = H * m_P * H.transpose() + E * N * E.transpose();
+    const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
+
+    const ugl::Vector3 innovation = GpsModel::group_action(m_X.inverse(), y) - GpsModel::target();
+    const ugl::lie::ExtendedPose dX = ugl::lie::SE2_3::exp(K*innovation);
 
     m_X = m_X*dX;
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
