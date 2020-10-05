@@ -6,6 +6,8 @@
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
 
+#include "gps_model.h"
+
 namespace invariant
 {
 
@@ -56,16 +58,18 @@ void MEKF::mocap_update(const ugl::lie::Pose&)
 
 }
 
-void MEKF::position_update(const Vector3& measurement)
+void MEKF::gps_update(const Vector3& y)
 {
-    const Jacobian<3,9> H = MEKF::position_measurement_jac();
-    const Covariance<3> R = MEKF::position_measurement_var();
+    const auto& H = GpsModel::error_jacobian();
+    const auto& E = GpsModel::noise_jacobian();
+    const auto& N = GpsModel::noise_covariance();
 
-    const Vector3 y = measurement - MEKF::position_measurement_model(m_x);
-    const Covariance<3> S = H*m_P*H.transpose() + R;
-    const ugl::Matrix<9, 3> K = m_P*H.transpose()*S.inverse();
+    const Covariance<3> S = H * m_P * H.transpose() + E * N * E.transpose();
+    const ugl::Matrix<9, 3> K = m_P * H.transpose() * S.inverse();
 
-    m_x = m_x + K*y;
+    const Vector3 innovation = y - GpsModel::h(get_state());
+
+    m_x = m_x + K*innovation;
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 
     reset_attitude_error();
@@ -136,22 +140,6 @@ MEKF::Covariance<9> MEKF::state_transition_var(double dt)
     Q.block<3,3>(6,6) = Matrix3::Identity() * dt2 * sigma_rate_sq;
 
     return Q;
-}
-
-Vector3 MEKF::position_measurement_model(const State& x)
-{
-    return x.segment<3>(0);
-}
-
-MEKF::Jacobian<3,9> MEKF::position_measurement_jac()
-{
-    return MEKF::Jacobian<3,9>::Identity();
-}
-
-MEKF::Covariance<3> MEKF::position_measurement_var()
-{
-    constexpr double sigma_pos = 0.05 * 100;       // m
-    return Covariance<3>::Identity() * sigma_pos*sigma_pos;
 }
 
 } // namespace invariant

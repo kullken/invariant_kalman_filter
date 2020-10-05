@@ -81,6 +81,7 @@ target_link_libraries(iekf
 ## MEKF ##
 add_library(mekf SHARED
   src/mekf.cpp
+  src/gps_model.cpp
 )
 
 target_link_libraries(mekf

@@ -40,7 +40,7 @@ public:
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     void mocap_update(const ugl::lie::Pose&);
-    void position_update(const ugl::Vector3& measurement);
+    void gps_update(const ugl::Vector3& y);
 
 private:
     void reset_attitude_error();
@@ -48,10 +48,6 @@ private:
     static State state_transition_model(const State& x, const ugl::lie::Rotation& R_ref, double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     static Jacobian<9,9> state_transition_jac(const ugl::lie::Rotation& R_ref, double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     static Covariance<9> state_transition_var(double dt);
-
-    static ugl::Vector3 position_measurement_model(const State& x);
-    static Jacobian<3,9> position_measurement_jac();
-    static Covariance<3> position_measurement_var();
 
 private:
     State m_x;
