@@ -8,7 +8,7 @@
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
 
-namespace mekf
+namespace invariant
 {
 
 class MEKF
@@ -61,6 +61,6 @@ private:
     static const ugl::Vector3 s_gravity;
 };
 
-} // namespace mekf
+} // namespace invariant
 
 #endif // INVARIANT_MEKF_H

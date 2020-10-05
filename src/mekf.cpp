@@ -6,7 +6,7 @@
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
 
-namespace mekf
+namespace invariant
 {
 
 using ugl::Vector3;
@@ -154,4 +154,4 @@ MEKF::Covariance<3> MEKF::position_measurement_var()
     return Covariance<3>::Identity() * sigma_pos*sigma_pos;
 }
 
-}
+} // namespace invariant
