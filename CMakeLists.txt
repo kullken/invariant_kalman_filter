@@ -63,28 +63,15 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## IEKF ##
-add_library(iekf SHARED
+## Kalman filter ##
+add_library(kalman_filter SHARED
   src/iekf.cpp
-  src/mocap_model.cpp
-)
-
-target_link_libraries(iekf
-  PUBLIC
-    ugl::math
-    ugl::lie_group
-  PRIVATE
-    project_options
-    project_warnings
-)
-
-## MEKF ##
-add_library(mekf SHARED
   src/mekf.cpp
+  src/mocap_model.cpp
   src/gps_model.cpp
 )
 
-target_link_libraries(mekf
+target_link_libraries(kalman_filter
   PUBLIC
     ugl::math
     ugl::lie_group
@@ -101,7 +88,7 @@ add_executable(kalman_node
 
 target_link_libraries(kalman_node
   PUBLIC
-    iekf
+    kalman_filter
     ${catkin_LIBRARIES}
   PRIVATE
     ugl::math
