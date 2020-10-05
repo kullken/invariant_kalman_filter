@@ -17,8 +17,7 @@
 
 #include "accuracy_test_config.h"
 #include "test_trajectories.h"
-#include "imu_sensor_model.h"
-#include "mocap_sensor_model.h"
+#include "virtual_sensor.h"
 
 namespace invariant::test
 {
@@ -36,18 +35,17 @@ struct Result
 };
 
 template<typename FilterType>
-class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, ImuSensorModel, MocapSensorModel, ugl::lie::ExtendedPose>>
+class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, std::vector<VirtualSensor>, ugl::lie::ExtendedPose>>
 {
 protected:
     AccuracyTest()
         : filter_()
         , trajectory_(std::get<0>(GetParam()).traj)
-        , imu_(std::get<1>(GetParam()))
-        , mocap_(std::get<2>(GetParam()))
+        , sensors_(std::get<1>(GetParam()))
     {
         ugl::random::set_seed(117);
 
-        const auto initial_error = std::get<3>(GetParam());
+        const auto initial_error = std::get<2>(GetParam());
         const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
         filter_.set_state(initial_state);
     }
@@ -55,8 +53,7 @@ protected:
 protected:
     FilterType filter_;
     ugl::trajectory::Trajectory trajectory_;
-    ImuSensorModel imu_;
-    MocapSensorModel mocap_;
+    std::vector<VirtualSensor> sensors_;
 };
 
 class IekfTestSuite : public AccuracyTest<invariant::IEKF>

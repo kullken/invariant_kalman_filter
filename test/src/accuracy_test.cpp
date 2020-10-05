@@ -144,18 +144,14 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
 
 Result IekfTestSuite::compute_accuracy()
 {
-    const std::vector<VirtualSensor> sensors{imu_, mocap_};
-
-    auto events = generate_events(trajectory_, sensors);
+    auto events = generate_events(trajectory_, sensors_);
     auto estimates = run_filter<invariant::IEKF>(filter_, events);
     return calculate_result(trajectory_, estimates);
 }
 
 Result MekfTestSuite::compute_accuracy()
 {
-    const std::vector<VirtualSensor> sensors{imu_, mocap_};
-
-    auto events = generate_events(trajectory_, sensors);
+    auto events = generate_events(trajectory_, sensors_);
     auto estimates = run_filter<invariant::MEKF>(filter_, events);
     return calculate_result(trajectory_, estimates);
 }

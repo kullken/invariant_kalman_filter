@@ -1,9 +1,14 @@
 #ifndef INVARIANT_ACCURACY_TEST_CONFIG_H
 #define INVARIANT_ACCURACY_TEST_CONFIG_H
 
+#include <vector>
+
 #include <gtest/gtest.h>
 
+#include <ugl/lie_group/extended_pose.h>
+
 #include "test_trajectories.h"
+#include "virtual_sensor.h"
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
 
@@ -36,15 +41,23 @@ const auto test_trajectories_partial = testing::Values(
 );
 
 inline
-const auto test_imu_models = testing::Values(
-    ImuSensorModel{ImuNoiseLevel::None, 100.0},
-    ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}
-);
-
-inline
-const auto test_mocap_models = testing::Values(
-    MocapSensorModel{MocapNoiseLevel::None, 100.0},
-    MocapSensorModel{MocapNoiseLevel::Low, 100.0}
+const auto test_sensor_models = testing::Values(
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+        VirtualSensor{MocapSensorModel{MocapNoiseLevel::None, 100.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+        VirtualSensor{MocapSensorModel{MocapNoiseLevel::Low, 100.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{MocapSensorModel{MocapNoiseLevel::None, 100.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{MocapSensorModel{MocapNoiseLevel::Low, 100.0}},
+    }
 );
 
 inline
@@ -55,16 +68,14 @@ const auto test_initial_errors = testing::Values(
 inline
 const auto test_configs_full = testing::Combine(
     test_trajectories_full,
-    test_imu_models,
-    test_mocap_models,
+    test_sensor_models,
     test_initial_errors
 );
 
 inline
 const auto test_configs_partial = testing::Combine(
     test_trajectories_partial,
-    test_imu_models,
-    test_mocap_models,
+    test_sensor_models,
     test_initial_errors
 );
 
