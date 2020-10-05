@@ -26,21 +26,21 @@ public:
 
     /// @brief Error jacobian of measurement model
     /// @return Const reference to the jacobian matrix
-    static const ugl::Matrix<6,9>& H();
+    static const ugl::Matrix<6,9>& error_jacobian();
 
     /// @brief Noise jacobian of measurement model
     /// @return Const reference to the jacobian matrix
-    static const ugl::Matrix<6,6>& E();
+    static const ugl::Matrix<6,6>& noise_jacobian();
 
     /// @brief Noise covariance of measurement model
     /// @return Const reference to the covariance matrix
-    static const ugl::Matrix<6,6>& N();
+    static const ugl::Matrix<6,6>& noise_covariance();
 
 private:
     static const ugl::lie::Pose s_target;
-    static const ugl::Matrix<6,9> s_H;
-    static const ugl::Matrix<6,6> s_E;
-    static const ugl::Matrix<6,6> s_N;
+    static const ugl::Matrix<6,9> s_error_jacobian;
+    static const ugl::Matrix<6,6> s_noise_jacobian;
+    static const ugl::Matrix<6,6> s_noise_covariance;
 };
 
 } // namespace invariant

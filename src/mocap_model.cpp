@@ -9,18 +9,18 @@ namespace invariant
 
 const ugl::lie::Pose MocapModel::s_target = ugl::lie::Pose::Identity();
 
-const ugl::Matrix<6,9> MocapModel::s_H = []() {
-    ugl::Matrix<6,9> H = ugl::Matrix<6,9>::Zero();
-    H.block<3,3>(0,0) = ugl::Matrix3::Identity();
-    H.block<3,3>(3,6) = ugl::Matrix3::Identity();
-    return H;
+const ugl::Matrix<6,9> MocapModel::s_error_jacobian = []() {
+    ugl::Matrix<6,9> jac = ugl::Matrix<6,9>::Zero();
+    jac.block<3,3>(0,0) = ugl::Matrix3::Identity();
+    jac.block<3,3>(3,6) = ugl::Matrix3::Identity();
+    return jac;
 }();
 
-const ugl::Matrix<6,6> MocapModel::s_E = []() {
+const ugl::Matrix<6,6> MocapModel::s_noise_jacobian = []() {
     return ugl::lie::Pose::adjoint(MocapModel::target());
 }();
 
-const ugl::Matrix<6,6> MocapModel::s_N = []() {
+const ugl::Matrix<6,6> MocapModel::s_noise_covariance = []() {
     return ugl::Matrix<6,6>::Identity() * 0.01;
 }();
 
@@ -34,19 +34,19 @@ const ugl::lie::Pose& MocapModel::target()
     return s_target;
 }
 
-const ugl::Matrix<6,9>& MocapModel::H()
+const ugl::Matrix<6,9>& MocapModel::error_jacobian()
 {
-    return s_H;
+    return s_error_jacobian;
 }
 
-const ugl::Matrix<6,6>& MocapModel::E()
+const ugl::Matrix<6,6>& MocapModel::noise_jacobian()
 {
-    return s_E;
+    return s_noise_jacobian;
 }
 
-const ugl::Matrix<6,6>& MocapModel::N()
+const ugl::Matrix<6,6>& MocapModel::noise_covariance()
 {
-    return s_N;
+    return s_noise_covariance;
 }
 
 } // namespace invariant

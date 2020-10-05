@@ -59,9 +59,9 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 
 void IEKF::mocap_update(const ugl::lie::Pose& y)
 {
-    const auto& H = MocapModel::H();
-    const auto& E = MocapModel::E();
-    const auto& N = MocapModel::N();
+    const auto& H = MocapModel::error_jacobian();
+    const auto& E = MocapModel::noise_jacobian();
+    const auto& N = MocapModel::noise_covariance();
 
     const Matrix<6,6> S = H * m_P * H.transpose() + E * N * E.transpose();
     const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
