@@ -78,7 +78,7 @@ void MEKF::reset_attitude_error()
     ugl::Matrix<9,9> T = ugl::Matrix<9,9>::Zero();
     T.block<3,3>(kPosIndex,kPosIndex) = Matrix3::Identity();
     T.block<3,3>(kVelIndex,kVelIndex) = Matrix3::Identity();
-    T.block<3,3>(kRotIndex,kRotIndex) = (-1/2 * ugl::lie::SO3::exp(delta).matrix());
+    T.block<3,3>(kRotIndex,kRotIndex) = -0.5 * ugl::lie::SO3::exp(delta).matrix();
 
     m_P = T * m_P * T.transpose();
     m_R_ref *= ugl::lie::SO3::exp(delta);
@@ -95,7 +95,7 @@ MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, 
     // const Rotation R = R_ref * ugl::lie::SO3::exp(delta);               // Without inversion of R
     const Rotation R = (R_ref * ugl::lie::SO3::exp(delta)).inverse();   // With inversion of R
 
-    const Vector3 delta_pred = delta + (ang_vel - 1/2 * ugl::lie::skew(ang_vel)*delta)*dt;
+    const Vector3 delta_pred = delta + (ang_vel - 0.5*ugl::lie::skew(ang_vel)*delta)*dt;
     const Vector3 vel_pred   = vel   + (R*acc + s_gravity)*dt;
     const Vector3 pos_pred   = pos   + vel*dt + (R*acc + s_gravity)*dt*dt*0.5;
 
