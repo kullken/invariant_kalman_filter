@@ -61,7 +61,7 @@ void MEKF::gps_update(const Vector3& y)
     const auto& N = GpsModel::noise_covariance();
 
     const Covariance<3> S = H * m_P * H.transpose() + E * N * E.transpose();
-    const ugl::Matrix<9, 3> K = m_P * H.transpose() * S.inverse();
+    const ugl::Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
     const Vector3 innovation = y - GpsModel::h(get_state());
 
@@ -73,22 +73,24 @@ void MEKF::gps_update(const Vector3& y)
 
 void MEKF::reset_attitude_error()
 {
-    const Vector3 delta = m_x.segment<3>(6);
+    const Vector3 delta = m_x.segment<3>(kRotIndex);
 
-    ugl::Matrix<9, 9> T = ugl::Matrix<9, 9>::Identity();
-    T.bottomRightCorner<3,3>() = (-1/2 * ugl::lie::SO3::exp(delta).matrix());
+    ugl::Matrix<9,9> T = ugl::Matrix<9,9>::Zero();
+    T.block<3,3>(kPosIndex,kPosIndex) = Matrix3::Identity();
+    T.block<3,3>(kVelIndex,kVelIndex) = Matrix3::Identity();
+    T.block<3,3>(kRotIndex,kRotIndex) = (-1/2 * ugl::lie::SO3::exp(delta).matrix());
 
     m_P = T * m_P * T.transpose();
     m_R_ref *= ugl::lie::SO3::exp(delta);
-    m_x.segment<3>(6) = Vector3::Zero();
+    m_x.segment<3>(kRotIndex) = Vector3::Zero();
 }
 
 // State transition model without resetting attitude error.
 MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
-    Vector3 pos = x.segment<3>(0);
-    Vector3 vel = x.segment<3>(3);
-    Vector3 delta = x.segment<3>(6);
+    Vector3 pos = x.segment<3>(kPosIndex);
+    Vector3 vel = x.segment<3>(kVelIndex);
+    Vector3 delta = x.segment<3>(kRotIndex);
 
     const Rotation R_actual = R_ref * ugl::lie::SO3::exp(delta);
     // const Vector3 rotated_acc = R_actual * acc;                  // Without inversion of R
@@ -99,7 +101,9 @@ MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, 
     delta += dt * (ang_vel - 1/2 * ugl::lie::skew(ang_vel)*delta);
 
     State x_predicted;
-    x_predicted << pos, vel, delta;
+    x_predicted.segment<3>(kPosIndex) = pos;
+    x_predicted.segment<3>(kVelIndex) = vel;
+    x_predicted.segment<3>(kRotIndex) = delta;
 
     return x_predicted;
 }
@@ -107,10 +111,10 @@ MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, 
 MEKF::Jacobian<9,9> MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     Jacobian<9,9> jac = Jacobian<9,9>::Identity();
-    jac.block<3,3>(0,3) = dt * Matrix3::Identity();
-    // jac.block<3,3>(3,6) = dt * ugl::lie::skew(R_ref*acc);                  // Without inversion of R
-    jac.block<3,3>(3,6) = dt * ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
-    jac.block<3,3>(6,6) -= dt * 1/2 * ugl::lie::skew(ang_vel);
+    jac.block<3,3>(kPosIndex,kVelIndex) = dt * Matrix3::Identity();
+    // jac.block<3,3>(kPosIndex,kVelIndex) = dt * ugl::lie::skew(R_ref*acc);                  // Without inversion of R
+    jac.block<3,3>(kVelIndex,kRotIndex) = dt * ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
+    jac.block<3,3>(kRotIndex,kRotIndex) -= dt * 1/2 * ugl::lie::skew(ang_vel);
 
     return jac;
 }
@@ -129,11 +133,11 @@ MEKF::Covariance<9> MEKF::state_transition_var(double dt)
     const double dt4 = dt3*dt;
 
     Covariance<9> Q = Covariance<9>::Zero();
-    Q.block<3,3>(0,0) = Matrix3::Identity() * dt4/4 * sigma_acc_sq;
-    Q.block<3,3>(0,3) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
-    Q.block<3,3>(3,0) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
-    Q.block<3,3>(3,3) = Matrix3::Identity() * dt2 * sigma_acc_sq;
-    Q.block<3,3>(6,6) = Matrix3::Identity() * dt2 * sigma_rate_sq;
+    Q.block<3,3>(kPosIndex,kPosIndex) = Matrix3::Identity() * dt4/4 * sigma_acc_sq;
+    Q.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
+    Q.block<3,3>(kVelIndex,kPosIndex) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
+    Q.block<3,3>(kVelIndex,kVelIndex) = Matrix3::Identity() * dt2 * sigma_acc_sq;
+    Q.block<3,3>(kRotIndex,kRotIndex) = Matrix3::Identity() * dt2 * sigma_rate_sq;
 
     return Q;
 }

@@ -26,14 +26,14 @@ public:
     MEKF() = default;
     MEKF(const ugl::lie::Rotation& R0, const ugl::Vector3& p0, const ugl::Vector3& v0, const Covariance<9>& P0);
 
-    ugl::Vector3 get_pos() const { return m_x.segment<3>(0); }
-    ugl::Vector3 get_vel() const { return m_x.segment<3>(3); }
+    ugl::Vector3 get_pos() const { return m_x.segment<3>(kPosIndex); }
+    ugl::Vector3 get_vel() const { return m_x.segment<3>(kVelIndex); }
     ugl::lie::Rotation get_rot() const { return m_R_ref; }
     ugl::UnitQuaternion get_quat() const { return m_R_ref.to_quaternion(); }
     ugl::lie::ExtendedPose get_state() const;
 
-    void set_pos(const ugl::Vector3& pos) { m_x.segment<3>(0) = pos; }
-    void set_vel(const ugl::Vector3& vel) { m_x.segment<3>(3) = vel; }
+    void set_pos(const ugl::Vector3& pos) { m_x.segment<3>(kPosIndex) = pos; }
+    void set_vel(const ugl::Vector3& vel) { m_x.segment<3>(kVelIndex) = vel; }
     void set_rot(const ugl::lie::Rotation& rot) { m_R_ref = rot; }
     void set_quat(const ugl::UnitQuaternion& quat) { m_R_ref = ugl::lie::Rotation{quat}; }
     void set_state(const ugl::lie::ExtendedPose& state);
@@ -53,6 +53,10 @@ private:
     State m_x = State::Zero();
     ugl::lie::Rotation m_R_ref = ugl::lie::Rotation::Identity();
     Covariance<9> m_P = Covariance<9>::Identity();
+
+    static constexpr int kPosIndex = 0;
+    static constexpr int kVelIndex = 3;
+    static constexpr int kRotIndex = 6;
 
     static const ugl::Vector3 s_gravity;
 };

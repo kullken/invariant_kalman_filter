@@ -45,6 +45,10 @@ private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();
     Covariance<9> m_P = Covariance<9>::Identity();
 
+    static constexpr int kRotIndex = 0;
+    static constexpr int kVelIndex = 3;
+    static constexpr int kPosIndex = 6;
+
     // Gravitational acceleration
     static const ugl::Vector3 s_gravity;
 };
