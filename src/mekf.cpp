@@ -88,24 +88,23 @@ void MEKF::reset_attitude_error()
 // State transition model without resetting attitude error.
 MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
-    Vector3 pos = x.segment<3>(kPosIndex);
-    Vector3 vel = x.segment<3>(kVelIndex);
-    Vector3 delta = x.segment<3>(kRotIndex);
+    const Vector3 delta = x.segment<3>(kRotIndex);
+    const Vector3 vel = x.segment<3>(kVelIndex);
+    const Vector3 pos = x.segment<3>(kPosIndex);
 
-    const Rotation R_actual = R_ref * ugl::lie::SO3::exp(delta);
-    // const Vector3 rotated_acc = R_actual * acc;                  // Without inversion of R
-    const Vector3 rotated_acc = R_actual.inverse() * acc;        // With inversion of R
+    // const Rotation R = R_ref * ugl::lie::SO3::exp(delta);               // Without inversion of R
+    const Rotation R = (R_ref * ugl::lie::SO3::exp(delta)).inverse();   // With inversion of R
 
-    pos   += dt * vel + dt*dt/2 * (rotated_acc + s_gravity);
-    vel   += dt * (rotated_acc + s_gravity);
-    delta += dt * (ang_vel - 1/2 * ugl::lie::skew(ang_vel)*delta);
+    const Vector3 delta_pred = delta + (ang_vel - 1/2 * ugl::lie::skew(ang_vel)*delta)*dt;
+    const Vector3 vel_pred   = vel   + (R*acc + s_gravity)*dt;
+    const Vector3 pos_pred   = pos   + vel*dt + (R*acc + s_gravity)*dt*dt*0.5;
 
-    State x_predicted;
-    x_predicted.segment<3>(kPosIndex) = pos;
-    x_predicted.segment<3>(kVelIndex) = vel;
-    x_predicted.segment<3>(kRotIndex) = delta;
+    State x_pred;
+    x_pred.segment<3>(kRotIndex) = delta_pred;
+    x_pred.segment<3>(kVelIndex) = vel_pred;
+    x_pred.segment<3>(kPosIndex) = pos_pred;
 
-    return x_predicted;
+    return x_pred;
 }
 
 MEKF::Jacobian<9,9> MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
