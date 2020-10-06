@@ -21,23 +21,20 @@ MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covar
     : m_R_ref(R0)
     , m_P(P0)
 {
-    m_x << p0, v0, Vector3::Zero();
+    set_pos(p0);
+    set_vel(v0);
 }
 
 ugl::lie::ExtendedPose MEKF::get_state() const
 {
-    const Vector3 pos = m_x.segment<3>(0);
-    const Vector3 vel = m_x.segment<3>(3);
-    const Vector3 delta = m_x.segment<3>(6);
-    const Rotation R = m_R_ref * ugl::lie::SO3::exp(delta);
-    return ugl::lie::ExtendedPose{R, vel, pos};
+    return ugl::lie::ExtendedPose{get_rot(), get_vel(), get_pos()};
 }
 
 void MEKF::set_state(const ugl::lie::ExtendedPose& state)
 {
-    m_x.segment<3>(0) = state.position();
-    m_x.segment<3>(3) = state.velocity();
-    m_x.segment<3>(6) = ugl::Vector3::Zero();
+    m_x.segment<3>(kPosIndex) = state.position();
+    m_x.segment<3>(kVelIndex) = state.velocity();
+    m_x.segment<3>(kRotIndex) = ugl::Vector3::Zero();
     m_R_ref = state.rotation();
 }
 
