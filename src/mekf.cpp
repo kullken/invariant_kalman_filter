@@ -111,7 +111,7 @@ MEKF::Jacobian<9,9> MEKF::state_transition_jac(const Rotation& R_ref, double dt,
 {
     Jacobian<9,9> jac = Jacobian<9,9>::Identity();
     jac.block<3,3>(kPosIndex,kVelIndex) = dt * Matrix3::Identity();
-    // jac.block<3,3>(kPosIndex,kVelIndex) = dt * ugl::lie::skew(R_ref*acc);                  // Without inversion of R
+    // jac.block<3,3>(kVelIndex,kRotIndex) = dt * ugl::lie::skew(R_ref*acc);                  // Without inversion of R
     jac.block<3,3>(kVelIndex,kRotIndex) = dt * ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
     jac.block<3,3>(kRotIndex,kRotIndex) -= dt * 1/2 * ugl::lie::skew(ang_vel);
 
