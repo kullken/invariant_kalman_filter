@@ -29,7 +29,7 @@ public:
     ugl::Vector3 get_pos() const { return m_x.segment<3>(kPosIndex); }
     ugl::Vector3 get_vel() const { return m_x.segment<3>(kVelIndex); }
     ugl::lie::Rotation get_rot() const { return m_R_ref; }
-    ugl::UnitQuaternion get_quat() const { return m_R_ref.to_quaternion(); }
+    ugl::UnitQuaternion get_quat() const { return get_rot().to_quaternion(); }
     ugl::lie::ExtendedPose get_state() const;
 
     void set_pos(const ugl::Vector3& pos) { m_x.segment<3>(kPosIndex) = pos; }
