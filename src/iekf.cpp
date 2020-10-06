@@ -48,8 +48,21 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     A.block<3,3>(kVelIndex,kRotIndex) = -ugl::lie::skew(acc);
     A.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity();
 
-    const Covariance<6> Q = Covariance<6>::Identity() * 0.1;
-    const Jacobian<9,6> D = Jacobian<9,6>::Identity();
+    const Covariance<6> Q = []() {
+        constexpr double sigma_gyro  = 0.1 ; // [rad/s]
+        constexpr double sigma_accel = 5.0;  // [m/s^2]
+        Covariance<6> Q = Covariance<6>::Zero();
+        Q.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
+        Q.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
+        return Q;
+    }();
+    const Jacobian<9,6> D = [&dt]() {
+        Jacobian<9,6> D = Jacobian<9,6>::Zero();
+        D.block<3,3>(0,0) = Matrix3::Identity() * dt;
+        D.block<3,3>(3,3) = Matrix3::Identity() * dt;
+        D.block<3,3>(6,3) = Matrix3::Identity() * dt*dt*0.5;
+        return D;
+    }();
 
     // Discretisation method from Hartley et al. (2018)
     const Matrix<9,9> Adt = A*dt;
