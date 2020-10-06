@@ -54,9 +54,9 @@ private:
     ugl::lie::Rotation m_R_ref = ugl::lie::Rotation::Identity();
     Covariance<9> m_P = Covariance<9>::Identity();
 
-    static constexpr int kPosIndex = 0;
+    static constexpr int kPosIndex = 6;
     static constexpr int kVelIndex = 3;
-    static constexpr int kRotIndex = 6;
+    static constexpr int kRotIndex = 0;
 
     static const ugl::Vector3 s_gravity;
 };
