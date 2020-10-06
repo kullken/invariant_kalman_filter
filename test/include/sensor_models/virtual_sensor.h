@@ -1,6 +1,7 @@
 #ifndef INVARIANT_TEST_SENSOR_MODEL_H
 #define INVARIANT_TEST_SENSOR_MODEL_H
 
+#include <iosfwd>
 #include <variant>
 
 #include <ugl/trajectory/trajectory.h>
@@ -25,6 +26,8 @@ public:
     double period() const;
 
     SensorEvent generate_event(double t, const ugl::trajectory::Trajectory& trajectory) const;
+
+    friend std::ostream& operator<<(std::ostream& os, const VirtualSensor& sensor);
 
 private:
     std::variant<ImuSensorModel, MocapSensorModel, GpsSensorModel> m_sensor;

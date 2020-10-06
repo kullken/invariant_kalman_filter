@@ -1,5 +1,6 @@
 #include "virtual_sensor.h"
 
+#include <ostream>
 #include <variant>
 
 #include <ugl/trajectory/trajectory.h>
@@ -25,6 +26,14 @@ SensorEvent VirtualSensor::generate_event(double t, const ugl::trajectory::Traje
         return SensorEvent{t, sensor.get_data(t, trajectory)};
     };
     return std::visit(visitor, m_sensor);
+}
+
+std::ostream& operator<<(std::ostream& os, const VirtualSensor& sensor)
+{
+    auto visitor = [&os](const auto& sensor) -> std::ostream& {
+        return os << sensor;
+    };
+    return std::visit(visitor, sensor.m_sensor);
 }
 
 } // namespace invariant::test
