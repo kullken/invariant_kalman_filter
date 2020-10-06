@@ -50,9 +50,9 @@ private:
     static Covariance<9> state_transition_var(double dt);
 
 private:
-    State m_x;
-    ugl::lie::Rotation m_R_ref;
-    Covariance<9> m_P;
+    State m_x = State::Zero();
+    ugl::lie::Rotation m_R_ref = ugl::lie::Rotation::Identity();
+    Covariance<9> m_P = Covariance<9>::Identity();
 
     static const ugl::Vector3 s_gravity;
 };

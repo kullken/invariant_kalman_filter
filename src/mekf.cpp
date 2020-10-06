@@ -18,8 +18,7 @@ using ugl::lie::Rotation;
 const Vector3 MEKF::s_gravity{0.0, 0.0, -9.82};
 
 MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
-    : m_x()
-    , m_R_ref(R0)
+    : m_R_ref(R0)
     , m_P(P0)
 {
     m_x << p0, v0, Vector3::Zero();
