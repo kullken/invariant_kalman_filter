@@ -116,18 +116,22 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
     for (const auto& estimate : estimates)
     {
         const double t = estimate.timestamp.toSec();
-        const ugl::Vector3 true_pos = trajectory.get_position(t);
-        const ugl::Vector3 true_vel = trajectory.get_velocity(t);
-        const ugl::UnitQuaternion true_quat = trajectory.get_quaternion(t);
+        const ugl::lie::ExtendedPose ground_truth = trajectory.get_extended_pose(t);
+        const ugl::Vector3 true_pos = ground_truth.position();
+        const ugl::Vector3 true_vel = ground_truth.velocity();
+        const ugl::UnitQuaternion true_quat = ground_truth.rotation().to_quaternion();
 
         const ugl::Vector3 predicted_pos = estimate.state.position();
         const ugl::Vector3 predicted_vel = estimate.state.velocity();
         const ugl::UnitQuaternion predicted_quat = estimate.state.rotation().to_quaternion();
 
+        result.times.push_back(t);
         result.position_errors.push_back(dist(true_pos, predicted_pos));
         result.velocity_errors.push_back(dist(true_vel, predicted_vel));
         result.rotation_errors.push_back(dist(true_quat, predicted_quat));
-        result.times.push_back(t);
+
+        result.estimates.push_back(estimate.state);
+        result.ground_truth.push_back(ground_truth);
     }
 
     const auto count = result.times.size();
@@ -159,12 +163,40 @@ Result MekfTestSuite::compute_accuracy()
 std::ostream& operator<<(std::ostream& os, const Result& result)
 {
     constexpr auto delimiter = ' ';
-    os << "time" << delimiter << "pos_error" << delimiter << "vel_error" << delimiter << "rot_error" << '\n';
+    os << "time" << delimiter
+       << "pos_err" << delimiter << "vel_err" << delimiter << "rot_err" << delimiter
+       << "px_pred" << delimiter << "py_pred" << delimiter << "pz_pred" << delimiter
+       << "vx_pred" << delimiter << "vy_pred" << delimiter << "vz_pred" << delimiter
+       << "qx_pred" << delimiter << "qy_pred" << delimiter << "qz_pred" << delimiter << "qw_pred" << delimiter
+       << "px_true" << delimiter << "py_true" << delimiter << "pz_true" << delimiter
+       << "vx_true" << delimiter << "vy_true" << delimiter << "vz_true" << delimiter
+       << "qx_true" << delimiter << "qy_true" << delimiter << "qz_true" << delimiter << "qw_true" << delimiter
+       << '\n';
 
-    auto size = std::min({result.position_errors.size(), result.velocity_errors.size(), result.rotation_errors.size()});
+    auto write_vector = [&](const ugl::Vector3& vec) {
+        os << vec.x() << delimiter << vec.y() << delimiter << vec.z() << delimiter;
+    };
+    auto write_quat = [&](const ugl::UnitQuaternion& quat) {
+        os << quat.x() << delimiter << quat.y() << delimiter << quat.z() << delimiter << quat.w() << delimiter;
+    };
+
+    const auto size = result.times.size();
     for (std::size_t i = 0; i < size; ++i)
     {
-        os << result.times[i] << delimiter << result.position_errors[i] << delimiter << result.velocity_errors[i] << delimiter << result.rotation_errors[i] << '\n';
+        os << result.times[i] << delimiter
+           << result.position_errors[i] << delimiter
+           << result.velocity_errors[i] << delimiter
+           << result.rotation_errors[i] << delimiter;
+
+        write_vector(result.estimates[i].position());
+        write_vector(result.estimates[i].velocity());
+        write_quat(result.estimates[i].rotation().to_quaternion());
+
+        write_vector(result.ground_truth[i].position());
+        write_vector(result.ground_truth[i].velocity());
+        write_quat(result.ground_truth[i].rotation().to_quaternion());
+
+        os << '\n';
     }
 
     return os;
