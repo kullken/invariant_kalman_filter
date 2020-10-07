@@ -56,21 +56,17 @@ catkin_package(
 ## Build ##
 ###########
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-)
-
 ## Kalman filter ##
 add_library(kalman_filter SHARED
-  src/iekf.cpp
-  src/mekf.cpp
-  src/mocap_model.cpp
-  src/gps_model.cpp
+  src/kalman_filter/iekf.cpp
+  src/kalman_filter/mekf.cpp
+  src/kalman_filter/mocap_model.cpp
+  src/kalman_filter/gps_model.cpp
 )
-
+target_include_directories(kalman_filter
+  PUBLIC
+    include/kalman_filter
+)
 target_link_libraries(kalman_filter
   PUBLIC
     ugl::math
@@ -82,10 +78,16 @@ target_link_libraries(kalman_filter
 
 ## Kalman ROS-node ##
 add_executable(kalman_node
-  src/kalman_node.cpp
-  src/measurement.cpp
+  src/kalman_node/kalman_node.cpp
+  src/kalman_node/measurement.cpp
 )
-
+target_include_directories(kalman_node
+  PUBLIC
+    include/kalman_node
+    ${catkin_INCLUDE_DIRS}
+  PRIVATE
+    src/kalman_node
+)
 target_link_libraries(kalman_node
   PUBLIC
     kalman_filter

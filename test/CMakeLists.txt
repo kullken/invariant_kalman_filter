@@ -10,12 +10,10 @@ add_library(sensor_models SHARED
   src/sensor_models/mocap_sensor_model.cpp
   src/sensor_models/gps_sensor_model.cpp
 )
-
 target_include_directories(sensor_models
   PUBLIC
     include/sensor_models
 )
-
 target_link_libraries(sensor_models
   PUBLIC
     ugl::math
@@ -33,12 +31,12 @@ add_library(accuracy_test SHARED
   src/accuracy_test_config.cpp
   src/test_trajectories.cpp
 )
-
 target_include_directories(accuracy_test
   PUBLIC
     include
+  PRIVATE
+    ${catkin_INCLUDE_DIRS}
 )
-
 target_link_libraries(accuracy_test
   PUBLIC
     ugl::math
