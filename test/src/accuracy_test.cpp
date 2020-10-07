@@ -149,14 +149,14 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
 Result IekfTestSuite::compute_accuracy()
 {
     auto events = generate_events(trajectory_, sensors_);
-    auto estimates = run_filter<invariant::IEKF>(filter_, events);
+    auto estimates = run_filter(filter_, events);
     return calculate_result(trajectory_, estimates);
 }
 
 Result MekfTestSuite::compute_accuracy()
 {
     auto events = generate_events(trajectory_, sensors_);
-    auto estimates = run_filter<invariant::MEKF>(filter_, events);
+    auto estimates = run_filter(filter_, events);
     return calculate_result(trajectory_, estimates);
 }
 
