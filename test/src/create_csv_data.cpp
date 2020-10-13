@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "accuracy_test.h"
-#include "accuracy_test_config.h" 
+#include "accuracy_test_config.h"
 
 namespace invariant::test
 {
@@ -33,9 +33,9 @@ TEST_P(IekfTestSuite, IekfTestCase)
     RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
     RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
 
-    std::cout << "result.position_rmse : " << result.position_rmse << '\n';
-    std::cout << "result.velocity_rmse : " << result.velocity_rmse << '\n';
-    std::cout << "result.rotation_rmse : " << result.rotation_rmse << '\n';
+    std::cout << "position_rmse : " << result.position_rmse << '\n';
+    std::cout << "velocity_rmse : " << result.velocity_rmse << '\n';
+    std::cout << "rotation_rmse : " << result.rotation_rmse << '\n';
 
     save_to_file(result);
 }
@@ -54,9 +54,9 @@ TEST_P(MekfTestSuite, MekfTestCase)
     RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
     RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
 
-    std::cout << "result.position_rmse : " << result.position_rmse << '\n';
-    std::cout << "result.velocity_rmse : " << result.velocity_rmse << '\n';
-    std::cout << "result.rotation_rmse : " << result.rotation_rmse << '\n';
+    std::cout << "position_rmse : " << result.position_rmse << '\n';
+    std::cout << "velocity_rmse : " << result.velocity_rmse << '\n';
+    std::cout << "rotation_rmse : " << result.rotation_rmse << '\n';
 
     save_to_file(result);
 }
