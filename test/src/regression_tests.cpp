@@ -4,14 +4,14 @@
 #include <gtest/gtest.h>
 
 #include "accuracy_test.h"
-#include "accuracy_test_config.h" 
+#include "accuracy_test_config.h"
 
 namespace invariant::test
 {
 namespace
 {
 
-constexpr int kNumTestRuns = 10;
+constexpr int kNumTestRuns = 20;
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
