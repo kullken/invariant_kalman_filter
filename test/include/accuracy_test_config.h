@@ -61,22 +61,15 @@ const auto test_sensor_models = testing::Values(
 );
 
 inline
-const auto test_initial_errors = testing::Values(
-    ugl::lie::ExtendedPose::Identity()
-);
-
-inline
 const auto test_configs_full = testing::Combine(
     test_trajectories_full,
-    test_sensor_models,
-    test_initial_errors
+    test_sensor_models
 );
 
 inline
 const auto test_configs_partial = testing::Combine(
     test_trajectories_partial,
-    test_sensor_models,
-    test_initial_errors
+    test_sensor_models
 );
 
 } // namespace invariant::test

@@ -17,6 +17,7 @@
 
 #include "accuracy_test_config.h"
 #include "test_trajectories.h"
+#include "offset_generator.h"
 #include "virtual_sensor.h"
 
 namespace invariant::test
@@ -38,23 +39,19 @@ struct Result
 };
 
 template<typename FilterType>
-class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, std::vector<VirtualSensor>, ugl::lie::ExtendedPose>>
+class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, std::vector<VirtualSensor>>>
 {
 protected:
     AccuracyTest()
-        : filter_()
-        , trajectory_(std::get<0>(GetParam()).traj)
+        : trajectory_(std::get<0>(GetParam()).traj)
         , sensors_(std::get<1>(GetParam()))
     {
         ugl::random::set_seed(117);
-
-        const auto initial_error = std::get<2>(GetParam());
-        const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
-        filter_.set_state(initial_state);
     }
 
 protected:
-    FilterType filter_;
+    FilterType filter_{};
+    OffsetGenerator offset_{};
     ugl::trajectory::Trajectory trajectory_;
     std::vector<VirtualSensor> sensors_;
 };

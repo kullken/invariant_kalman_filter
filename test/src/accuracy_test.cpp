@@ -148,6 +148,10 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
 
 Result IekfTestSuite::compute_accuracy()
 {
+    const auto initial_error = offset_.sample();
+    const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
+    filter_.set_state(initial_state);
+
     auto events = generate_events(trajectory_, sensors_);
     auto estimates = run_filter(filter_, events);
     return calculate_result(trajectory_, estimates);
@@ -155,6 +159,10 @@ Result IekfTestSuite::compute_accuracy()
 
 Result MekfTestSuite::compute_accuracy()
 {
+    const auto initial_error = offset_.sample();
+    const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
+    filter_.set_state(initial_state);
+
     auto events = generate_events(trajectory_, sensors_);
     auto estimates = run_filter(filter_, events);
     return calculate_result(trajectory_, estimates);

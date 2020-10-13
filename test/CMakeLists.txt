@@ -30,6 +30,7 @@ add_library(accuracy_test SHARED
   src/accuracy_test.cpp
   src/accuracy_test_config.cpp
   src/test_trajectories.cpp
+  src/offset_generator.cpp
 )
 target_include_directories(accuracy_test
   PUBLIC
