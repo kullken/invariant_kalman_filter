@@ -11,7 +11,8 @@ namespace invariant::test
 namespace
 {
 
-constexpr int kNumTestRuns = 20;
+constexpr int kNumTestRuns      = 5;
+constexpr int kNumOffsetSamples = 10;
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
@@ -21,15 +22,19 @@ TEST_P(IekfTestSuite, IekfTestCase)
 
     for (int i = 0; i < kNumTestRuns; ++i)
     {
-        const auto result = compute_accuracy();
-        position_rmse += result.position_rmse;
-        velocity_rmse += result.velocity_rmse;
-        rotation_rmse += result.rotation_rmse;
+        const auto sensor_events = generate_events(trajectory_, sensors_);
+        for (int j = 0; j < kNumOffsetSamples; ++j)
+        {
+            const auto result = compute_accuracy(sensor_events);
+            position_rmse += result.position_rmse;
+            velocity_rmse += result.velocity_rmse;
+            rotation_rmse += result.rotation_rmse;
+        }
     }
 
-    position_rmse /= kNumTestRuns;
-    velocity_rmse /= kNumTestRuns;
-    rotation_rmse /= kNumTestRuns;
+    position_rmse /= kNumTestRuns * kNumOffsetSamples;
+    velocity_rmse /= kNumTestRuns * kNumOffsetSamples;
+    rotation_rmse /= kNumTestRuns * kNumOffsetSamples;
 
     RecordProperty("PositionRMSE", std::to_string(position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(velocity_rmse));
@@ -54,15 +59,19 @@ TEST_P(MekfTestSuite, MekfTestCase)
 
     for (int i = 0; i < kNumTestRuns; ++i)
     {
-        const auto result = compute_accuracy();
-        position_rmse += result.position_rmse;
-        velocity_rmse += result.velocity_rmse;
-        rotation_rmse += result.rotation_rmse;
+        const auto sensor_events = generate_events(trajectory_, sensors_);
+        for (int j = 0; j < kNumOffsetSamples; ++j)
+        {
+            const auto result = compute_accuracy(sensor_events);
+            position_rmse += result.position_rmse;
+            velocity_rmse += result.velocity_rmse;
+            rotation_rmse += result.rotation_rmse;
+        }
     }
 
-    position_rmse /= kNumTestRuns;
-    velocity_rmse /= kNumTestRuns;
-    rotation_rmse /= kNumTestRuns;
+    position_rmse /= kNumTestRuns * kNumOffsetSamples;
+    velocity_rmse /= kNumTestRuns * kNumOffsetSamples;
+    rotation_rmse /= kNumTestRuns * kNumOffsetSamples;
 
     RecordProperty("PositionRMSE", std::to_string(position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(velocity_rmse));

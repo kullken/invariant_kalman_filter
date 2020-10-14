@@ -27,7 +27,8 @@ void save_to_file(const Result& result)
 
 TEST_P(IekfTestSuite, IekfTestCase)
 {
-    const auto result = compute_accuracy();
+    const auto sensor_events = generate_events(trajectory_, sensors_);
+    const auto result = compute_accuracy(sensor_events);
 
     RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
@@ -48,7 +49,8 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(MekfTestSuite, MekfTestCase)
 {
-    const Result result = compute_accuracy();
+    const auto sensor_events = generate_events(trajectory_, sensors_);
+    const auto result = compute_accuracy(sensor_events);
 
     RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
     RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));

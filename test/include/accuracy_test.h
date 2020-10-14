@@ -109,13 +109,12 @@ protected:
         ugl::random::set_seed(117);
     }
 
-    Result compute_accuracy()
+    Result compute_accuracy(const std::vector<SensorEvent>& events)
     {
         const auto initial_error = offset_.sample();
         const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
         filter_.set_state(initial_state);
 
-        auto events = generate_events(trajectory_, sensors_);
         auto estimates = run_filter(filter_, events);
         return calculate_result(trajectory_, estimates);
     }
