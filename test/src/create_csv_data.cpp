@@ -5,12 +5,13 @@
 
 #include <gtest/gtest.h>
 
+#include "iekf.h"
+#include "mekf.h"
+
 #include "accuracy_test.h"
 #include "accuracy_test_config.h"
 
 namespace invariant::test
-{
-namespace
 {
 
 void save_to_file(const Result& result)
@@ -25,55 +26,43 @@ void save_to_file(const Result& result)
     csv_file << result;
 }
 
-using IekfTestSuite = AccuracyTest<IEKF>;
-
-TEST_P(IekfTestSuite, IekfTestCase)
+template<typename FilterType>
+class DataGenerationTest: public AccuracyTest<FilterType>
 {
-    const auto sensor_events = generate_events(trajectory_, sensors_);
-    const auto result = compute_accuracy(sensor_events);
+protected:
+    void run_test()
+    {
+        const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
+        const auto result = this->compute_accuracy(sensor_events);
 
-    RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
-    RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
-    RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
+        this->RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
+        this->RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
+        this->RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
 
-    std::cout << "position_rmse : " << result.position_rmse << '\n';
-    std::cout << "velocity_rmse : " << result.velocity_rmse << '\n';
-    std::cout << "rotation_rmse : " << result.rotation_rmse << '\n';
+        std::cout << "position_rmse : " << result.position_rmse << '\n';
+        std::cout << "velocity_rmse : " << result.velocity_rmse << '\n';
+        std::cout << "rotation_rmse : " << result.rotation_rmse << '\n';
 
-    save_to_file(result);
-}
+        save_to_file(result);
+    }
+};
 
+using IekfTestSuite = DataGenerationTest<IEKF>;
+TEST_P(IekfTestSuite, IekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     GenerateCsvData,
     IekfTestSuite,
     test_configs_partial,
 );
 
-using MekfTestSuite = AccuracyTest<MEKF>;
-
-TEST_P(MekfTestSuite, MekfTestCase)
-{
-    const auto sensor_events = generate_events(trajectory_, sensors_);
-    const auto result = compute_accuracy(sensor_events);
-
-    RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
-    RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
-    RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
-
-    std::cout << "position_rmse : " << result.position_rmse << '\n';
-    std::cout << "velocity_rmse : " << result.velocity_rmse << '\n';
-    std::cout << "rotation_rmse : " << result.rotation_rmse << '\n';
-
-    save_to_file(result);
-}
-
+using MekfTestSuite = DataGenerationTest<MEKF>;
+TEST_P(MekfTestSuite, MekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     GenerateCsvData,
     MekfTestSuite,
     test_configs_partial,
 );
 
-} // namespace
 } // namespace invariant::test
 
 int main(int argc, char **argv)

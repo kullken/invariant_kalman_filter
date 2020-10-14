@@ -62,6 +62,7 @@ if (CATKIN_ENABLE_TESTING)
       include
   )
   target_link_libraries(create_csv_data
+      kalman_filter
       accuracy_test
       project_options
       project_warnings
@@ -73,6 +74,7 @@ if (CATKIN_ENABLE_TESTING)
       include
   )
   target_link_libraries(regression_tests
+      kalman_filter
       accuracy_test
       project_options
       project_warnings
