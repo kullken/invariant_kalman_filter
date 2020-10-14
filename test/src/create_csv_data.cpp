@@ -25,6 +25,8 @@ void save_to_file(const Result& result)
     csv_file << result;
 }
 
+using IekfTestSuite = AccuracyTest<IEKF>;
+
 TEST_P(IekfTestSuite, IekfTestCase)
 {
     const auto sensor_events = generate_events(trajectory_, sensors_);
@@ -46,6 +48,8 @@ INSTANTIATE_TEST_CASE_P(
     IekfTestSuite,
     test_configs_partial,
 );
+
+using MekfTestSuite = AccuracyTest<MEKF>;
 
 TEST_P(MekfTestSuite, MekfTestCase)
 {

@@ -14,6 +14,8 @@ namespace
 constexpr int kNumTestRuns      = 5;
 constexpr int kNumOffsetSamples = 10;
 
+using IekfTestSuite = AccuracyTest<IEKF>;
+
 TEST_P(IekfTestSuite, IekfTestCase)
 {
     double position_rmse{0};
@@ -50,6 +52,8 @@ INSTANTIATE_TEST_CASE_P(
     IekfTestSuite,
     test_configs_full,
 );
+
+using MekfTestSuite = AccuracyTest<MEKF>;
 
 TEST_P(MekfTestSuite, MekfTestCase)
 {

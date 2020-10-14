@@ -126,22 +126,6 @@ protected:
     std::vector<VirtualSensor> sensors_;
 };
 
-class IekfTestSuite : public AccuracyTest<invariant::IEKF>
-{
-protected:
-    IekfTestSuite() : AccuracyTest()
-    {
-    }
-};
-
-class MekfTestSuite : public AccuracyTest<invariant::MEKF>
-{
-protected:
-    MekfTestSuite() : AccuracyTest()
-    {
-    }
-};
-
 std::ostream& operator<<(std::ostream& os, const Result& result);
 
 } // namespace invariant::test
