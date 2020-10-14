@@ -35,7 +35,6 @@ add_library(accuracy_test SHARED
 target_include_directories(accuracy_test
   PUBLIC
     include
-  PRIVATE
     ${catkin_INCLUDE_DIRS}
 )
 target_link_libraries(accuracy_test
@@ -46,8 +45,8 @@ target_link_libraries(accuracy_test
     ugl::random
     kalman_filter
     sensor_models
-  PRIVATE
     ${catkin_LIBRARIES}
+  PRIVATE
     project_options
     project_warnings
 )

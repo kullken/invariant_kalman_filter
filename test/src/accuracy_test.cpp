@@ -22,7 +22,6 @@
 
 namespace invariant::test
 {
-
 namespace
 {
 
@@ -36,24 +35,8 @@ double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
     return a.angularDistance(b);
 }
 
-struct Estimate
-{
-    ros::Time timestamp;
-    ugl::lie::ExtendedPose state;
+} // namespace
 
-    Estimate() = default;
-
-    Estimate(const ros::Time& t_timestamp, const ugl::lie::ExtendedPose& t_state)
-        : timestamp(t_timestamp)
-        , state(t_state)
-    {
-    }
-};
-
-/// @brief Generate sensor events from a virtual trajectory
-/// @param trajectory the ground truth trajectory
-/// @param sensors vector of virtual sensors used to generate events
-/// @return A sorted vector of sensor events
 std::vector<SensorEvent> generate_events(
         const ugl::trajectory::Trajectory& trajectory,
         const std::vector<VirtualSensor>& sensors)
@@ -78,37 +61,6 @@ std::vector<SensorEvent> generate_events(
     return events;
 }
 
-/// @brief Run filter on collection of data-events
-/// @param filter the filter to use (copied before use)
-/// @param events the collection of events (assumed chronologically ordered)
-/// @return Vector of timestamps and estimated states
-template<typename FilterType>
-std::vector<Estimate> run_filter(FilterType filter, const std::vector<SensorEvent>& events)
-{
-    std::vector<Estimate> estimates{};
-
-    const ros::Time start_time{0.0};
-    const ros::Time end_time{events.back().time()};
-    const ros::Duration dt{0.01};
-
-    auto event_it = std::cbegin(events);
-    for (ros::Time time = start_time; time <= end_time; time += dt)
-    {
-        while (event_it != std::cend(events) && event_it->time() <= time.toSec())
-        {
-            event_it->update_filter(filter);
-            ++event_it;
-        }
-        estimates.emplace_back(time, filter.get_state());
-    }
-
-    return estimates;
-}
-
-/// @brief Compares recorded estimates with ground truth trajectory
-/// @param estimates the estimates from the filter
-/// @param trajectory the ground truth trajectory
-/// @return Result of the comparision
 Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std::vector<Estimate>& estimates)
 {
     Result result{};
@@ -142,30 +94,6 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
     result.rotation_rmse = std::sqrt(std::accumulate(std::cbegin(result.rotation_errors), std::cend(result.rotation_errors), 0.0, square_and_add) / count);
 
     return result;
-}
-
-} // namespace
-
-Result IekfTestSuite::compute_accuracy()
-{
-    const auto initial_error = offset_.sample();
-    const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
-    filter_.set_state(initial_state);
-
-    auto events = generate_events(trajectory_, sensors_);
-    auto estimates = run_filter(filter_, events);
-    return calculate_result(trajectory_, estimates);
-}
-
-Result MekfTestSuite::compute_accuracy()
-{
-    const auto initial_error = offset_.sample();
-    const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
-    filter_.set_state(initial_state);
-
-    auto events = generate_events(trajectory_, sensors_);
-    auto estimates = run_filter(filter_, events);
-    return calculate_result(trajectory_, estimates);
 }
 
 std::ostream& operator<<(std::ostream& os, const Result& result)
