@@ -57,7 +57,7 @@ def get_test_suite_root(file_name: str, test_name: str) -> ET.Element:
     tree = ET.parse(file_name)
     root = tree.getroot()
     for testsuite in root.findall("testsuite"):
-        if testsuite.attrib["name"] == "AccuracyTestBase/" + test_name:
+        if testsuite.attrib["name"] == "RegressionTests/" + test_name:
             return testsuite
     raise NameError("The testsuite name [{}] was not found in file [{}]".format(test_name, file_name))
 
