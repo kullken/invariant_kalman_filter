@@ -2,11 +2,13 @@
 #include <ostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
 
 #include <ugl/math/vector.h>
 #include <ugl/math/quaternion.h>
+#include <ugl/lie_group/rotation.h>
 
 #include "iekf.h"
 #include "mekf.h"
@@ -24,17 +26,14 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
        << "pos_err" << delimiter << "vel_err" << delimiter << "rot_err" << delimiter
        << "px_pred" << delimiter << "py_pred" << delimiter << "pz_pred" << delimiter
        << "vx_pred" << delimiter << "vy_pred" << delimiter << "vz_pred" << delimiter
-       << "qx_pred" << delimiter << "qy_pred" << delimiter << "qz_pred" << delimiter << "qw_pred" << delimiter
+       << "rx_pred" << delimiter << "ry_pred" << delimiter << "rz_pred" << delimiter
        << "px_true" << delimiter << "py_true" << delimiter << "pz_true" << delimiter
        << "vx_true" << delimiter << "vy_true" << delimiter << "vz_true" << delimiter
-       << "qx_true" << delimiter << "qy_true" << delimiter << "qz_true" << delimiter << "qw_true" << delimiter
+       << "rx_true" << delimiter << "ry_true" << delimiter << "rz_true" << delimiter
        << '\n';
 
     auto write_vector = [&](const ugl::Vector3& vec) {
         os << vec.x() << delimiter << vec.y() << delimiter << vec.z() << delimiter;
-    };
-    auto write_quat = [&](const ugl::UnitQuaternion& quat) {
-        os << quat.x() << delimiter << quat.y() << delimiter << quat.z() << delimiter << quat.w() << delimiter;
     };
 
     const auto size = result.times.size();
@@ -47,11 +46,11 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
 
         write_vector(result.estimates[i].position());
         write_vector(result.estimates[i].velocity());
-        write_quat(result.estimates[i].rotation().to_quaternion());
+        write_vector(ugl::lie::SO3::log(result.estimates[i].rotation()));
 
         write_vector(result.ground_truth[i].position());
         write_vector(result.ground_truth[i].velocity());
-        write_quat(result.ground_truth[i].rotation().to_quaternion());
+        write_vector(ugl::lie::SO3::log(result.ground_truth[i].rotation()));
 
         os << '\n';
     }
@@ -59,7 +58,7 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
     return os;
 }
 
-void save_to_file(const Result& result)
+void save_to_file(const std::vector<Result>& results)
 {
     auto test_info = testing::UnitTest::GetInstance()->current_test_info();
     std::string file_name = test_info->name();
@@ -68,27 +67,34 @@ void save_to_file(const Result& result)
 
     std::ofstream csv_file{result_path};
     csv_file << "# " << test_info->name() << ": " << test_info->value_param() << '\n';
-    csv_file << result;
+    csv_file << '\n';
+    csv_file << "test_case_count" << '\n' << results.size() << '\n';
+    csv_file << "rows_per_case" << '\n' << results[0].times.size() << '\n';
+    csv_file << '\n';
+
+    for (const auto& result : results)
+    {
+        csv_file << result << '\n';
+    }
 }
 
 template<typename FilterType>
 class DataGenerationTest: public AccuracyTest<FilterType>
 {
+private:
+    static constexpr int kNumOffsetSamples = 10;
+
 protected:
     void run_test()
     {
-        const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
-        const auto result = this->compute_accuracy(sensor_events);
-
-        this->RecordProperty("PositionRMSE", std::to_string(result.position_rmse));
-        this->RecordProperty("VelocityRMSE", std::to_string(result.velocity_rmse));
-        this->RecordProperty("RotationRMSE", std::to_string(result.rotation_rmse));
-
-        std::cout << "position_rmse : " << result.position_rmse << '\n';
-        std::cout << "velocity_rmse : " << result.velocity_rmse << '\n';
-        std::cout << "rotation_rmse : " << result.rotation_rmse << '\n';
-
-        save_to_file(result);
+        std::vector<Result> results{};
+        for (int i = 0; i < kNumOffsetSamples; ++i)
+        {
+            const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
+            const auto result = this->compute_accuracy(sensor_events);
+            results.push_back(result);
+        }
+        save_to_file(results);
     }
 };
 
