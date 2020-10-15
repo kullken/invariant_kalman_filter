@@ -52,7 +52,9 @@ private:
 private:
     State m_x = State::Zero();
     ugl::lie::Rotation m_R_ref = ugl::lie::Rotation::Identity();
-    Covariance<9> m_P = Covariance<9>::Identity();
+    Covariance<9> m_P = s_default_covariance;
+
+    static const ugl::Matrix<9,9> s_default_covariance;
 
     static constexpr int kPosIndex = 6;
     static constexpr int kVelIndex = 3;

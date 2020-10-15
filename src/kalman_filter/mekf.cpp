@@ -17,6 +17,19 @@ using ugl::lie::Rotation;
 
 const Vector3 MEKF::s_gravity{0.0, 0.0, -9.82};
 
+const MEKF::Covariance<9> MEKF::s_default_covariance = []() {
+    constexpr double rot_stddev = 0.1;  // [rad]
+    constexpr double vel_stddev = 0.5;  // [m/s]
+    constexpr double pos_stddev = 0.5;  // [m]
+
+    Covariance<9> covariance = Covariance<9>::Zero();
+    covariance.block<3,3>(0,0) = Matrix3::Identity() * rot_stddev*rot_stddev;
+    covariance.block<3,3>(3,3) = Matrix3::Identity() * vel_stddev*vel_stddev;
+    covariance.block<3,3>(6,6) = Matrix3::Identity() * pos_stddev*pos_stddev;
+
+    return covariance;
+}();
+
 MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
     : m_R_ref(R0)
     , m_P(P0)
