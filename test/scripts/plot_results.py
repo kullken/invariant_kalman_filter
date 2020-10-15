@@ -61,11 +61,12 @@ def plot_error(data, description):
     return
 
 def plot_state(data, description):
-    figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="all", sharey="row")
+    figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
     ((px_axes, py_axes, pz_axes), (vx_axes, vy_axes, vz_axes), (rx_axes, ry_axes, rz_axes)) = axes
 
     figure.suptitle(description)
 
+    # Plot trajectory for different initial errors.
     for case_data in data:
         px_axes.plot(case_data["time"], case_data["pos_pred"]["x"])
         py_axes.plot(case_data["time"], case_data["pos_pred"]["y"])
@@ -79,29 +80,21 @@ def plot_state(data, description):
         ry_axes.plot(case_data["time"], case_data["rot_pred"]["y"])
         rz_axes.plot(case_data["time"], case_data["rot_pred"]["z"])
 
-    px_axes.plot(data[0]["time"], data[0]["pos_true"]["x"], "--", label="x - True")
-    py_axes.plot(data[0]["time"], data[0]["pos_true"]["y"], "--", label="y - True")
-    pz_axes.plot(data[0]["time"], data[0]["pos_true"]["z"], "--", label="z - True")
+    # Plot ground truth values.
+    px_axes.plot(data[0]["time"], data[0]["pos_true"]["x"], "k--", label="True value")
+    py_axes.plot(data[0]["time"], data[0]["pos_true"]["y"], "k--", label="True value")
+    pz_axes.plot(data[0]["time"], data[0]["pos_true"]["z"], "k--", label="True value")
 
-    px_axes.legend()
-    py_axes.legend()
-    pz_axes.legend()
+    vx_axes.plot(data[0]["time"], data[0]["vel_true"]["x"], "k--", label="True value")
+    vy_axes.plot(data[0]["time"], data[0]["vel_true"]["y"], "k--", label="True value")
+    vz_axes.plot(data[0]["time"], data[0]["vel_true"]["z"], "k--", label="True value")
 
-    vx_axes.plot(data[0]["time"], data[0]["vel_true"]["x"], "--", label="x - True")
-    vy_axes.plot(data[0]["time"], data[0]["vel_true"]["y"], "--", label="y - True")
-    vz_axes.plot(data[0]["time"], data[0]["vel_true"]["z"], "--", label="z - True")
+    rx_axes.plot(data[0]["time"], data[0]["rot_true"]["x"], "k--", label="True value")
+    ry_axes.plot(data[0]["time"], data[0]["rot_true"]["y"], "k--", label="True value")
+    rz_axes.plot(data[0]["time"], data[0]["rot_true"]["z"], "k--", label="True value")
 
-    vx_axes.legend()
-    vy_axes.legend()
-    vz_axes.legend()
-
-    rx_axes.plot(data[0]["time"], data[0]["rot_true"]["x"], "--", label="x - True")
-    ry_axes.plot(data[0]["time"], data[0]["rot_true"]["y"], "--", label="y - True")
-    rz_axes.plot(data[0]["time"], data[0]["rot_true"]["z"], "--", label="z - True")
-
-    rx_axes.legend()
-    ry_axes.legend()
-    rz_axes.legend()
+    for ax in axes.flatten():
+        ax.legend()
 
 
 if __name__ == "__main__":
