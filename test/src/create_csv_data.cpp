@@ -1,9 +1,12 @@
 #include <algorithm>
-#include <iostream>
+#include <ostream>
 #include <fstream>
 #include <string>
 
 #include <gtest/gtest.h>
+
+#include <ugl/math/vector.h>
+#include <ugl/math/quaternion.h>
 
 #include "iekf.h"
 #include "mekf.h"
@@ -13,6 +16,48 @@
 
 namespace invariant::test
 {
+
+std::ostream& operator<<(std::ostream& os, const Result& result)
+{
+    constexpr auto delimiter = ' ';
+    os << "time" << delimiter
+       << "pos_err" << delimiter << "vel_err" << delimiter << "rot_err" << delimiter
+       << "px_pred" << delimiter << "py_pred" << delimiter << "pz_pred" << delimiter
+       << "vx_pred" << delimiter << "vy_pred" << delimiter << "vz_pred" << delimiter
+       << "qx_pred" << delimiter << "qy_pred" << delimiter << "qz_pred" << delimiter << "qw_pred" << delimiter
+       << "px_true" << delimiter << "py_true" << delimiter << "pz_true" << delimiter
+       << "vx_true" << delimiter << "vy_true" << delimiter << "vz_true" << delimiter
+       << "qx_true" << delimiter << "qy_true" << delimiter << "qz_true" << delimiter << "qw_true" << delimiter
+       << '\n';
+
+    auto write_vector = [&](const ugl::Vector3& vec) {
+        os << vec.x() << delimiter << vec.y() << delimiter << vec.z() << delimiter;
+    };
+    auto write_quat = [&](const ugl::UnitQuaternion& quat) {
+        os << quat.x() << delimiter << quat.y() << delimiter << quat.z() << delimiter << quat.w() << delimiter;
+    };
+
+    const auto size = result.times.size();
+    for (std::size_t i = 0; i < size; ++i)
+    {
+        os << result.times[i] << delimiter
+           << result.position_errors[i] << delimiter
+           << result.velocity_errors[i] << delimiter
+           << result.rotation_errors[i] << delimiter;
+
+        write_vector(result.estimates[i].position());
+        write_vector(result.estimates[i].velocity());
+        write_quat(result.estimates[i].rotation().to_quaternion());
+
+        write_vector(result.ground_truth[i].position());
+        write_vector(result.ground_truth[i].velocity());
+        write_quat(result.ground_truth[i].rotation().to_quaternion());
+
+        os << '\n';
+    }
+
+    return os;
+}
 
 void save_to_file(const Result& result)
 {

@@ -1,7 +1,6 @@
 #ifndef INVARIANT_ACCURACY_TEST_H
 #define INVARIANT_ACCURACY_TEST_H
 
-#include <ostream>
 #include <tuple>
 #include <string>
 #include <vector>
@@ -125,8 +124,6 @@ protected:
     ugl::trajectory::Trajectory trajectory_;
     std::vector<VirtualSensor> sensors_;
 };
-
-std::ostream& operator<<(std::ostream& os, const Result& result);
 
 } // namespace invariant::test
 
