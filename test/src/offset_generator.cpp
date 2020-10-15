@@ -13,8 +13,8 @@ const ugl::Matrix<9,9> OffsetGenerator::s_default_covariance = []() {
 
     ugl::Matrix<9,9> covariance = ugl::Matrix<9,9>::Zero();
     covariance.block<3,3>(0,0) = ugl::Matrix3::Identity() * rot_stddev*rot_stddev;
-    covariance.block<3,3>(0,0) = ugl::Matrix3::Identity() * vel_stddev*vel_stddev;
-    covariance.block<3,3>(0,0) = ugl::Matrix3::Identity() * pos_stddev*pos_stddev;
+    covariance.block<3,3>(3,3) = ugl::Matrix3::Identity() * vel_stddev*vel_stddev;
+    covariance.block<3,3>(6,6) = ugl::Matrix3::Identity() * pos_stddev*pos_stddev;
 
     return covariance;
 }();
