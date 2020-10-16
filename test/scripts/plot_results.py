@@ -67,18 +67,19 @@ def plot_state(data, description):
     figure.suptitle(description)
 
     # Plot trajectory for different initial errors.
+    plot_args = {"linewidth": 0.5}
     for case_data in data:
-        px_axes.plot(case_data["time"], case_data["pos_pred"]["x"])
-        py_axes.plot(case_data["time"], case_data["pos_pred"]["y"])
-        pz_axes.plot(case_data["time"], case_data["pos_pred"]["z"])
+        px_axes.plot(case_data["time"], case_data["pos_pred"]["x"], **plot_args)
+        py_axes.plot(case_data["time"], case_data["pos_pred"]["y"], **plot_args)
+        pz_axes.plot(case_data["time"], case_data["pos_pred"]["z"], **plot_args)
 
-        vx_axes.plot(case_data["time"], case_data["vel_pred"]["x"])
-        vy_axes.plot(case_data["time"], case_data["vel_pred"]["y"])
-        vz_axes.plot(case_data["time"], case_data["vel_pred"]["z"])
+        vx_axes.plot(case_data["time"], case_data["vel_pred"]["x"], **plot_args)
+        vy_axes.plot(case_data["time"], case_data["vel_pred"]["y"], **plot_args)
+        vz_axes.plot(case_data["time"], case_data["vel_pred"]["z"], **plot_args)
 
-        rx_axes.plot(case_data["time"], case_data["rot_pred"]["x"])
-        ry_axes.plot(case_data["time"], case_data["rot_pred"]["y"])
-        rz_axes.plot(case_data["time"], case_data["rot_pred"]["z"])
+        rx_axes.plot(case_data["time"], case_data["rot_pred"]["x"], **plot_args)
+        ry_axes.plot(case_data["time"], case_data["rot_pred"]["y"], **plot_args)
+        rz_axes.plot(case_data["time"], case_data["rot_pred"]["z"], **plot_args)
 
     # Plot ground truth values.
     px_axes.plot(data[0]["time"], data[0]["pos_true"]["x"], "k--", label="True value")
@@ -92,6 +93,21 @@ def plot_state(data, description):
     rx_axes.plot(data[0]["time"], data[0]["rot_true"]["x"], "k--", label="True value")
     ry_axes.plot(data[0]["time"], data[0]["rot_true"]["y"], "k--", label="True value")
     rz_axes.plot(data[0]["time"], data[0]["rot_true"]["z"], "k--", label="True value")
+
+    px_axes.set_ylabel("x position [m]")
+    py_axes.set_ylabel("y position [m]")
+    pz_axes.set_ylabel("z position [m]")
+
+    vx_axes.set_ylabel("x velocity [m/s]")
+    vy_axes.set_ylabel("y velocity [m/s]")
+    vz_axes.set_ylabel("z velocity [m/s]")
+
+    rx_axes.set_ylabel("roll [rad]")
+    ry_axes.set_ylabel("pitch [rad]")
+    rz_axes.set_ylabel("yaw [rad]")
+
+    for ax in axes.flatten():
+        ax.set_xlabel("Time [s]")
 
     for ax in axes.flatten():
         ax.legend()
