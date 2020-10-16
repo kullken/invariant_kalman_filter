@@ -11,6 +11,7 @@
 #include "virtual_sensor.h"
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
+#include "gps_sensor_model.h"
 
 namespace invariant::test
 {
@@ -42,21 +43,37 @@ const auto test_trajectories_partial = testing::Values(
 
 inline
 const auto test_sensor_models = testing::Values(
+    // std::vector{
+    //     VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+    //     VirtualSensor{MocapSensorModel{MocapNoiseLevel::None, 100.0}},
+    // },
+    // std::vector{
+    //     VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+    //     VirtualSensor{MocapSensorModel{MocapNoiseLevel::Low, 100.0}},
+    // },
+    // std::vector{
+    //     VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+    //     VirtualSensor{MocapSensorModel{MocapNoiseLevel::None, 100.0}},
+    // },
+    // std::vector{
+    //     VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+    //     VirtualSensor{MocapSensorModel{MocapNoiseLevel::Low, 100.0}},
+    // }
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{MocapSensorModel{MocapNoiseLevel::None, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
     },
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{MocapSensorModel{MocapNoiseLevel::Low, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
     },
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
-        VirtualSensor{MocapSensorModel{MocapNoiseLevel::None, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
     },
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
-        VirtualSensor{MocapSensorModel{MocapNoiseLevel::Low, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
     }
 );
 
