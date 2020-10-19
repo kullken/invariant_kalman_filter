@@ -110,7 +110,7 @@ protected:
 
     Result compute_accuracy(const std::vector<SensorEvent>& events)
     {
-        const auto initial_error = offset_.sample();
+        const auto initial_error = offset_.sample_uniform();
         const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
         filter_.set_state(initial_state);
 
