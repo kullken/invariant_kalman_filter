@@ -46,7 +46,7 @@ private:
     static Jacobian<9,9> process_error_jacobian(const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
 
     /// @brief Noise jacobian of the process model
-    static Jacobian<9,6> process_noise_jacobian(double dt);
+    static Jacobian<9,6> process_noise_jacobian();
 
     /// @brief Noise covariance of the process model
     static Covariance<6> process_noise_covariance();

@@ -54,14 +54,13 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     m_X = ugl::lie::ExtendedPose{R_pred, v_pred, p_pred};
 
     const auto& A = process_error_jacobian(acc, ang_vel);
-    const auto& D = process_noise_jacobian(dt);
+    const auto& D = process_noise_jacobian();
     const auto& Q = process_noise_covariance();
 
-    // Discretisation method from Hartley et al. (2018)
     const Matrix<9,9> Adt = A*dt;
     const Matrix<9,9> Adt2 = Adt*Adt;
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + Adt + Adt2/2 + Adt2*Adt/6 + Adt2*Adt2/24; // Approximates Phi = exp(A*dt)
-    m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose();
+    m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose() * dt*dt;
 }
 
 void IEKF::mocap_update(const ugl::lie::Pose& y)
@@ -107,12 +106,11 @@ IEKF::Jacobian<9,9> IEKF::process_error_jacobian(const ugl::Vector3& acc, const 
     return jac;
 }
 
-IEKF::Jacobian<9,6> IEKF::process_noise_jacobian(double dt)
+IEKF::Jacobian<9,6> IEKF::process_noise_jacobian()
 {
     Jacobian<9,6> jac = Jacobian<9,6>::Zero();
-    jac.block<3,3>(0,0) = Matrix3::Identity() * dt;
-    jac.block<3,3>(3,3) = Matrix3::Identity() * dt;
-    jac.block<3,3>(6,3) = Matrix3::Identity() * dt*dt*0.5;
+    jac.block<3,3>(0,0) = Matrix3::Identity();
+    jac.block<3,3>(3,3) = Matrix3::Identity();
     return jac;
 }
 
