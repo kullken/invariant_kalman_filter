@@ -53,29 +53,9 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 
     m_X = ugl::lie::ExtendedPose{R_pred, v_pred, p_pred};
 
-    // Error propagation
-    Matrix<9,9> A = Matrix<9,9>::Zero();
-    A.block<3,3>(kRotIndex,kRotIndex) = -ugl::lie::skew(ang_vel);
-    A.block<3,3>(kVelIndex,kVelIndex) = -ugl::lie::skew(ang_vel);
-    A.block<3,3>(kPosIndex,kPosIndex) = -ugl::lie::skew(ang_vel);
-    A.block<3,3>(kVelIndex,kRotIndex) = -ugl::lie::skew(acc);
-    A.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity();
-
-    const Covariance<6> Q = []() {
-        constexpr double sigma_gyro  = 0.1 ; // [rad/s]
-        constexpr double sigma_accel = 5.0;  // [m/s^2]
-        Covariance<6> Q = Covariance<6>::Zero();
-        Q.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
-        Q.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
-        return Q;
-    }();
-    const Jacobian<9,6> D = [&dt]() {
-        Jacobian<9,6> D = Jacobian<9,6>::Zero();
-        D.block<3,3>(0,0) = Matrix3::Identity() * dt;
-        D.block<3,3>(3,3) = Matrix3::Identity() * dt;
-        D.block<3,3>(6,3) = Matrix3::Identity() * dt*dt*0.5;
-        return D;
-    }();
+    const auto& A = process_error_jacobian(acc, ang_vel);
+    const auto& D = process_noise_jacobian(dt);
+    const auto& Q = process_noise_covariance();
 
     // Discretisation method from Hartley et al. (2018)
     const Matrix<9,9> Adt = A*dt;
@@ -114,6 +94,36 @@ void IEKF::gps_update(const ugl::Vector3& y)
 
     m_X = m_X*dX;
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
+}
+
+IEKF::Jacobian<9,9> IEKF::process_error_jacobian(const ugl::Vector3& acc, const ugl::Vector3& ang_vel)
+{
+    Jacobian<9,9> jac = Jacobian<9,9>::Zero();
+    jac.block<3,3>(kRotIndex,kRotIndex) = -ugl::lie::skew(ang_vel);
+    jac.block<3,3>(kVelIndex,kVelIndex) = -ugl::lie::skew(ang_vel);
+    jac.block<3,3>(kPosIndex,kPosIndex) = -ugl::lie::skew(ang_vel);
+    jac.block<3,3>(kVelIndex,kRotIndex) = -ugl::lie::skew(acc);
+    jac.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity();
+    return jac;
+}
+
+IEKF::Jacobian<9,6> IEKF::process_noise_jacobian(double dt)
+{
+    Jacobian<9,6> jac = Jacobian<9,6>::Zero();
+    jac.block<3,3>(0,0) = Matrix3::Identity() * dt;
+    jac.block<3,3>(3,3) = Matrix3::Identity() * dt;
+    jac.block<3,3>(6,3) = Matrix3::Identity() * dt*dt*0.5;
+    return jac;
+}
+
+IEKF::Covariance<6> IEKF::process_noise_covariance()
+{
+    constexpr double sigma_gyro  = 0.1 ; // [rad/s]
+    constexpr double sigma_accel = 5.0;  // [m/s^2]
+    Covariance<6> covar = Covariance<6>::Zero();
+    covar.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
+    covar.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
+    return covar;
 }
 
 const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
