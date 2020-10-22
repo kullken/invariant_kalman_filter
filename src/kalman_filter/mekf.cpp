@@ -53,11 +53,16 @@ void MEKF::set_state(const ugl::lie::ExtendedPose& state)
 
 void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 {
-    const Jacobian<9,9> A = MEKF::state_transition_jac(m_R_ref, dt, acc, ang_vel);
-    const Covariance<9> Q = MEKF::state_transition_var(dt);
-
     m_x = MEKF::state_transition_model(m_x, m_R_ref, dt, acc, ang_vel);
-    m_P = A*m_P*A.transpose() + Q;
+
+    const auto& A = process_error_jacobian(m_R_ref, acc, ang_vel);
+    const auto& D = process_noise_jacobian();
+    const auto& Q = process_noise_covariance();
+
+    const ugl::Matrix<9,9> Adt = A*dt;
+    const ugl::Matrix<9,9> Adt2 = Adt*Adt;
+    const ugl::Matrix<9,9> Phi = ugl::Matrix<9,9>::Identity() + Adt + Adt2/2 + Adt2*Adt/6 + Adt2*Adt2/24; // Approximates Phi = exp(A*dt)
+    m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose() * dt*dt;
 
     reset_attitude_error();
 }
@@ -120,38 +125,32 @@ MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, 
     return x_pred;
 }
 
-MEKF::Jacobian<9,9> MEKF::state_transition_jac(const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
+MEKF::Jacobian<9,9> MEKF::process_error_jacobian(const Rotation& R_ref, const Vector3& acc, const Vector3& ang_vel)
 {
-    Jacobian<9,9> jac = Jacobian<9,9>::Identity();
-    jac.block<3,3>(kPosIndex,kVelIndex) = dt * Matrix3::Identity();
-    // jac.block<3,3>(kVelIndex,kRotIndex) = dt * ugl::lie::skew(R_ref*acc);                  // Without inversion of R
-    jac.block<3,3>(kVelIndex,kRotIndex) = dt * ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
-    jac.block<3,3>(kRotIndex,kRotIndex) -= dt * 0.5 * ugl::lie::skew(ang_vel);
-
+    Jacobian<9,9> jac = Jacobian<9,9>::Zero();
+    jac.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity();
+    // jac.block<3,3>(kVelIndex,kRotIndex) = ugl::lie::skew(R_ref*acc);                  // Without inversion of R
+    jac.block<3,3>(kVelIndex,kRotIndex) = ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
+    jac.block<3,3>(kRotIndex,kRotIndex) = -0.5 * ugl::lie::skew(ang_vel);
     return jac;
 }
 
-MEKF::Covariance<9> MEKF::state_transition_var(double dt)
+MEKF::Jacobian<9,6> MEKF::process_noise_jacobian()
 {
-    // Values directly from Mueller et al. (2018).
-    constexpr double sigma_acc  = 5;      // m/s^2
-    constexpr double sigma_rate = 0.1;    // rad/s
+    Jacobian<9,6> jac = Jacobian<9,6>::Zero();
+    jac.block<3,3>(0,0) = Matrix3::Identity();
+    jac.block<3,3>(3,3) = Matrix3::Identity();
+    return jac;
+}
 
-    constexpr double sigma_acc_sq  = sigma_acc*sigma_acc;
-    constexpr double sigma_rate_sq = sigma_rate*sigma_rate;
-
-    const double dt2 = dt*dt;
-    const double dt3 = dt2*dt;
-    const double dt4 = dt3*dt;
-
-    Covariance<9> Q = Covariance<9>::Zero();
-    Q.block<3,3>(kPosIndex,kPosIndex) = Matrix3::Identity() * dt4/4 * sigma_acc_sq;
-    Q.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
-    Q.block<3,3>(kVelIndex,kPosIndex) = Matrix3::Identity() * dt3/2 * sigma_acc_sq;
-    Q.block<3,3>(kVelIndex,kVelIndex) = Matrix3::Identity() * dt2 * sigma_acc_sq;
-    Q.block<3,3>(kRotIndex,kRotIndex) = Matrix3::Identity() * dt2 * sigma_rate_sq;
-
-    return Q;
+MEKF::Covariance<6> MEKF::process_noise_covariance()
+{
+    constexpr double sigma_gyro  = 0.1 ; // [rad/s]
+    constexpr double sigma_accel = 5.0;  // [m/s^2]
+    Covariance<6> covar = Covariance<6>::Zero();
+    covar.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
+    covar.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
+    return covar;
 }
 
 } // namespace invariant
