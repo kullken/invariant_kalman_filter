@@ -96,7 +96,7 @@ void MEKF::reset_attitude_error()
     ugl::Matrix<9,9> T = ugl::Matrix<9,9>::Zero();
     T.block<3,3>(kPosIndex,kPosIndex) = Matrix3::Identity();
     T.block<3,3>(kVelIndex,kVelIndex) = Matrix3::Identity();
-    T.block<3,3>(kRotIndex,kRotIndex) = -0.5 * ugl::lie::SO3::exp(delta).matrix();
+    T.block<3,3>(kRotIndex,kRotIndex) = ugl::lie::SO3::exp(-0.5 * delta).matrix();
 
     m_P = T * m_P * T.transpose();
     m_R_ref *= ugl::lie::SO3::exp(delta);
