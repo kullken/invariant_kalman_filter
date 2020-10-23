@@ -11,17 +11,21 @@ vec3_type = np.dtype([
     ("z", float),
 ])
 
-csv_data_type = np.dtype([
+ground_truth_dtype = np.dtype([
+    ("time",     float),
+    ("pos", vec3_type),
+    ("vel", vec3_type),
+    ("rot", vec3_type),
+])
+
+test_case_dtype = np.dtype([
     ("time",     float),
     ("pos_err",  float),
     ("vel_err",  float),
     ("rot_err",  float),
-    ("pos_pred", vec3_type),
-    ("vel_pred", vec3_type),
-    ("rot_pred", vec3_type),
-    ("pos_true", vec3_type),
-    ("vel_true", vec3_type),
-    ("rot_true", vec3_type),
+    ("pos", vec3_type),
+    ("vel", vec3_type),
+    ("rot", vec3_type),
 ])
 
 def create_arg_parser():
@@ -60,7 +64,7 @@ def plot_error(data, description):
 
     return
 
-def plot_state(data, description):
+def plot_state(data, ground_truth, description):
     figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
     ((px_axes, py_axes, pz_axes), (vx_axes, vy_axes, vz_axes), (rx_axes, ry_axes, rz_axes)) = axes
 
@@ -69,30 +73,30 @@ def plot_state(data, description):
     # Plot trajectory for different initial errors.
     plot_args = {"linewidth": 0.5}
     for case_data in data:
-        px_axes.plot(case_data["time"], case_data["pos_pred"]["x"], **plot_args)
-        py_axes.plot(case_data["time"], case_data["pos_pred"]["y"], **plot_args)
-        pz_axes.plot(case_data["time"], case_data["pos_pred"]["z"], **plot_args)
+        px_axes.plot(case_data["time"], case_data["pos"]["x"], **plot_args)
+        py_axes.plot(case_data["time"], case_data["pos"]["y"], **plot_args)
+        pz_axes.plot(case_data["time"], case_data["pos"]["z"], **plot_args)
 
-        vx_axes.plot(case_data["time"], case_data["vel_pred"]["x"], **plot_args)
-        vy_axes.plot(case_data["time"], case_data["vel_pred"]["y"], **plot_args)
-        vz_axes.plot(case_data["time"], case_data["vel_pred"]["z"], **plot_args)
+        vx_axes.plot(case_data["time"], case_data["vel"]["x"], **plot_args)
+        vy_axes.plot(case_data["time"], case_data["vel"]["y"], **plot_args)
+        vz_axes.plot(case_data["time"], case_data["vel"]["z"], **plot_args)
 
-        rx_axes.plot(case_data["time"], case_data["rot_pred"]["x"], **plot_args)
-        ry_axes.plot(case_data["time"], case_data["rot_pred"]["y"], **plot_args)
-        rz_axes.plot(case_data["time"], case_data["rot_pred"]["z"], **plot_args)
+        rx_axes.plot(case_data["time"], case_data["rot"]["x"], **plot_args)
+        ry_axes.plot(case_data["time"], case_data["rot"]["y"], **plot_args)
+        rz_axes.plot(case_data["time"], case_data["rot"]["z"], **plot_args)
 
     # Plot ground truth values.
-    px_axes.plot(data[0]["time"], data[0]["pos_true"]["x"], "k--", label="True value")
-    py_axes.plot(data[0]["time"], data[0]["pos_true"]["y"], "k--", label="True value")
-    pz_axes.plot(data[0]["time"], data[0]["pos_true"]["z"], "k--", label="True value")
+    px_axes.plot(ground_truth["time"], ground_truth["pos"]["x"], "k--", label="True value")
+    py_axes.plot(ground_truth["time"], ground_truth["pos"]["y"], "k--", label="True value")
+    pz_axes.plot(ground_truth["time"], ground_truth["pos"]["z"], "k--", label="True value")
 
-    vx_axes.plot(data[0]["time"], data[0]["vel_true"]["x"], "k--", label="True value")
-    vy_axes.plot(data[0]["time"], data[0]["vel_true"]["y"], "k--", label="True value")
-    vz_axes.plot(data[0]["time"], data[0]["vel_true"]["z"], "k--", label="True value")
+    vx_axes.plot(ground_truth["time"], ground_truth["vel"]["x"], "k--", label="True value")
+    vy_axes.plot(ground_truth["time"], ground_truth["vel"]["y"], "k--", label="True value")
+    vz_axes.plot(ground_truth["time"], ground_truth["vel"]["z"], "k--", label="True value")
 
-    rx_axes.plot(data[0]["time"], data[0]["rot_true"]["x"], "k--", label="True value")
-    ry_axes.plot(data[0]["time"], data[0]["rot_true"]["y"], "k--", label="True value")
-    rz_axes.plot(data[0]["time"], data[0]["rot_true"]["z"], "k--", label="True value")
+    rx_axes.plot(ground_truth["time"], ground_truth["rot"]["x"], "k--", label="True value")
+    ry_axes.plot(ground_truth["time"], ground_truth["rot"]["y"], "k--", label="True value")
+    rz_axes.plot(ground_truth["time"], ground_truth["rot"]["z"], "k--", label="True value")
 
     px_axes.set_ylabel("x position [m]")
     py_axes.set_ylabel("y position [m]")
@@ -129,12 +133,14 @@ if __name__ == "__main__":
     FILE_HEADER_ROWS = 6
     CASE_HEADER_ROWS = 2
 
+    ground_truth = np.loadtxt(file_path, dtype=ground_truth_dtype, skiprows=FILE_HEADER_ROWS+CASE_HEADER_ROWS, max_rows=rows_per_case)
+
     data = []
     for n in range(test_case_count):
-        skip_rows = FILE_HEADER_ROWS + CASE_HEADER_ROWS*(n+1) + rows_per_case*n
-        data.append(np.loadtxt(file_path, dtype=csv_data_type, skiprows=skip_rows, max_rows=rows_per_case))
+        skip_rows = FILE_HEADER_ROWS + CASE_HEADER_ROWS*(n+2) + rows_per_case*(n+1)
+        data.append(np.loadtxt(file_path, dtype=test_case_dtype, skiprows=skip_rows, max_rows=rows_per_case))
 
     plot_error(data, description)
-    plot_state(data, description)
+    plot_state(data, ground_truth, description)
 
     plt.show()

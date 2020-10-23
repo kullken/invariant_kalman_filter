@@ -9,6 +9,7 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/quaternion.h>
 #include <ugl/lie_group/rotation.h>
+#include <ugl/lie_group/extended_pose.h>
 
 #include "iekf.h"
 #include "mekf.h"
@@ -18,18 +19,18 @@
 
 namespace invariant::test
 {
+namespace
+{
+
+constexpr auto delimiter = ' ';
 
 std::ostream& operator<<(std::ostream& os, const Result& result)
 {
-    constexpr auto delimiter = ' ';
     os << "time" << delimiter
        << "pos_err" << delimiter << "vel_err" << delimiter << "rot_err" << delimiter
-       << "px_pred" << delimiter << "py_pred" << delimiter << "pz_pred" << delimiter
-       << "vx_pred" << delimiter << "vy_pred" << delimiter << "vz_pred" << delimiter
-       << "rx_pred" << delimiter << "ry_pred" << delimiter << "rz_pred" << delimiter
-       << "px_true" << delimiter << "py_true" << delimiter << "pz_true" << delimiter
-       << "vx_true" << delimiter << "vy_true" << delimiter << "vz_true" << delimiter
-       << "rx_true" << delimiter << "ry_true" << delimiter << "rz_true" << delimiter
+       << "pos_x" << delimiter << "pos_y" << delimiter << "pos_z" << delimiter
+       << "vel_x" << delimiter << "vel_y" << delimiter << "vel_z" << delimiter
+       << "rot_x" << delimiter << "rot_y" << delimiter << "rot_z" << delimiter
        << '\n';
 
     auto write_vector = [&](const ugl::Vector3& vec) {
@@ -48,14 +49,33 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
         write_vector(result.estimates[i].velocity());
         write_vector(ugl::lie::SO3::log(result.estimates[i].rotation()));
 
-        write_vector(result.ground_truth[i].position());
-        write_vector(result.ground_truth[i].velocity());
-        write_vector(ugl::lie::SO3::log(result.ground_truth[i].rotation()));
-
         os << '\n';
     }
 
     return os;
+}
+
+void write_ground_truth(std::ostream& os, const std::vector<double>& times, const std::vector<ugl::lie::ExtendedPose>& states)
+{
+    os << "time" << delimiter
+       << "pos_x" << delimiter << "pos_y" << delimiter << "pos_z" << delimiter
+       << "vel_x" << delimiter << "vel_y" << delimiter << "vel_z" << delimiter
+       << "rot_x" << delimiter << "rot_y" << delimiter << "rot_z" << delimiter
+       << '\n';
+
+    auto write_vector = [&](const ugl::Vector3& vec) {
+        os << vec.x() << delimiter << vec.y() << delimiter << vec.z() << delimiter;
+    };
+
+    const auto size = times.size();
+    for (std::size_t i = 0; i < size; ++i)
+    {
+        os << times[i] << delimiter;
+        write_vector(states[i].position());
+        write_vector(states[i].velocity());
+        write_vector(ugl::lie::SO3::log(states[i].rotation()));
+        os << '\n';
+    }
 }
 
 void save_to_file(const std::vector<Result>& results)
@@ -72,11 +92,16 @@ void save_to_file(const std::vector<Result>& results)
     csv_file << "rows_per_case" << '\n' << results[0].times.size() << '\n';
     csv_file << '\n';
 
+    write_ground_truth(csv_file, results[0].times, results[0].ground_truth);
+    csv_file << '\n';
+
     for (const auto& result : results)
     {
         csv_file << result << '\n';
     }
 }
+
+} // namespace
 
 template<typename FilterType>
 class DataGenerationTest: public AccuracyTest<FilterType>
