@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <ostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -81,24 +82,27 @@ void write_ground_truth(std::ostream& os, const std::vector<double>& times, cons
 void save_to_file(const std::vector<Result>& results)
 {
     auto test_info = testing::UnitTest::GetInstance()->current_test_info();
-    std::string file_name = test_info->name();
-    std::replace(std::begin(file_name), std::end(file_name), '/', '_');
-	const std::string result_path{"/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/" + file_name + ".csv"};
 
-    std::ofstream csv_file{result_path};
-    csv_file << "# " << test_info->name() << ": " << test_info->value_param() << '\n';
-    csv_file << '\n';
-    csv_file << "test_case_count" << '\n' << results.size() << '\n';
-    csv_file << "rows_per_case" << '\n' << results[0].times.size() << '\n';
-    csv_file << '\n';
+    std::stringstream ss;
+    ss << "# " << test_info->name() << ": " << test_info->value_param() << '\n';
+    ss << '\n';
+    ss << "test_case_count" << '\n' << results.size() << '\n';
+    ss << "rows_per_case" << '\n' << results[0].times.size() << '\n';
+    ss << '\n';
 
-    write_ground_truth(csv_file, results[0].times, results[0].ground_truth);
-    csv_file << '\n';
+    write_ground_truth(ss, results[0].times, results[0].ground_truth);
+    ss << '\n';
 
     for (const auto& result : results)
     {
-        csv_file << result << '\n';
+        ss << result << '\n';
     }
+
+    std::string file_name = test_info->name();
+    std::replace(std::begin(file_name), std::end(file_name), '/', '_');
+	const std::string result_path{"/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/" + file_name + ".csv"};
+    std::ofstream csv_file{result_path};
+    csv_file << ss.rdbuf();
 }
 
 } // namespace
