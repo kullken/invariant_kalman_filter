@@ -8,6 +8,7 @@
 #include <ugl/math/quaternion.h>
 
 #include <ugl/trajectory/trajectory.h>
+#include <ugl/trajectory/circle_arc.h>
 #include <ugl/trajectory/bezier.h>
 #include <ugl/trajectory/bezier_sequence.h>
 #include <ugl/trajectory/slerp_segment.h>
@@ -100,6 +101,13 @@ ugl::trajectory::Trajectory start_stop(ugl::Vector3 acceleration, double duratio
 
     ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
 
+    return {lin_traj, ang_traj};
+}
+
+ugl::trajectory::Trajectory circle(double degrees, double radius, double duration)
+{
+    auto lin_traj = ugl::trajectory::CircleArc{deg2rad(degrees), radius, duration};
+    auto ang_traj = rotate_yaw(degrees, duration);
     return {lin_traj, ang_traj};
 }
 

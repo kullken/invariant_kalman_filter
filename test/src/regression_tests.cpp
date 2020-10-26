@@ -32,7 +32,8 @@ const auto test_trajectories = testing::Values(
     TestTrajectory{"Translate Quadratic x: 10m; 1s", quadratic_translation({10,0,0}, 1)},
     TestTrajectory{"Translate Quadratic x: 10m; 10s", quadratic_translation({10,0,0}, 10)},
     TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)},
-    TestTrajectory{"StartStop: {0,0,1}, 10s", start_stop({0,0,1}, 10)}
+    TestTrajectory{"StartStop: {0,0,1}, 10s", start_stop({0,0,1}, 10)},
+    TestTrajectory{"Circle: 720, 1m, 10s", circle(720, 1, 10)}
 );
 
 const auto test_sensor_models = testing::Values(
