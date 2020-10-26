@@ -110,7 +110,7 @@ void save_to_file(const std::vector<Result>& results)
 }
 
 const auto test_trajectories = testing::Values(
-    TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
+    TestTrajectory{"StandStill 10s", stand_still(10)},
     TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
     TestTrajectory{"ConstantVel xy: 10m; 10s", constant_velocity({1,1,0}, 10)},
     TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)}

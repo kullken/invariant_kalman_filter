@@ -15,7 +15,7 @@
 
 namespace invariant::test
 {
-namespace 
+namespace
 {
 
 constexpr auto pi = 3.141592653589793238462643383279502884L;
@@ -43,13 +43,13 @@ static auto rotate_yaw(double degrees, double total_duration)
         start = end;
         degrees_left -= delta_deg;
     }
-    
+
     return ugl::trajectory::SlerpSequence(segments);
 }
 
 } // namespace
 
-ugl::trajectory::Trajectory getStandStillTrajectory(double duration)
+ugl::trajectory::Trajectory stand_still(double duration)
 {
     ugl::trajectory::Bezier<0> lin_traj{duration, {ugl::Vector3::Zero()}};
 

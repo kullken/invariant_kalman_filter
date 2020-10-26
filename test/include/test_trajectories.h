@@ -22,7 +22,7 @@ inline std::ostream& operator<<(std::ostream& os, const TestTrajectory& param)
     return os << param.description;
 }
 
-ugl::trajectory::Trajectory getStandStillTrajectory(double duration=1.0);
+ugl::trajectory::Trajectory stand_still(double duration=1.0);
 
 ugl::trajectory::Trajectory rotate_in_place(double degrees, double duration=1.0);
 

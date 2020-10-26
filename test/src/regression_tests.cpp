@@ -20,7 +20,7 @@ namespace
 {
 
 const auto test_trajectories = testing::Values(
-    TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
+    TestTrajectory{"StandStill 10s", stand_still(10)},
     TestTrajectory{"Rotate 360 left, 1s", rotate_in_place(360, 1)},
     TestTrajectory{"Rotate 360 right, 1s", rotate_in_place(-360, 1)},
     TestTrajectory{"Rotate 3600 left, 1s", rotate_in_place(3600, 1)},
