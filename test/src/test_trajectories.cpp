@@ -18,10 +18,13 @@ namespace invariant::test
 namespace
 {
 
-constexpr auto pi = 3.141592653589793238462643383279502884L;
-constexpr auto deg2rad = pi / 180.0;
+constexpr double deg2rad(double degrees)
+{
+    constexpr auto pi = 3.141592653589793238462643383279502884L;
+    return degrees * pi / 180.0;
+}
 
-static auto rotate_yaw(double degrees, double total_duration)
+auto rotate_yaw(double degrees, double total_duration)
 {
     const ugl::Vector3 rotation_axis = degrees < 0 ? ugl::Vector3{0,0,-1} : ugl::Vector3{0,0,1};
     double degrees_left = degrees < 0 ? -degrees : degrees;
@@ -34,7 +37,7 @@ static auto rotate_yaw(double degrees, double total_duration)
     while (degrees_left > 0)
     {
         const double delta_deg = std::min(degrees_left, 90.0);
-        const ugl::UnitQuaternion delta = ugl::math::to_quat(delta_deg*deg2rad, rotation_axis);
+        const ugl::UnitQuaternion delta = ugl::math::to_quat(deg2rad(delta_deg), rotation_axis);
         end = delta * start;
 
         const double duration = delta_deg / deg_per_sec;
