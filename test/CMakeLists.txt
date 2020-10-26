@@ -42,7 +42,6 @@ target_link_libraries(accuracy_test
     ugl::trajectory
     ugl::lie_group
     ugl::random
-    kalman_filter
     sensor_models
     ${catkin_LIBRARIES}
   PRIVATE
