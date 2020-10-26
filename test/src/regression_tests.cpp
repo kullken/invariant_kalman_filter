@@ -21,16 +21,11 @@ namespace
 
 const auto test_trajectories = testing::Values(
     TestTrajectory{"StandStill 10s", stand_still(10)},
-    TestTrajectory{"Rotate 360 left, 1s", rotate_in_place(360, 1)},
-    TestTrajectory{"Rotate 360 right, 1s", rotate_in_place(-360, 1)},
-    TestTrajectory{"Rotate 3600 left, 1s", rotate_in_place(3600, 1)},
     TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
     TestTrajectory{"ConstantVel xy: 10m; 10s", constant_velocity({1,1,0}, 10)},
     TestTrajectory{"ConstantVel  z: 10m; 10s", constant_velocity({0,0,1}, 10)},
-    TestTrajectory{"Translate Quadratic xy: 1m; 1s", quadratic_translation({1,1,0}, 1)},
-    TestTrajectory{"Translate Quadratic z: 1m; 1s", quadratic_translation({0,0,1}, 1)},
-    TestTrajectory{"Translate Quadratic x: 10m; 1s", quadratic_translation({10,0,0}, 1)},
-    TestTrajectory{"Translate Quadratic x: 10m; 10s", quadratic_translation({10,0,0}, 10)},
+    TestTrajectory{"Translate Quadratic xy: 10m; 10s", quadratic_translation({10,10,0}, 10)},
+    TestTrajectory{"Translate Quadratic z: 10m; 10s", quadratic_translation({0,0,10}, 10)},
     TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)},
     TestTrajectory{"StartStop: {0,0,1}, 10s", start_stop({0,0,1}, 10)},
     TestTrajectory{"Circle: 720, 1m, 10s", circle(720, 1, 10)}
@@ -67,7 +62,7 @@ class RegressionTest: public AccuracyTest<FilterType>
 {
 private:
     static constexpr int kNumTestRuns      = 10;
-    static constexpr int kNumOffsetSamples = 1;
+    static constexpr int kNumOffsetSamples = 10;
 
 protected:
     void run_test()

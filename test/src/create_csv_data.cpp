@@ -147,7 +147,7 @@ template<typename FilterType>
 class DataGenerationTest: public AccuracyTest<FilterType>
 {
 private:
-    static constexpr int kNumOffsetSamples = 10;
+    static constexpr int kNumOffsetSamples = 20;
 
 protected:
     void run_test()
