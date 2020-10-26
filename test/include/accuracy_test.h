@@ -17,7 +17,6 @@
 #include "iekf.h"
 #include "mekf.h"
 
-#include "accuracy_test_config.h"
 #include "test_trajectories.h"
 #include "offset_generator.h"
 

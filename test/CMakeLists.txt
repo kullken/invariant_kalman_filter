@@ -28,7 +28,6 @@ target_link_libraries(sensor_models
 ## Accuracy Test
 add_library(accuracy_test SHARED
   src/accuracy_test.cpp
-  src/accuracy_test_config.cpp
   src/test_trajectories.cpp
   src/offset_generator.cpp
 )
@@ -64,6 +63,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(create_csv_data
       kalman_filter
       accuracy_test
+      sensor_models
       project_options
       project_warnings
   )
@@ -76,6 +76,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(regression_tests
       kalman_filter
       accuracy_test
+      sensor_models
       project_options
       project_warnings
   )

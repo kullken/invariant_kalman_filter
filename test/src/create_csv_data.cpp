@@ -16,7 +16,11 @@
 #include "mekf.h"
 
 #include "accuracy_test.h"
-#include "accuracy_test_config.h"
+#include "test_trajectories.h"
+#include "virtual_sensor.h"
+#include "imu_sensor_model.h"
+#include "mocap_sensor_model.h"
+#include "gps_sensor_model.h"
 
 namespace invariant::test
 {
@@ -105,6 +109,37 @@ void save_to_file(const std::vector<Result>& results)
     csv_file << ss.rdbuf();
 }
 
+const auto test_trajectories = testing::Values(
+    TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
+    TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
+    TestTrajectory{"ConstantVel xy: 10m; 10s", constant_velocity({1,1,0}, 10)},
+    TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)}
+);
+
+const auto test_sensor_models = testing::Values(
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
+    }
+);
+
+const auto test_configs = testing::Combine(
+    test_trajectories,
+    test_sensor_models
+);
+
 } // namespace
 
 template<typename FilterType>
@@ -132,7 +167,7 @@ TEST_P(IekfTestSuite, IekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     GenerateCsvData,
     IekfTestSuite,
-    test_configs_partial,
+    test_configs,
 );
 
 using MekfTestSuite = DataGenerationTest<MEKF>;
@@ -140,7 +175,7 @@ TEST_P(MekfTestSuite, MekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     GenerateCsvData,
     MekfTestSuite,
-    test_configs_partial,
+    test_configs,
 );
 
 } // namespace invariant::test

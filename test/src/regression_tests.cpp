@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -7,10 +8,58 @@
 #include "mekf.h"
 
 #include "accuracy_test.h"
-#include "accuracy_test_config.h"
+#include "test_trajectories.h"
+#include "virtual_sensor.h"
+#include "imu_sensor_model.h"
+#include "mocap_sensor_model.h"
+#include "gps_sensor_model.h"
 
 namespace invariant::test
 {
+namespace
+{
+
+const auto test_trajectories = testing::Values(
+    TestTrajectory{"StandStill 10s", getStandStillTrajectory(10)},
+    TestTrajectory{"Rotate 360 left, 1s", rotate_in_place(360, 1)},
+    TestTrajectory{"Rotate 360 right, 1s", rotate_in_place(-360, 1)},
+    TestTrajectory{"Rotate 3600 left, 1s", rotate_in_place(3600, 1)},
+    TestTrajectory{"Rotate 3600 left, 10s", rotate_in_place(3600, 10)},
+    TestTrajectory{"ConstantVel xy: 10m; 10s", constant_velocity({1,1,0}, 10)},
+    TestTrajectory{"ConstantVel  z: 10m; 10s", constant_velocity({0,0,1}, 10)},
+    TestTrajectory{"Translate Quadratic xy: 1m; 1s", quadratic_translation({1,1,0}, 1)},
+    TestTrajectory{"Translate Quadratic z: 1m; 1s", quadratic_translation({0,0,1}, 1)},
+    TestTrajectory{"Translate Quadratic x: 10m; 1s", quadratic_translation({10,0,0}, 1)},
+    TestTrajectory{"Translate Quadratic x: 10m; 10s", quadratic_translation({10,0,0}, 10)},
+    TestTrajectory{"StartStop: {1,1,0}, 10s", start_stop({1,1,0}, 10)},
+    TestTrajectory{"StartStop: {0,0,1}, 10s", start_stop({0,0,1}, 10)}
+);
+
+const auto test_sensor_models = testing::Values(
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
+    },
+    std::vector{
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
+    }
+);
+
+const auto test_configs = testing::Combine(
+    test_trajectories,
+    test_sensor_models
+);
+
+} // namepsace
 
 template<typename FilterType>
 class RegressionTest: public AccuracyTest<FilterType>
@@ -57,7 +106,7 @@ TEST_P(IekfTestSuite, IekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     RegressionTests,
     IekfTestSuite,
-    test_configs_full,
+    test_configs,
 );
 
 using MekfTestSuite = RegressionTest<MEKF>;
@@ -65,7 +114,7 @@ TEST_P(MekfTestSuite, MekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     RegressionTests,
     MekfTestSuite,
-    test_configs_full,
+    test_configs,
 );
 
 } // namespace invariant::test
