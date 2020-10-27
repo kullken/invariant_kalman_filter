@@ -42,6 +42,9 @@ public:
     void mocap_update(const ugl::lie::Pose& y);
     void gps_update(const ugl::lie::Euclidean<3>& y);
 
+    template<typename MeasurementModel>
+    void update(const typename MeasurementModel::MeasurementType& y);
+
 private:
     /// @brief Error jacobian of the process model
     static Jacobian<9,9> process_error_jacobian(const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
@@ -65,6 +68,26 @@ private:
     // Gravitational acceleration
     static const ugl::Vector3 s_gravity;
 };
+
+template<typename MeasurementModel>
+void IEKF::update(const typename MeasurementModel::MeasurementType& y)
+{
+    using Y = typename MeasurementModel::MeasurementType;
+    using G = ugl::lie::ExtendedPose;
+
+    const auto& H = MeasurementModel::error_jacobian();
+    const auto& E = MeasurementModel::noise_jacobian();
+    const auto& N = MeasurementModel::noise_covariance();
+
+    const ugl::Matrix<Y::DoF,Y::DoF> S = H * m_P * H.transpose() + E * N * E.transpose();
+    const ugl::Matrix<G::DoF,Y::DoF> K = m_P * H.transpose() * S.inverse();
+
+    const Y innovation = MeasurementModel::group_action(m_X.inverse(), y) * MeasurementModel::target().inverse();
+    const G::VectorType correction = K*ugl::lie::log(innovation);
+
+    m_X = m_X * ugl::lie::exp(correction);
+    m_P = m_P - K*H*m_P;
+}
 
 } // namespace invariant
 
