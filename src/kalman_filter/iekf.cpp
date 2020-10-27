@@ -3,6 +3,7 @@
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
 
+#include <ugl/lie_group/euclidean.h>
 #include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
@@ -73,13 +74,13 @@ void IEKF::mocap_update(const ugl::lie::Pose& y)
     const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
 
     const ugl::lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * MocapModel::target().inverse();
-    const ugl::lie::ExtendedPose dX = ugl::lie::SE2_3::exp(K*ugl::lie::SE_3::log(innovation));
+    const ugl::Vector<9> correction = K*ugl::lie::log(innovation);
 
-    m_X = m_X*dX;
+    m_X = m_X * ugl::lie::exp(correction);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 
-void IEKF::gps_update(const ugl::Vector3& y)
+void IEKF::gps_update(const ugl::lie::Euclidean<3>& y)
 {
     const auto& H = GpsModel::error_jacobian();
     const auto& E = GpsModel::noise_jacobian();
@@ -88,10 +89,10 @@ void IEKF::gps_update(const ugl::Vector3& y)
     const Matrix<3,3> S = H * m_P * H.transpose() + E * N * E.transpose();
     const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
-    const ugl::Vector3 innovation = GpsModel::group_action(m_X.inverse(), y) - GpsModel::target();
-    const ugl::lie::ExtendedPose dX = ugl::lie::SE2_3::exp(K*innovation);
+    const ugl::lie::Euclidean<3> innovation = GpsModel::group_action(m_X.inverse(), y) * GpsModel::target().inverse();
+    const ugl::Vector<9> correction = K*ugl::lie::log(innovation);
 
-    m_X = m_X*dX;
+    m_X = m_X * ugl::lie::exp(correction);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 

@@ -4,6 +4,7 @@
 #include <iosfwd>
 
 #include <ugl/math/vector.h>
+#include <ugl/lie_group/euclidean.h>
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/normal_distribution.h>
 
@@ -12,7 +13,7 @@ namespace invariant::test
 
 struct GpsData
 {
-    ugl::Vector3 position;
+    ugl::lie::Euclidean<3> position;
 };
 
 enum class GpsNoiseLevel

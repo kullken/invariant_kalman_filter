@@ -5,6 +5,7 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
+#include <ugl/lie_group/euclidean.h>
 #include <ugl/trajectory/trajectory.h>
 
 namespace invariant::test
@@ -21,7 +22,7 @@ GpsSensorModel::GpsSensorModel(GpsNoiseLevel level, double frequency)
 
 GpsData GpsSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    return GpsData{get_pos_reading(t, trajectory)};
+    return GpsData{ugl::lie::Euclidean<3>{get_pos_reading(t, trajectory)}};
 }
 
 ugl::Vector3 GpsSensorModel::get_pos_reading(double t, const ugl::trajectory::Trajectory& trajectory) const

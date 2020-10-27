@@ -6,8 +6,8 @@
 namespace invariant
 {
 
-const ugl::Vector3 GpsModel::s_target = []() {
-    return ugl::Vector3::Zero();
+const GpsModel::MeasurementType GpsModel::s_target = []() {
+    return GpsModel::MeasurementType::Identity();
 }();
 
 const ugl::Matrix<3,9> GpsModel::s_error_jacobian = []() {
@@ -28,15 +28,15 @@ const ugl::Matrix<3,3> GpsModel::s_noise_covariance = []() {
 
 ugl::Vector3 GpsModel::h(const ugl::lie::ExtendedPose& state)
 {
-    return group_action(state, target());
+    return group_action(state, target()).vector();
 }
 
-ugl::Vector3 GpsModel::group_action(const ugl::lie::ExtendedPose& actor, const ugl::Vector3& target)
+GpsModel::MeasurementType GpsModel::group_action(const ugl::lie::ExtendedPose& actor, const GpsModel::MeasurementType& target)
 {
-    return actor.position() + actor.rotation() * target;
+    return GpsModel::MeasurementType{actor.position() + actor.rotation() * target.vector()};
 }
 
-const ugl::Vector3& GpsModel::target()
+const GpsModel::MeasurementType& GpsModel::target()
 {
     return s_target;
 }

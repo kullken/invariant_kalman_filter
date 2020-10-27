@@ -5,6 +5,7 @@
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
 
+#include <ugl/lie_group/euclidean.h>
 #include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
@@ -39,7 +40,7 @@ public:
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     void mocap_update(const ugl::lie::Pose& y);
-    void gps_update(const ugl::Vector3& y);
+    void gps_update(const ugl::lie::Euclidean<3>& y);
 
 private:
     /// @brief Error jacobian of the process model

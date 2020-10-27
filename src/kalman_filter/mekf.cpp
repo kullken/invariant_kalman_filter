@@ -2,6 +2,8 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
+
+#include <ugl/lie_group/euclidean.h>
 #include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
@@ -72,7 +74,7 @@ void MEKF::mocap_update(const ugl::lie::Pose&)
 
 }
 
-void MEKF::gps_update(const Vector3& y)
+void MEKF::gps_update(const ugl::lie::Euclidean<3>& y)
 {
     const auto& H = GpsModel::error_jacobian();
     const auto& E = GpsModel::noise_jacobian();
@@ -81,7 +83,7 @@ void MEKF::gps_update(const Vector3& y)
     const Covariance<3> S = H * m_P * H.transpose() + E * N * E.transpose();
     const ugl::Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
-    const Vector3 innovation = y - GpsModel::h(get_state());
+    const Vector3 innovation = y.vector() - GpsModel::h(get_state());
 
     m_x = m_x + K*innovation;
     m_P = (Covariance<9>::Identity() - K*H) * m_P;

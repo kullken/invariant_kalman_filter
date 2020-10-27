@@ -2,6 +2,7 @@
 #define INVARIANT_GPS_MODEL_H
 
 #include <ugl/math/matrix.h>
+#include <ugl/lie_group/euclidean.h>
 #include <ugl/lie_group/extended_pose.h>
 
 namespace invariant
@@ -10,6 +11,9 @@ namespace invariant
 /// @brief A measurement model for GPS sensors.
 class GpsModel
 {
+public:
+    using MeasurementType = ugl::lie::Euclidean<3>;
+
 public:
     GpsModel() = delete;
 
@@ -22,11 +26,11 @@ public:
     /// @param actor the value which is to act on target
     /// @param target the target of the action
     /// @return Result of action: y = actor * target
-    static ugl::Vector3 group_action(const ugl::lie::ExtendedPose& actor, const ugl::Vector3& target);
+    static MeasurementType group_action(const ugl::lie::ExtendedPose& actor, const MeasurementType& target);
 
     /// @brief Target for group action
     /// @return Const reference to target variable
-    static const ugl::Vector3& target();
+    static const MeasurementType& target();
 
     /// @brief Error jacobian of measurement model
     /// @return Const reference to the jacobian matrix
@@ -41,7 +45,7 @@ public:
     static const ugl::Matrix<3,3>& noise_covariance();
 
 private:
-    static const ugl::Vector3 s_target;
+    static const ugl::lie::Euclidean<3> s_target;
     static const ugl::Matrix<3,9> s_error_jacobian;
     static const ugl::Matrix<3,3> s_noise_jacobian;
     static const ugl::Matrix<3,3> s_noise_covariance;
