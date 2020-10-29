@@ -14,12 +14,7 @@
 namespace invariant
 {
 
-using ugl::Vector3;
-using ugl::Matrix3;
-using ugl::lie::Rotation;
-
-using ugl::Vector;
-using ugl::Matrix;
+using namespace ugl;
 
 const IEKF::Covariance<9> IEKF::s_default_covariance = []() {
     constexpr double rot_stddev = 0.1;  // [rad]
@@ -34,7 +29,7 @@ const IEKF::Covariance<9> IEKF::s_default_covariance = []() {
     return covariance;
 }();
 
-IEKF::IEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
+IEKF::IEKF(const lie::Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
     : m_X(R0, v0, p0)
     , m_P(P0)
 {
@@ -43,16 +38,16 @@ IEKF::IEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covar
 void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     // State propagation
-    const Rotation R = m_X.rotation();
-    const Vector3  v = m_X.velocity();
-    const Vector3  p = m_X.position();
+    const lie::Rotation R = m_X.rotation();
+    const Vector3 v = m_X.velocity();
+    const Vector3 p = m_X.position();
 
     // Discretisation method from Hartley et al. (2018)
-    const Rotation R_pred = R * ugl::lie::SO3::exp(ang_vel*dt);
-    const Vector3  v_pred = v + (R*acc + s_gravity)*dt;
-    const Vector3  p_pred = p + v*dt + 0.5*(R*acc + s_gravity)*dt*dt;
+    const lie::Rotation R_pred = R * lie::SO3::exp(ang_vel*dt);
+    const Vector3 v_pred = v + (R*acc + s_gravity)*dt;
+    const Vector3 p_pred = p + v*dt + 0.5*(R*acc + s_gravity)*dt*dt;
 
-    m_X = ugl::lie::ExtendedPose{R_pred, v_pred, p_pred};
+    m_X = lie::ExtendedPose{R_pred, v_pred, p_pred};
 
     const auto& A = process_error_jacobian(acc, ang_vel);
     const auto& D = process_noise_jacobian();
@@ -62,7 +57,7 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose() * dt*dt;
 }
 
-void IEKF::mocap_update(const ugl::lie::Pose& y)
+void IEKF::mocap_update(const lie::Pose& y)
 {
     const auto& H = MocapModel::error_jacobian();
     const auto& E = MocapModel::noise_jacobian();
@@ -71,14 +66,14 @@ void IEKF::mocap_update(const ugl::lie::Pose& y)
     const Matrix<6,6> S = H * m_P * H.transpose() + E * N * E.transpose();
     const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
 
-    const ugl::lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * MocapModel::target().inverse();
-    const ugl::Vector<9> correction = K*ugl::lie::log(innovation);
+    const lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * MocapModel::target().inverse();
+    const Vector<9> correction = K*lie::log(innovation);
 
-    m_X = m_X * ugl::lie::exp(correction);
+    m_X = m_X * lie::exp(correction);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 
-void IEKF::gps_update(const ugl::lie::Euclidean<3>& y)
+void IEKF::gps_update(const lie::Euclidean<3>& y)
 {
     const auto& H = GpsModel::error_jacobian();
     const auto& E = GpsModel::noise_jacobian();
@@ -87,20 +82,20 @@ void IEKF::gps_update(const ugl::lie::Euclidean<3>& y)
     const Matrix<3,3> S = H * m_P * H.transpose() + E * N * E.transpose();
     const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
-    const ugl::lie::Euclidean<3> innovation = GpsModel::group_action(m_X.inverse(), y) * GpsModel::target().inverse();
-    const ugl::Vector<9> correction = K*ugl::lie::log(innovation);
+    const lie::Euclidean<3> innovation = GpsModel::group_action(m_X.inverse(), y) * GpsModel::target().inverse();
+    const Vector<9> correction = K*lie::log(innovation);
 
-    m_X = m_X * ugl::lie::exp(correction);
+    m_X = m_X * lie::exp(correction);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 
-IEKF::Jacobian<9,9> IEKF::process_error_jacobian(const ugl::Vector3& acc, const ugl::Vector3& ang_vel)
+IEKF::Jacobian<9,9> IEKF::process_error_jacobian(const Vector3& acc, const Vector3& ang_vel)
 {
     Jacobian<9,9> jac = Jacobian<9,9>::Zero();
-    jac.block<3,3>(kRotIndex,kRotIndex) = -ugl::lie::skew(ang_vel);
-    jac.block<3,3>(kVelIndex,kVelIndex) = -ugl::lie::skew(ang_vel);
-    jac.block<3,3>(kPosIndex,kPosIndex) = -ugl::lie::skew(ang_vel);
-    jac.block<3,3>(kVelIndex,kRotIndex) = -ugl::lie::skew(acc);
+    jac.block<3,3>(kRotIndex,kRotIndex) = -lie::skew(ang_vel);
+    jac.block<3,3>(kVelIndex,kVelIndex) = -lie::skew(ang_vel);
+    jac.block<3,3>(kPosIndex,kPosIndex) = -lie::skew(ang_vel);
+    jac.block<3,3>(kVelIndex,kRotIndex) = -lie::skew(acc);
     jac.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity();
     return jac;
 }

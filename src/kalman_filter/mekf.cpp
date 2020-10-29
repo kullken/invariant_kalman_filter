@@ -13,9 +13,7 @@
 namespace invariant
 {
 
-using ugl::Vector3;
-using ugl::Matrix3;
-using ugl::lie::Rotation;
+using namespace ugl;
 
 const Vector3 MEKF::s_gravity{0.0, 0.0, -9.82};
 
@@ -32,7 +30,7 @@ const MEKF::Covariance<9> MEKF::s_default_covariance = []() {
     return covariance;
 }();
 
-MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
+MEKF::MEKF(const lie::Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
     : m_R_ref(R0)
     , m_P(P0)
 {
@@ -40,16 +38,16 @@ MEKF::MEKF(const Rotation& R0, const Vector3& p0, const Vector3& v0, const Covar
     set_vel(v0);
 }
 
-ugl::lie::ExtendedPose MEKF::get_state() const
+lie::ExtendedPose MEKF::get_state() const
 {
-    return ugl::lie::ExtendedPose{get_rot(), get_vel(), get_pos()};
+    return lie::ExtendedPose{get_rot(), get_vel(), get_pos()};
 }
 
-void MEKF::set_state(const ugl::lie::ExtendedPose& state)
+void MEKF::set_state(const lie::ExtendedPose& state)
 {
     m_x.segment<3>(kPosIndex) = state.position();
     m_x.segment<3>(kVelIndex) = state.velocity();
-    m_x.segment<3>(kRotIndex) = ugl::Vector3::Zero();
+    m_x.segment<3>(kRotIndex) = Vector3::Zero();
     m_R_ref = state.rotation();
 }
 
@@ -61,25 +59,25 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const auto& D = process_noise_jacobian();
     const auto& Q = process_noise_covariance();
 
-    const ugl::Matrix<9,9> Phi = ugl::Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
+    const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
     m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose() * dt*dt;
 
     reset_attitude_error();
 }
 
-void MEKF::mocap_update(const ugl::lie::Pose&)
+void MEKF::mocap_update(const lie::Pose&)
 {
 
 }
 
-void MEKF::gps_update(const ugl::lie::Euclidean<3>& y)
+void MEKF::gps_update(const lie::Euclidean<3>& y)
 {
     const auto& H = GpsModel::error_jacobian();
     const auto& E = GpsModel::noise_jacobian();
     const auto& N = GpsModel::noise_covariance();
 
     const Covariance<3> S = H * m_P * H.transpose() + E * N * E.transpose();
-    const ugl::Matrix<9,3> K = m_P * H.transpose() * S.inverse();
+    const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
     const Vector3 innovation = y.vector() - GpsModel::h(get_state());
 
@@ -93,27 +91,27 @@ void MEKF::reset_attitude_error()
 {
     const Vector3 delta = m_x.segment<3>(kRotIndex);
 
-    ugl::Matrix<9,9> T = ugl::Matrix<9,9>::Zero();
+    Matrix<9,9> T = Matrix<9,9>::Zero();
     T.block<3,3>(kPosIndex,kPosIndex) = Matrix3::Identity();
     T.block<3,3>(kVelIndex,kVelIndex) = Matrix3::Identity();
-    T.block<3,3>(kRotIndex,kRotIndex) = ugl::lie::SO3::exp(-0.5 * delta).matrix();
+    T.block<3,3>(kRotIndex,kRotIndex) = lie::SO3::exp(-0.5 * delta).matrix();
 
     m_P = T * m_P * T.transpose();
-    m_R_ref *= ugl::lie::SO3::exp(delta);
+    m_R_ref *= lie::SO3::exp(delta);
     m_x.segment<3>(kRotIndex) = Vector3::Zero();
 }
 
 // State transition model without resetting attitude error.
-MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
+MEKF::State MEKF::state_transition_model(const State& x, const lie::Rotation& R_ref, double dt, const Vector3& acc, const Vector3& ang_vel)
 {
     const Vector3 delta = x.segment<3>(kRotIndex);
     const Vector3 vel = x.segment<3>(kVelIndex);
     const Vector3 pos = x.segment<3>(kPosIndex);
 
-    // const Rotation R = R_ref * ugl::lie::SO3::exp(delta);               // Without inversion of R
-    const Rotation R = (R_ref * ugl::lie::SO3::exp(delta)).inverse();   // With inversion of R
+    // const lie::Rotation R = R_ref * lie::SO3::exp(delta);               // Without inversion of R
+    const lie::Rotation R = (R_ref * lie::SO3::exp(delta)).inverse();   // With inversion of R
 
-    const Vector3 delta_pred = delta + (ang_vel - 0.5*ugl::lie::skew(ang_vel)*delta)*dt;
+    const Vector3 delta_pred = delta + (ang_vel - 0.5*lie::skew(ang_vel)*delta)*dt;
     const Vector3 vel_pred   = vel   + (R*acc + s_gravity)*dt;
     const Vector3 pos_pred   = pos   + vel*dt + (R*acc + s_gravity)*dt*dt*0.5;
 
@@ -125,13 +123,13 @@ MEKF::State MEKF::state_transition_model(const State& x, const Rotation& R_ref, 
     return x_pred;
 }
 
-MEKF::Jacobian<9,9> MEKF::process_error_jacobian(const Rotation& R_ref, const Vector3& acc, const Vector3& ang_vel)
+MEKF::Jacobian<9,9> MEKF::process_error_jacobian(const lie::Rotation& R_ref, const Vector3& acc, const Vector3& ang_vel)
 {
     Jacobian<9,9> jac = Jacobian<9,9>::Zero();
     jac.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity();
-    // jac.block<3,3>(kVelIndex,kRotIndex) = ugl::lie::skew(R_ref*acc);                  // Without inversion of R
-    jac.block<3,3>(kVelIndex,kRotIndex) = ugl::lie::skew(R_ref.inverse()*acc);        // With inversion of R
-    jac.block<3,3>(kRotIndex,kRotIndex) = -0.5 * ugl::lie::skew(ang_vel);
+    // jac.block<3,3>(kVelIndex,kRotIndex) = lie::skew(R_ref*acc);                  // Without inversion of R
+    jac.block<3,3>(kVelIndex,kRotIndex) = lie::skew(R_ref.inverse()*acc);        // With inversion of R
+    jac.block<3,3>(kRotIndex,kRotIndex) = -0.5 * lie::skew(ang_vel);
     return jac;
 }
 
