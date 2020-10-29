@@ -61,9 +61,7 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const auto& D = process_noise_jacobian();
     const auto& Q = process_noise_covariance();
 
-    const ugl::Matrix<9,9> Adt = A*dt;
-    const ugl::Matrix<9,9> Adt2 = Adt*Adt;
-    const ugl::Matrix<9,9> Phi = ugl::Matrix<9,9>::Identity() + Adt + Adt2/2 + Adt2*Adt/6 + Adt2*Adt2/24; // Approximates Phi = exp(A*dt)
+    const ugl::Matrix<9,9> Phi = ugl::Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
     m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose() * dt*dt;
 
     reset_attitude_error();
