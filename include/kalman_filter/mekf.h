@@ -48,8 +48,6 @@ private:
     void reset_attitude_error();
 
     static State state_transition_model(const State& x, const ugl::lie::Rotation& R_ref, double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-    static Jacobian<9,9> state_transition_jac(const ugl::lie::Rotation& R_ref, double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-    static Covariance<9> state_transition_var(double dt);
 
     /// @brief Error jacobian of the process model
     static Jacobian<9,9> process_error_jacobian(const ugl::lie::Rotation& R_ref, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
