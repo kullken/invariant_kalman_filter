@@ -56,11 +56,12 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     m_x = MEKF::state_transition_model(m_x, m_R_ref, dt, acc, ang_vel);
 
     const auto& A = process_error_jacobian(m_R_ref, acc, ang_vel);
-    const auto& D = process_noise_jacobian();
-    const auto& Q = process_noise_covariance();
+    static const auto& D = process_noise_jacobian();
+    static const auto& Q = process_noise_covariance();
+    static const Matrix<9,9> Q_hat = D*Q*D.transpose();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
-    m_P = Phi * (m_P + dt*D*Q*D.transpose()*dt) * Phi.transpose();
+    m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();
 
     reset_attitude_error();
 }
@@ -72,11 +73,12 @@ void MEKF::mocap_update(const lie::Pose&)
 
 void MEKF::gps_update(const lie::Euclidean<3>& y)
 {
-    const auto& H = GpsModel::error_jacobian();
-    const auto& E = GpsModel::noise_jacobian();
-    const auto& N = GpsModel::noise_covariance();
+    static const auto& H = GpsModel::error_jacobian();
+    static const auto& E = GpsModel::noise_jacobian();
+    static const auto& N = GpsModel::noise_covariance();
+    static const Matrix<3,3> N_hat = E*N*E.transpose();
 
-    const Covariance<3> S = H * m_P * H.transpose() + E * N * E.transpose();
+    const Matrix<3,3> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
     const Vector3 innovation = y.vector() - GpsModel::h(get_state());

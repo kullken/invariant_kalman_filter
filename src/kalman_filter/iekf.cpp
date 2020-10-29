@@ -48,20 +48,22 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     m_X = lie::ExtendedPose{R_pred, v_pred, p_pred};
 
     const auto& A = process_error_jacobian(acc, ang_vel);
-    const auto& D = process_noise_jacobian();
-    const auto& Q = process_noise_covariance();
+    static const auto& D = process_noise_jacobian();
+    static const auto& Q = process_noise_covariance();
+    static const Matrix<9,9> Q_hat = D*Q*D.transpose();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
-    m_P = Phi * (m_P + dt*D*Q*D.transpose()*dt) * Phi.transpose();
+    m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();
 }
 
 void IEKF::mocap_update(const lie::Pose& y)
 {
-    const auto& H = MocapModel::error_jacobian();
-    const auto& E = MocapModel::noise_jacobian();
-    const auto& N = MocapModel::noise_covariance();
+    static const auto& H = MocapModel::error_jacobian();
+    static const auto& E = MocapModel::noise_jacobian();
+    static const auto& N = MocapModel::noise_covariance();
+    static const Matrix<6,6> N_hat = E*N*E.transpose();
 
-    const Matrix<6,6> S = H * m_P * H.transpose() + E * N * E.transpose();
+    const Matrix<6,6> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
 
     const lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * MocapModel::target().inverse();
@@ -73,11 +75,12 @@ void IEKF::mocap_update(const lie::Pose& y)
 
 void IEKF::gps_update(const lie::Euclidean<3>& y)
 {
-    const auto& H = GpsModel::error_jacobian();
-    const auto& E = GpsModel::noise_jacobian();
-    const auto& N = GpsModel::noise_covariance();
+    static const auto& H = GpsModel::error_jacobian();
+    static const auto& E = GpsModel::noise_jacobian();
+    static const auto& N = GpsModel::noise_covariance();
+    static const Matrix<3,3> N_hat = E*N*E.transpose();
 
-    const Matrix<3,3> S = H * m_P * H.transpose() + E * N * E.transpose();
+    const Matrix<3,3> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
     const lie::Euclidean<3> innovation = GpsModel::group_action(m_X.inverse(), y) * GpsModel::target().inverse();
