@@ -60,7 +60,7 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const auto& Q = process_noise_covariance();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
-    m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose() * dt*dt;
+    m_P = Phi * (m_P + dt*D*Q*D.transpose()*dt) * Phi.transpose();
 
     reset_attitude_error();
 }

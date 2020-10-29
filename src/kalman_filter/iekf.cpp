@@ -37,12 +37,10 @@ IEKF::IEKF(const lie::Rotation& R0, const Vector3& p0, const Vector3& v0, const 
 
 void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 {
-    // State propagation
     const lie::Rotation R = m_X.rotation();
     const Vector3 v = m_X.velocity();
     const Vector3 p = m_X.position();
 
-    // Discretisation method from Hartley et al. (2018)
     const lie::Rotation R_pred = R * lie::SO3::exp(ang_vel*dt);
     const Vector3 v_pred = v + (R*acc + s_gravity)*dt;
     const Vector3 p_pred = p + v*dt + 0.5*(R*acc + s_gravity)*dt*dt;
@@ -54,7 +52,7 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     const auto& Q = process_noise_covariance();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
-    m_P = Phi*m_P*Phi.transpose() + Phi*D*Q*D.transpose()*Phi.transpose() * dt*dt;
+    m_P = Phi * (m_P + dt*D*Q*D.transpose()*dt) * Phi.transpose();
 }
 
 void IEKF::mocap_update(const lie::Pose& y)
