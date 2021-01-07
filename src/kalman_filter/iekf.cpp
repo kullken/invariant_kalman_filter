@@ -17,9 +17,9 @@ namespace invariant
 using namespace ugl;
 
 const IEKF::Covariance<9> IEKF::s_default_covariance = []() {
-    constexpr double rot_stddev = 0.1;  // [rad]
-    constexpr double vel_stddev = 0.5;  // [m/s]
-    constexpr double pos_stddev = 0.5;  // [m]
+    constexpr double rot_stddev = 1.0;  // [rad]
+    constexpr double vel_stddev = 1.5;  // [m/s]
+    constexpr double pos_stddev = 2.0;  // [m]
 
     Covariance<9> covariance = Covariance<9>::Zero();
     covariance.block<3,3>(0,0) = Matrix3::Identity() * rot_stddev*rot_stddev;
