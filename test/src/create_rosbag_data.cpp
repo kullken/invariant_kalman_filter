@@ -124,6 +124,11 @@ void save_to_file(const std::vector<Result>& results, const std::vector<SensorEv
         const std::string id = "offset_" + std::to_string(i);
         write_result(rosbag, results[i], id);
     }
+
+    for (const auto& event: events)
+    {
+        event.write_to_rosbag(rosbag, "");
+    }
 }
 
 const auto test_trajectories = testing::Values(

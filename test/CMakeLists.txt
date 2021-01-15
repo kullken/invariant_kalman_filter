@@ -13,6 +13,7 @@ add_library(sensor_models SHARED
 target_include_directories(sensor_models
   PUBLIC
     include/sensor_models
+    ${catkin_INCLUDE_DIRS}
 )
 target_link_libraries(sensor_models
   PUBLIC
@@ -20,6 +21,7 @@ target_link_libraries(sensor_models
     ugl::trajectory
     ugl::lie_group
     ugl::random
+    ${catkin_LIBRARIES}
   PRIVATE
     project_options
     project_warnings

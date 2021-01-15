@@ -1,8 +1,11 @@
 #ifndef INVARIANT_TEST_SENSOR_EVENT_H
 #define INVARIANT_TEST_SENSOR_EVENT_H
 
+#include <string>
 #include <type_traits>
 #include <variant>
+
+#include <rosbag/bag.h>
 
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
@@ -40,6 +43,8 @@ public:
 
         std::visit(visitor, m_data);
     }
+
+    void write_to_rosbag(rosbag::Bag& rosbag, const std::string& topic_prefix) const;
 
 private:
     double m_time;
