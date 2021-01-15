@@ -67,6 +67,21 @@ if (CATKIN_ENABLE_TESTING)
       project_warnings
   )
 
+  catkin_add_executable_with_gtest(create_rosbag_data src/create_rosbag_data.cpp)
+  target_include_directories(create_rosbag_data
+    PRIVATE
+      include
+      ${catkin_INCLUDE_DIRS}
+  )
+  target_link_libraries(create_rosbag_data
+      kalman_filter
+      accuracy_test
+      sensor_models
+      ${catkin_LIBRARIES}
+      project_options
+      project_warnings
+  )
+
   catkin_add_executable_with_gtest(regression_tests src/regression_tests.cpp)
   target_include_directories(regression_tests
     PRIVATE
