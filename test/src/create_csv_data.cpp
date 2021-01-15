@@ -152,10 +152,10 @@ private:
 protected:
     void run_test()
     {
+        const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
         std::vector<Result> results{};
         for (int i = 0; i < kNumOffsetSamples; ++i)
         {
-            const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
             const auto result = this->compute_accuracy(sensor_events);
             results.push_back(result);
         }
