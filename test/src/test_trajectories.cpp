@@ -25,15 +25,15 @@ constexpr double deg2rad(double degrees)
     return degrees * pi / 180.0;
 }
 
-auto rotate_yaw(double degrees, double total_duration)
+auto rotate_yaw(double degrees, double total_duration, double start_degree=0.0)
 {
     const ugl::Vector3 rotation_axis = degrees < 0 ? ugl::Vector3{0,0,-1} : ugl::Vector3{0,0,1};
     double degrees_left = degrees < 0 ? -degrees : degrees;
     const double deg_per_sec = degrees_left / total_duration;
 
     std::vector<ugl::trajectory::SlerpSegment> segments{};
-    ugl::UnitQuaternion start = ugl::UnitQuaternion::Identity();
-    ugl::UnitQuaternion end   = ugl::UnitQuaternion::Identity();
+    ugl::UnitQuaternion start = ugl::math::to_quat(deg2rad(start_degree), ugl::Vector3{0,0,1});
+    ugl::UnitQuaternion end;
 
     while (degrees_left > 0)
     {
@@ -107,7 +107,7 @@ ugl::trajectory::Trajectory start_stop(ugl::Vector3 acceleration, double duratio
 ugl::trajectory::Trajectory circle(double degrees, double radius, double duration)
 {
     auto lin_traj = ugl::trajectory::CircleArc{deg2rad(degrees), radius, duration};
-    auto ang_traj = rotate_yaw(degrees, duration);
+    auto ang_traj = rotate_yaw(degrees, duration, 90.0);
     return {lin_traj, ang_traj};
 }
 
