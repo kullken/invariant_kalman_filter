@@ -22,6 +22,8 @@ public:
 
     ugl::lie::ExtendedPose sample_uniform() const;
 
+    const ugl::Matrix<9,9>& get_covariance() const;
+
 private:
     ugl::random::NormalDistribution<9> m_gaussian{s_default_covariance};
     ugl::random::UniformDistribution<9> m_uniform{-s_default_uniform_range, s_default_uniform_range};
