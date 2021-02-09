@@ -87,26 +87,21 @@ void write_errors(rosbag::Bag& rosbag,
     }
 }
 
-void write_result(rosbag::Bag& rosbag, const Result& result, const std::string& id)
+void write_results(rosbag::Bag& rosbag, const std::vector<Result>& results, const std::string& topic_prefix)
 {
-    write_states(rosbag, result.estimates, result.times, id + "/estimate");
-    write_errors(rosbag, result.position_errors, result.times, id + "/error/position");
-    write_errors(rosbag, result.velocity_errors, result.times, id + "/error/velocity");
-    write_errors(rosbag, result.rotation_errors, result.times, id + "/error/rotation");
+    const auto size = results.size();
+    for (std::size_t i = 0; i < size; ++i)
+    {
+        const auto& result = results[i];
+        const std::string id = topic_prefix + "/offset_" + std::to_string(i);
+        write_states(rosbag, result.estimates, result.times, id + "/estimate");
+        write_errors(rosbag, result.position_errors, result.times, id + "/error/position");
+        write_errors(rosbag, result.velocity_errors, result.times, id + "/error/velocity");
+        write_errors(rosbag, result.rotation_errors, result.times, id + "/error/rotation");
+    }
 }
 
-void write_meta_info(rosbag::Bag& rosbag)
-{
-    auto test_info = testing::UnitTest::GetInstance()->current_test_info();
-    std_msgs::String test_name{};
-    test_name.data = test_info->name();
-    rosbag.write("test_name", to_rosbag_time(0), test_name);
-    std_msgs::String value_param{};
-    value_param.data = test_info->value_param();
-    rosbag.write("value_param", to_rosbag_time(0), value_param);
-}
-
-void save_to_file(const std::vector<Result>& results, const std::vector<SensorEvent>& events)
+void save_to_rosbag(const std::vector<Result>& iekf_results, const std::vector<Result>& mekf_results, const std::vector<SensorEvent>& events)
 {
     auto test_info = testing::UnitTest::GetInstance()->current_test_info();
     std::string file_name = test_info->name();
@@ -114,16 +109,14 @@ void save_to_file(const std::vector<Result>& results, const std::vector<SensorEv
 	const std::string result_path{"/home/vk/mav_ws/src/invariant_kalman_filter/test/results/bags/" + file_name + ".bag"};
     rosbag::Bag rosbag{result_path, rosbag::bagmode::Write};
 
-    write_meta_info(rosbag);
+    std_msgs::String value_param{};
+    value_param.data = test_info->value_param();
+    rosbag.write("/value_param", to_rosbag_time(0), value_param);
 
-    write_states(rosbag, results[0].ground_truth, results[0].times, "ground_truth");
+    write_states(rosbag, iekf_results[0].ground_truth, iekf_results[0].times, "/ground_truth");
 
-    const auto size = results.size();
-    for (std::size_t i = 0; i < size; ++i)
-    {
-        const std::string id = "offset_" + std::to_string(i);
-        write_result(rosbag, results[i], id);
-    }
+    write_results(rosbag, iekf_results, "/iekf");
+    write_results(rosbag, mekf_results, "/mekf");
 
     for (const auto& event: events)
     {
@@ -175,29 +168,37 @@ protected:
     void run_test()
     {
         const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
-        std::vector<Result> results{};
+        std::vector<Result> iekf_results{};
+        std::vector<Result> mekf_results{};
         for (int i = 0; i < kNumOffsetSamples; ++i)
         {
-            const auto result = this->compute_accuracy(sensor_events);
-            results.push_back(result);
+            const auto initial_error = this->offset_.sample_uniform();
+            const auto initial_state = this->trajectory_.get_extended_pose(0.0) * initial_error;
+            const auto initial_covar = this->offset_.get_covariance();
+
+            IEKF iekf_filter{};
+            iekf_filter.set_state(initial_state);
+            iekf_filter.set_covariance(initial_covar);
+            const auto iekf_estimates = run_filter(iekf_filter, sensor_events);
+            const auto iekf_result = calculate_result(this->trajectory_, iekf_estimates);
+            iekf_results.push_back(iekf_result);
+
+            MEKF mekf_filter{};
+            mekf_filter.set_state(initial_state);
+            mekf_filter.set_covariance(initial_covar);
+            const auto mekf_estimates = run_filter(mekf_filter, sensor_events);
+            const auto mekf_result = calculate_result(this->trajectory_, mekf_estimates);
+            mekf_results.push_back(mekf_result);
         }
-        save_to_file(results, sensor_events);
+        save_to_rosbag(iekf_results, mekf_results, sensor_events);
     }
 };
 
-using IekfTestSuite = DataGenerationTest<IEKF>;
-TEST_P(IekfTestSuite, IekfTestCase) { run_test(); }
+using RosbagTestSuite = DataGenerationTest<IEKF>;
+TEST_P(RosbagTestSuite, TestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
-    GenerateCsvData,
-    IekfTestSuite,
-    test_configs,
-);
-
-using MekfTestSuite = DataGenerationTest<MEKF>;
-TEST_P(MekfTestSuite, MekfTestCase) { run_test(); }
-INSTANTIATE_TEST_CASE_P(
-    GenerateCsvData,
-    MekfTestSuite,
+    GenerateRosbagData,
+    RosbagTestSuite,
     test_configs,
 );
 
