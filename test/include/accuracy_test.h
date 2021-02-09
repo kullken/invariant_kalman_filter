@@ -109,6 +109,7 @@ protected:
         const auto initial_error = offset_.sample_uniform();
         const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
         filter_.set_state(initial_state);
+        filter_.set_covariance(offset_.get_covariance());
 
         auto estimates = run_filter(filter_, events);
         return calculate_result(trajectory_, estimates);

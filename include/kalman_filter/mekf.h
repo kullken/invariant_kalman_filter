@@ -33,12 +33,14 @@ public:
     ugl::lie::Rotation get_rot() const { return m_R_ref; }
     ugl::UnitQuaternion get_quat() const { return get_rot().to_quaternion(); }
     ugl::lie::ExtendedPose get_state() const;
+    const Covariance<9>& get_covariance() const { return m_P; }
 
     void set_pos(const ugl::Vector3& pos) { m_x.segment<3>(kPosIndex) = pos; }
     void set_vel(const ugl::Vector3& vel) { m_x.segment<3>(kVelIndex) = vel; }
     void set_rot(const ugl::lie::Rotation& rot) { m_R_ref = rot; }
     void set_quat(const ugl::UnitQuaternion& quat) { m_R_ref = ugl::lie::Rotation{quat}; }
     void set_state(const ugl::lie::ExtendedPose& state);
+    void set_covariance(const Covariance<9>& P) { m_P = P; }
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
     void mocap_update(const ugl::lie::Pose&);
