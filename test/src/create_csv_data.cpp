@@ -120,19 +120,19 @@ const auto test_trajectories = testing::Values(
 const auto test_sensor_models = testing::Values(
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 10.0}},
     },
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 10.0}},
     },
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 20.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 10.0}},
     },
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 20.0}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 10.0}},
     }
 );
 
