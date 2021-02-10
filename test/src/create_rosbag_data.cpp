@@ -151,9 +151,14 @@ const auto test_sensor_models = testing::Values(
     }
 );
 
+const auto offset_generators = testing::Values(
+    OffsetGenerator{}
+);
+
 const auto test_configs = testing::Combine(
     test_trajectories,
-    test_sensor_models
+    test_sensor_models,
+    offset_generators
 );
 
 } // namespace

@@ -93,12 +93,13 @@ std::vector<Estimate> run_filter(FilterType filter, const std::vector<SensorEven
     return estimates;
 }
 
-class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, std::vector<VirtualSensor>>>
+class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, std::vector<VirtualSensor>, OffsetGenerator>>
 {
 protected:
     AccuracyTest()
         : trajectory_(std::get<0>(GetParam()).traj)
         , sensors_(std::get<1>(GetParam()))
+        , offset_(std::get<2>(GetParam()))
     {
         ugl::random::set_seed(117);
     }
@@ -117,9 +118,9 @@ protected:
     }
 
 protected:
-    OffsetGenerator offset_{};
     ugl::trajectory::Trajectory trajectory_;
     std::vector<VirtualSensor> sensors_;
+    OffsetGenerator offset_;
 };
 
 } // namespace invariant::test
