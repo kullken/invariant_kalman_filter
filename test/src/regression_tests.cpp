@@ -58,7 +58,7 @@ const auto test_configs = testing::Combine(
 } // namepsace
 
 template<typename FilterType>
-class RegressionTest: public AccuracyTest<FilterType>
+class RegressionTest: public AccuracyTest
 {
 private:
     static constexpr int kNumTestRuns      = 10;
@@ -76,7 +76,7 @@ protected:
             const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
             for (int j = 0; j < kNumOffsetSamples; ++j)
             {
-                const auto result = this->compute_accuracy(sensor_events);
+                const auto result = this->compute_accuracy<FilterType>(sensor_events);
                 position_rmse += result.position_rmse;
                 velocity_rmse += result.velocity_rmse;
                 rotation_rmse += result.rotation_rmse;

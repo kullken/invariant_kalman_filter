@@ -93,7 +93,6 @@ std::vector<Estimate> run_filter(FilterType filter, const std::vector<SensorEven
     return estimates;
 }
 
-template<typename FilterType>
 class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, std::vector<VirtualSensor>>>
 {
 protected:
@@ -104,19 +103,20 @@ protected:
         ugl::random::set_seed(117);
     }
 
+    template<typename FilterType>
     Result compute_accuracy(const std::vector<SensorEvent>& events)
     {
         const auto initial_error = offset_.sample_uniform();
         const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
-        filter_.set_state(initial_state);
-        filter_.set_covariance(offset_.get_covariance());
+        const auto initial_covar = offset_.get_covariance();
 
-        auto estimates = run_filter(filter_, events);
+        FilterType filter{initial_state, initial_covar};
+
+        const auto estimates = run_filter(filter, events);
         return calculate_result(trajectory_, estimates);
     }
 
 protected:
-    FilterType filter_{};
     OffsetGenerator offset_{};
     ugl::trajectory::Trajectory trajectory_;
     std::vector<VirtualSensor> sensors_;

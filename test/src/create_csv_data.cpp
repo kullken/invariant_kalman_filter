@@ -144,7 +144,7 @@ const auto test_configs = testing::Combine(
 } // namespace
 
 template<typename FilterType>
-class DataGenerationTest: public AccuracyTest<FilterType>
+class DataGenerationTest: public AccuracyTest
 {
 private:
     static constexpr int kNumOffsetSamples = 20;
@@ -156,7 +156,7 @@ protected:
         std::vector<Result> results{};
         for (int i = 0; i < kNumOffsetSamples; ++i)
         {
-            const auto result = this->compute_accuracy(sensor_events);
+            const auto result = this->compute_accuracy<FilterType>(sensor_events);
             results.push_back(result);
         }
         save_to_file(results);

@@ -158,8 +158,7 @@ const auto test_configs = testing::Combine(
 
 } // namespace
 
-template<typename FilterType>
-class DataGenerationTest: public AccuracyTest<FilterType>
+class DataGenerationTest: public AccuracyTest
 {
 private:
     static constexpr int kNumOffsetSamples = 10;
@@ -190,7 +189,7 @@ protected:
     }
 };
 
-using RosbagTestSuite = DataGenerationTest<IEKF>;
+using RosbagTestSuite = DataGenerationTest;
 TEST_P(RosbagTestSuite, TestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     GenerateRosbagData,
