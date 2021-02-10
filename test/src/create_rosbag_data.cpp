@@ -176,16 +176,12 @@ protected:
             const auto initial_state = this->trajectory_.get_extended_pose(0.0) * initial_error;
             const auto initial_covar = this->offset_.get_covariance();
 
-            IEKF iekf_filter{};
-            iekf_filter.set_state(initial_state);
-            iekf_filter.set_covariance(initial_covar);
+            IEKF iekf_filter{initial_state, initial_covar};
             const auto iekf_estimates = run_filter(iekf_filter, sensor_events);
             const auto iekf_result = calculate_result(this->trajectory_, iekf_estimates);
             iekf_results.push_back(iekf_result);
 
-            MEKF mekf_filter{};
-            mekf_filter.set_state(initial_state);
-            mekf_filter.set_covariance(initial_covar);
+            MEKF mekf_filter{initial_state, initial_covar};
             const auto mekf_estimates = run_filter(mekf_filter, sensor_events);
             const auto mekf_result = calculate_result(this->trajectory_, mekf_estimates);
             mekf_results.push_back(mekf_result);

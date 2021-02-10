@@ -30,6 +30,12 @@ const MEKF::Covariance<9> MEKF::s_default_covariance = []() {
     return covariance;
 }();
 
+MEKF::MEKF(const ugl::lie::ExtendedPose& X0, const Covariance<9>& P0)
+    : m_P(P0)
+{
+    set_state(X0);
+}
+
 MEKF::MEKF(const lie::Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
     : m_R_ref(R0)
     , m_P(P0)

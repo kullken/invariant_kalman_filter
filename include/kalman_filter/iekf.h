@@ -24,6 +24,7 @@ public:
 
 public:
     IEKF() = default;
+    IEKF(const ugl::lie::ExtendedPose& X0, const Covariance<9>& P0);
     IEKF(const ugl::lie::Rotation& R0, const ugl::Vector3& p0, const ugl::Vector3& v0, const Covariance<9>& P0);
 
     ugl::Vector3 get_pos() const { return m_X.position(); }

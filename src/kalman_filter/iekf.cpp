@@ -29,6 +29,12 @@ const IEKF::Covariance<9> IEKF::s_default_covariance = []() {
     return covariance;
 }();
 
+IEKF::IEKF(const lie::ExtendedPose& X0, const Covariance<9>& P0)
+    : m_X(X0)
+    , m_P(P0)
+{
+}
+
 IEKF::IEKF(const lie::Rotation& R0, const Vector3& p0, const Vector3& v0, const Covariance<9>& P0)
     : m_X(R0, v0, p0)
     , m_P(P0)
