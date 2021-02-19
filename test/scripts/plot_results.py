@@ -57,10 +57,11 @@ def plot_error(data, description):
     rot_axes.set_xlabel("Time [s]")
     rot_axes.set_ylabel("Error [rad]")
 
+    plot_args = {"linewidth": 0.5}
     for case_data in data:
-        pos_axes.plot(case_data["time"], case_data["pos_err"])
-        vel_axes.plot(case_data["time"], case_data["vel_err"])
-        rot_axes.plot(case_data["time"], case_data["rot_err"])
+        pos_axes.plot(case_data["time"], case_data["pos_err"], **plot_args)
+        vel_axes.plot(case_data["time"], case_data["vel_err"], **plot_args)
+        rot_axes.plot(case_data["time"], case_data["rot_err"], **plot_args)
 
     return
 
