@@ -127,11 +127,11 @@ const auto test_sensor_models = testing::Values(
         VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 10.0}},
     },
     std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, 100.0}},
         VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 10.0}},
     },
     std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Mueller18, 100.0}},
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, 100.0}},
         VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 10.0}},
     }
 );
