@@ -8,8 +8,8 @@
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
 
-#include "mocap_model.h"
 #include "gps_model.h"
+#include "mocap_model.h"
 
 namespace invariant
 {
@@ -62,34 +62,30 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();
 }
 
-void IEKF::mocap_update(const lie::Pose& y)
+void IEKF::update(const lie::Pose& y, const MocapModel& sensor_model)
 {
-    static const auto& H = MocapModel::error_jacobian();
-    static const auto& E = MocapModel::noise_jacobian();
-    static const auto& N = MocapModel::noise_covariance();
-    static const Matrix<6,6> N_hat = E*N*E.transpose();
+    const auto& H = sensor_model.error_jacobian();
+    const auto& N_hat = sensor_model.modified_noise_covariance();
 
     const Matrix<6,6> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
 
-    const lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * MocapModel::target().inverse();
+    const lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * sensor_model.target().inverse();
     const Vector<9> correction = K*lie::log(innovation);
 
     m_X = m_X * lie::exp(correction);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 
-void IEKF::gps_update(const lie::Euclidean<3>& y)
+void IEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
 {
-    static const auto& H = GpsModel::error_jacobian();
-    static const auto& E = GpsModel::noise_jacobian();
-    static const auto& N = GpsModel::noise_covariance();
-    static const Matrix<3,3> N_hat = E*N*E.transpose();
+    const auto& H = sensor_model.error_jacobian();
+    const auto& N_hat = sensor_model.modified_noise_covariance();
 
     const Matrix<3,3> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
-    const lie::Euclidean<3> innovation = GpsModel::group_action(m_X.inverse(), y) * GpsModel::target().inverse();
+    const lie::Euclidean<3> innovation = GpsModel::group_action(m_X.inverse(), y) * sensor_model.target().inverse();
     const Vector<9> correction = K*lie::log(innovation);
 
     m_X = m_X * lie::exp(correction);

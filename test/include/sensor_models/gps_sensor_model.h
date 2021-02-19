@@ -8,12 +8,15 @@
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/normal_distribution.h>
 
+#include "gps_model.h"
+
 namespace invariant::test
 {
 
 struct GpsData
 {
-    ugl::lie::Euclidean<3> position;
+    ugl::lie::Euclidean<3> measurement;
+    GpsModel model;
 };
 
 enum class GpsNoiseLevel
@@ -28,9 +31,7 @@ enum class GpsNoiseLevel
 class GpsSensorModel
 {
 public:
-    GpsSensorModel() = default;
-
-    GpsSensorModel(GpsNoiseLevel level, double frequency);
+    GpsSensorModel(GpsNoiseLevel level, double frequency, const GpsModel::MeasurementType& offset=GpsModel::MeasurementType::Identity());
 
     double period() const
     {
@@ -56,6 +57,7 @@ private:
     double period_ = 0.1;
 
     ugl::random::NormalDistribution<3> position_noise_;
+    GpsModel model_;
 };
 
 std::ostream& operator<<(std::ostream& os, const GpsNoiseLevel& level);

@@ -3,20 +3,19 @@
 
 #include <iosfwd>
 
-#include <ugl/math/vector.h>
-#include <ugl/math/matrix.h>
-#include <ugl/math/quaternion.h>
-#include <ugl/lie_group/rotation.h>
 #include <ugl/lie_group/pose.h>
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/normal_distribution.h>
+
+#include "mocap_model.h"
 
 namespace invariant::test
 {
 
 struct MocapData
 {
-    ugl::lie::Pose pose;
+    ugl::lie::Pose measurement;
+    MocapModel model;
 };
 
 enum class MocapNoiseLevel
@@ -31,9 +30,7 @@ enum class MocapNoiseLevel
 class MocapSensorModel
 {
 public:
-    MocapSensorModel() = default;
-
-    MocapSensorModel(MocapNoiseLevel level, double frequency);
+    MocapSensorModel(MocapNoiseLevel level, double frequency, const ugl::lie::Pose& offset=ugl::lie::Pose::Identity());
 
     double period() const
     {
@@ -54,18 +51,12 @@ public:
     /// @return A pose reading expressed in the inertial frame.
     ugl::lie::Pose get_pose_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
-    /// @return A position reading expressed in the inertial frame.
-    ugl::Vector3 get_pos_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
-
-    /// @return A rotation reading expressed in the inertial frame.
-    ugl::lie::Rotation get_rot_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
-
 private:
     MocapNoiseLevel noise_level_ = MocapNoiseLevel::None;
     double period_ = 0.01;
 
-    ugl::random::NormalDistribution<3> position_noise_;
-    ugl::random::NormalDistribution<3> rotation_noise_;
+    ugl::random::NormalDistribution<6> noise_;
+    MocapModel model_;
 };
 
 std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level);

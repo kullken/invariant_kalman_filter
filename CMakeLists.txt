@@ -57,6 +57,24 @@ catkin_package(
 ## Build ##
 ###########
 
+## Sensor Models ##
+add_library(sensor_models SHARED
+  src/kalman_filter/mocap_model.cpp
+  src/kalman_filter/gps_model.cpp
+)
+target_include_directories(sensor_models
+  PUBLIC
+    include/kalman_filter
+)
+target_link_libraries(sensor_models
+  PUBLIC
+    ugl::math
+    ugl::lie_group
+  PRIVATE
+    project_options
+    project_warnings
+)
+
 ## Kalman filter ##
 add_library(kalman_filter SHARED
   src/kalman_filter/iekf.cpp
@@ -72,6 +90,7 @@ target_link_libraries(kalman_filter
   PUBLIC
     ugl::math
     ugl::lie_group
+    sensor_models
   PRIVATE
     project_options
     project_warnings

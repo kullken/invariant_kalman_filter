@@ -10,6 +10,9 @@
 #include <ugl/lie_group/pose.h>
 #include <ugl/lie_group/extended_pose.h>
 
+#include "gps_model.h"
+#include "mocap_model.h"
+
 namespace invariant
 {
 
@@ -44,8 +47,8 @@ public:
     void set_covariance(const Covariance<9>& P) { m_P = P; }
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-    void mocap_update(const ugl::lie::Pose&);
-    void gps_update(const ugl::lie::Euclidean<3>& y);
+    void update(const ugl::lie::Pose& y, const MocapModel& sensor_model);
+    void update(const ugl::lie::Euclidean<3>& y, const GpsModel& sensor_model);
 
 private:
     void reset_attitude_error();

@@ -29,7 +29,7 @@ void write_data(rosbag::Bag& rosbag, const GpsData& data, double time, const std
     geometry_msgs::PointStamped point;
     point.header.stamp = to_rosbag_time(time);
     point.header.frame_id = "map";
-    tf2::toMsg(data.position.vector(), point.point);
+    tf2::toMsg(data.measurement.vector(), point.point);
     rosbag.write(topic_prefix + "/gps", point.header.stamp, point);
 }
 
@@ -38,7 +38,7 @@ void write_data(rosbag::Bag& rosbag, const MocapData& data, double time, const s
     geometry_msgs::PoseStamped pose;
     pose.header.stamp = to_rosbag_time(time);
     pose.header.frame_id = "map";
-    tf2::toMsg(data.pose, pose.pose);
+    tf2::toMsg(data.measurement, pose.pose);
     rosbag.write(topic_prefix + "/mocap", pose.header.stamp, pose);
 }
 

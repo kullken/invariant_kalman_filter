@@ -15,12 +15,13 @@ public:
     using MeasurementType = ugl::lie::Euclidean<3>;
 
 public:
-    GpsModel() = delete;
+    GpsModel(const MeasurementType& offset, const ugl::Matrix<3,3>& noise_covariance);
 
-    /// @brief The observation function h(X)
+    /// @brief The observation function h(X,w)
     /// @param state the system state
+    /// @param noise the measurement noise (default: zero vector)
     /// @return The expected observation given the system state
-    static ugl::Vector3 h(const ugl::lie::ExtendedPose& state);
+    ugl::Vector3 h(const ugl::lie::ExtendedPose& state, const ugl::Vector3& noise=ugl::Vector3::Zero()) const;
 
     /// @brief Left group action on a target representing measurement y = actor * target
     /// @param actor the value which is to act on target
@@ -30,7 +31,7 @@ public:
 
     /// @brief Target for group action
     /// @return Const reference to target variable
-    static const MeasurementType& target();
+    const MeasurementType& target() const;
 
     /// @brief Error jacobian of measurement model
     /// @return Const reference to the jacobian matrix
@@ -42,13 +43,18 @@ public:
 
     /// @brief Noise covariance of measurement model
     /// @return Const reference to the covariance matrix
-    static const ugl::Matrix<3,3>& noise_covariance();
+    const ugl::Matrix<3,3>& noise_covariance() const;
+
+    /// @brief N_hat = E*N*E^T
+    const ugl::Matrix<3,3>& modified_noise_covariance() const;
 
 private:
-    static const ugl::lie::Euclidean<3> s_target;
+    MeasurementType m_target;
+    ugl::Matrix<3,3> m_noise_covariance;
+    ugl::Matrix<3,3> m_modified_noise_covariance;
+
     static const ugl::Matrix<3,9> s_error_jacobian;
     static const ugl::Matrix<3,3> s_noise_jacobian;
-    static const ugl::Matrix<3,3> s_noise_covariance;
 };
 
 } // namespace invariant

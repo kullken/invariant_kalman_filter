@@ -7,8 +7,6 @@
 namespace invariant
 {
 
-const ugl::lie::Pose MocapModel::s_target = ugl::lie::Pose::Identity();
-
 const ugl::Matrix<6,9> MocapModel::s_error_jacobian = []() {
     ugl::Matrix<6,9> jac = ugl::Matrix<6,9>::Zero();
     jac.block<3,3>(0,0) = ugl::Matrix3::Identity();
@@ -16,22 +14,26 @@ const ugl::Matrix<6,9> MocapModel::s_error_jacobian = []() {
     return jac;
 }();
 
-const ugl::Matrix<6,6> MocapModel::s_noise_jacobian = []() {
-    return ugl::lie::Pose::adjoint(MocapModel::target());
-}();
+MocapModel::MocapModel(const ugl::lie::Pose& offset, const ugl::Matrix<6,6>& noise_covariance)
+    : m_target(offset)
+    , m_noise_covariance(noise_covariance)
+    , m_modified_noise_covariance(noise_jacobian() * noise_covariance * noise_jacobian().transpose())
+{
+}
 
-const ugl::Matrix<6,6> MocapModel::s_noise_covariance = []() {
-    return ugl::Matrix<6,6>::Identity() * 0.01;
-}();
+ugl::lie::Pose MocapModel::h(const ugl::lie::ExtendedPose& state, const ugl::lie::Pose::VectorType& noise) const
+{
+    return (group_action(state, m_target) * ugl::lie::Pose::exp(noise));
+}
 
 ugl::lie::Pose MocapModel::group_action(const ugl::lie::ExtendedPose& actor, const ugl::lie::Pose& target)
 {
     return ugl::lie::Pose{actor.rotation(), actor.position()} * target;
 }
 
-const ugl::lie::Pose& MocapModel::target()
+const ugl::lie::Pose& MocapModel::target() const
 {
-    return s_target;
+    return m_target;
 }
 
 const ugl::Matrix<6,9>& MocapModel::error_jacobian()
@@ -39,14 +41,19 @@ const ugl::Matrix<6,9>& MocapModel::error_jacobian()
     return s_error_jacobian;
 }
 
-const ugl::Matrix<6,6>& MocapModel::noise_jacobian()
+ugl::Matrix<6,6> MocapModel::noise_jacobian() const
 {
-    return s_noise_jacobian;
+    return ugl::lie::Pose::adjoint(m_target); // TODO: Precompute in constructor?
 }
 
-const ugl::Matrix<6,6>& MocapModel::noise_covariance()
+const ugl::Matrix<6,6>& MocapModel::noise_covariance() const
 {
-    return s_noise_covariance;
+    return m_noise_covariance;
+}
+
+const ugl::Matrix<6,6>& MocapModel::modified_noise_covariance() const
+{
+    return m_modified_noise_covariance;
 }
 
 } // namespace invariant

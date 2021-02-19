@@ -9,6 +9,7 @@
 #include <ugl/lie_group/extended_pose.h>
 
 #include "gps_model.h"
+#include "mocap_model.h"
 
 namespace invariant
 {
@@ -72,22 +73,20 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
     reset_attitude_error();
 }
 
-void MEKF::mocap_update(const lie::Pose&)
+void MEKF::update(const lie::Pose&, const MocapModel&)
 {
 
 }
 
-void MEKF::gps_update(const lie::Euclidean<3>& y)
+void MEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
 {
-    static const auto& H = GpsModel::error_jacobian();
-    static const auto& E = GpsModel::noise_jacobian();
-    static const auto& N = GpsModel::noise_covariance();
-    static const Matrix<3,3> N_hat = E*N*E.transpose();
+    const auto& H = sensor_model.error_jacobian();
+    const auto& N_hat = sensor_model.modified_noise_covariance();
 
     const Matrix<3,3> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
-    const Vector3 innovation = y.vector() - GpsModel::h(get_state());
+    const Vector3 innovation = y.vector() - sensor_model.h(get_state());
 
     m_x = m_x + K*innovation;
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
