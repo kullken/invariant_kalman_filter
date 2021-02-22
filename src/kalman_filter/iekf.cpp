@@ -70,10 +70,9 @@ void IEKF::update(const lie::Pose& y, const MocapModel& sensor_model)
     const Matrix<6,6> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
 
-    const lie::Pose innovation = MocapModel::group_action(m_X.inverse(), y) * sensor_model.target().inverse();
-    const Vector<9> correction = K*lie::log(innovation);
+    const auto innovation = lie::ominus(MocapModel::group_action(m_X.inverse(), y), sensor_model.target());
 
-    m_X = m_X * lie::exp(correction);
+    m_X = lie::oplus(m_X, K*innovation);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 
@@ -85,10 +84,9 @@ void IEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
     const Matrix<3,3> S = H * m_P * H.transpose() + N_hat;
     const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
 
-    const lie::Euclidean<3> innovation = GpsModel::group_action(m_X.inverse(), y) * sensor_model.target().inverse();
-    const Vector<9> correction = K*lie::log(innovation);
+    const auto innovation = lie::ominus(GpsModel::group_action(m_X.inverse(), y), sensor_model.target());
 
-    m_X = m_X * lie::exp(correction);
+    m_X = lie::oplus(m_X, K*innovation);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
 
