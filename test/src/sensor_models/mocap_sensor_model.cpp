@@ -16,7 +16,7 @@ MocapSensorModel::MocapSensorModel(MocapNoiseLevel level, double frequency, cons
     : noise_level_(level)
     , period_(1.0/frequency)
     , noise_(get_covariance(level))
-    , model_(offset, get_covariance(level)) /// TODO: What value to assign when noise level == None?
+    , model_(offset, level == MocapNoiseLevel::None ? get_covariance(MocapNoiseLevel::Low) : get_covariance(level))
 {
 }
 

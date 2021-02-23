@@ -17,7 +17,7 @@ GpsSensorModel::GpsSensorModel(GpsNoiseLevel level, double frequency, const GpsM
     : noise_level_(level)
     , period_(1.0/frequency)
     , position_noise_(get_position_covar(level))
-    , model_(offset, get_position_covar(level)) /// TODO: What value to assign when noise level == None?
+    , model_(offset, level == GpsNoiseLevel::None ? get_position_covar(GpsNoiseLevel::Low) : get_position_covar(level))
 {
 }
 
