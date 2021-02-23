@@ -35,7 +35,7 @@ public:
 
     /// @brief Error jacobian of measurement model
     /// @return Const reference to the jacobian matrix
-    static const ugl::Matrix<3,9>& error_jacobian();
+    const ugl::Matrix<3,9>& error_jacobian() const;
 
     /// @brief Noise jacobian of measurement model
     /// @return Const reference to the jacobian matrix
@@ -52,8 +52,8 @@ private:
     MeasurementType m_target;
     ugl::Matrix<3,3> m_noise_covariance;
     ugl::Matrix<3,3> m_modified_noise_covariance;
+    ugl::Matrix<3,9> m_error_jacobian;
 
-    static const ugl::Matrix<3,9> s_error_jacobian;
     static const ugl::Matrix<3,3> s_noise_jacobian;
 };
 
