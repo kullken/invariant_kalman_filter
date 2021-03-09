@@ -7,13 +7,6 @@
 namespace invariant
 {
 
-const ugl::Matrix<6,9> MocapModel::s_error_jacobian = []() {
-    ugl::Matrix<6,9> jac = ugl::Matrix<6,9>::Zero();
-    jac.block<3,3>(0,0) = ugl::Matrix3::Identity();
-    jac.block<3,3>(3,6) = ugl::Matrix3::Identity();
-    return jac;
-}();
-
 MocapModel::MocapModel(const ugl::lie::Pose& offset, const ugl::Matrix<6,6>& noise_covariance)
     : m_target(offset)
     , m_noise_covariance(noise_covariance)
@@ -36,14 +29,18 @@ const ugl::lie::Pose& MocapModel::target() const
     return m_target;
 }
 
-const ugl::Matrix<6,9>& MocapModel::error_jacobian()
+ugl::Matrix<6,9> MocapModel::error_jacobian() const
 {
-    return s_error_jacobian;
+    ugl::Matrix<6,9> psi_jacobian = ugl::Matrix<6,9>::Zero();
+    psi_jacobian.block<3,3>(0,0) = ugl::Matrix3::Identity();
+    psi_jacobian.block<3,3>(3,6) = ugl::Matrix3::Identity();
+    ugl::Matrix<6,9> error_jacobian = ugl::lie::Pose::adjoint(m_target.inverse()) * psi_jacobian;
+    return error_jacobian;
 }
 
 ugl::Matrix<6,6> MocapModel::noise_jacobian() const
 {
-    return ugl::lie::Pose::adjoint(m_target); // TODO: Precompute in constructor?
+    return ugl::Matrix<6,6>::Identity();
 }
 
 const ugl::Matrix<6,6>& MocapModel::noise_covariance() const
