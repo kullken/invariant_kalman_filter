@@ -51,9 +51,7 @@ public:
 
 private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();
-    Covariance<9> m_P = s_default_covariance;
-
-    static const ugl::Matrix<9,9> s_default_covariance;
+    Covariance<9> m_P = Covariance<9>::Identity();
 
     static constexpr int kRotIndex = 0;
     static constexpr int kVelIndex = 3;
