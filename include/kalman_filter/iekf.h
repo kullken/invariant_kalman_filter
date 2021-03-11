@@ -11,6 +11,7 @@
 #include <ugl/lie_group/extended_pose.h>
 
 #include "gps_model.h"
+#include "imu_model.h"
 #include "mocap_model.h"
 
 namespace invariant
@@ -49,20 +50,11 @@ public:
     void update(const ugl::lie::Euclidean<3>& y, const GpsModel& sensor_model);
 
 private:
-    /// @brief Error jacobian of the process model
-    static Jacobian<9,9> process_error_jacobian(const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-
-    /// @brief Noise jacobian of the process model
-    static Jacobian<9,6> process_noise_jacobian();
-
-    /// @brief Noise covariance of the process model
-    static Covariance<6> process_noise_covariance();
-
-private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();
     Covariance<9> m_P = s_default_covariance;
 
     static const ugl::Matrix<9,9> s_default_covariance;
+    static const ImuModel s_imu_model;
 
     static constexpr int kRotIndex = 0;
     static constexpr int kVelIndex = 3;

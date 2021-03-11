@@ -59,8 +59,9 @@ catkin_package(
 
 ## Sensor Models ##
 add_library(sensor_models SHARED
-  src/kalman_filter/mocap_model.cpp
   src/kalman_filter/gps_model.cpp
+  src/kalman_filter/imu_model.cpp
+  src/kalman_filter/mocap_model.cpp
 )
 target_include_directories(sensor_models
   PUBLIC

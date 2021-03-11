@@ -9,6 +9,7 @@
 #include <ugl/lie_group/extended_pose.h>
 
 #include "gps_model.h"
+#include "imu_model.h"
 #include "mocap_model.h"
 
 namespace invariant
@@ -27,6 +28,15 @@ const IEKF::Covariance<9> IEKF::s_default_covariance = []() {
     covariance.block<3,3>(6,6) = Matrix3::Identity() * pos_stddev*pos_stddev;
 
     return covariance;
+}();
+
+const ImuModel IEKF::s_imu_model = []() {
+    constexpr double sigma_gyro  = 0.1 ; // [rad/s]
+    constexpr double sigma_accel = 5.0;  // [m/s^2]
+    Covariance<6> covariance = Covariance<6>::Zero();
+    covariance.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
+    covariance.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
+    return ImuModel{covariance};
 }();
 
 IEKF::IEKF(const lie::ExtendedPose& X0, const Covariance<9>& P0)
@@ -53,10 +63,8 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 
     m_X = lie::ExtendedPose{R_pred, v_pred, p_pred};
 
-    const auto& A = process_error_jacobian(acc, ang_vel);
-    static const auto& D = process_noise_jacobian();
-    static const auto& Q = process_noise_covariance();
-    static const Matrix<9,9> Q_hat = D*Q*D.transpose();
+    const auto& A = s_imu_model.error_jacobian(acc, ang_vel);
+    const auto& Q_hat = s_imu_model.modified_noise_covariance();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
     m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();
@@ -88,35 +96,6 @@ void IEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
 
     m_X = lie::oplus(m_X, K*innovation);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
-}
-
-IEKF::Jacobian<9,9> IEKF::process_error_jacobian(const Vector3& acc, const Vector3& ang_vel)
-{
-    Jacobian<9,9> jac = Jacobian<9,9>::Zero();
-    jac.block<3,3>(kRotIndex,kRotIndex) = -lie::skew(ang_vel);
-    jac.block<3,3>(kVelIndex,kVelIndex) = -lie::skew(ang_vel);
-    jac.block<3,3>(kPosIndex,kPosIndex) = -lie::skew(ang_vel);
-    jac.block<3,3>(kVelIndex,kRotIndex) = -lie::skew(acc);
-    jac.block<3,3>(kPosIndex,kVelIndex) = Matrix3::Identity();
-    return jac;
-}
-
-IEKF::Jacobian<9,6> IEKF::process_noise_jacobian()
-{
-    Jacobian<9,6> jac = Jacobian<9,6>::Zero();
-    jac.block<3,3>(0,0) = Matrix3::Identity();
-    jac.block<3,3>(3,3) = Matrix3::Identity();
-    return jac;
-}
-
-IEKF::Covariance<6> IEKF::process_noise_covariance()
-{
-    constexpr double sigma_gyro  = 0.1 ; // [rad/s]
-    constexpr double sigma_accel = 5.0;  // [m/s^2]
-    Covariance<6> covar = Covariance<6>::Zero();
-    covar.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
-    covar.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
-    return covar;
 }
 
 const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
