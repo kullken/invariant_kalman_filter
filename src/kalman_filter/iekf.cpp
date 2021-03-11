@@ -17,6 +17,8 @@ namespace invariant
 
 using namespace ugl;
 
+const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
+
 IEKF::IEKF(const lie::ExtendedPose& X0, const Covariance<9>& P0)
     : m_X(X0)
     , m_P(P0)
@@ -75,7 +77,5 @@ void IEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
     m_X = lie::oplus(m_X, K*innovation);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 }
-
-const Vector3 IEKF::s_gravity{0.0, 0.0, -9.82};
 
 } // namespace invariant
