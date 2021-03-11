@@ -7,6 +7,8 @@
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/normal_distribution.h>
 
+#include "imu_model.h"
+
 namespace invariant::test
 {
 
@@ -15,6 +17,7 @@ struct ImuData
     double dt;
     ugl::Vector3 acc;
     ugl::Vector3 rate;
+    ImuModel model;
 };
 
 enum class ImuNoiseLevel
@@ -63,6 +66,7 @@ private:
 
     ugl::random::NormalDistribution<3> accel_noise_;
     ugl::random::NormalDistribution<3> gyro_noise_;
+    ImuModel imu_model_;
 
     static const ugl::Vector3 s_gravity;
 };

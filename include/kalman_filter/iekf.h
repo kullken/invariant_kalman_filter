@@ -45,7 +45,7 @@ public:
     void set_state(const ugl::lie::ExtendedPose& state) { m_X = state; }
     void set_covariance(const Covariance<9>& P) { m_P = P; }
 
-    void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
+    void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel, const ImuModel& imu_model);
     void update(const ugl::lie::Pose& y, const MocapModel& sensor_model);
     void update(const ugl::lie::Euclidean<3>& y, const GpsModel& sensor_model);
 
@@ -54,7 +54,6 @@ private:
     Covariance<9> m_P = s_default_covariance;
 
     static const ugl::Matrix<9,9> s_default_covariance;
-    static const ImuModel s_imu_model;
 
     static constexpr int kRotIndex = 0;
     static constexpr int kVelIndex = 3;

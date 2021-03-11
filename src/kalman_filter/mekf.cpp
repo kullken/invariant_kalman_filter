@@ -9,6 +9,7 @@
 #include <ugl/lie_group/extended_pose.h>
 
 #include "gps_model.h"
+#include "imu_model.h"
 #include "mocap_model.h"
 
 namespace invariant
@@ -58,14 +59,13 @@ void MEKF::set_state(const lie::ExtendedPose& state)
     m_R_ref = state.rotation();
 }
 
-void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
+void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel, const ImuModel& imu_model)
 {
     m_x = MEKF::state_transition_model(m_x, m_R_ref, dt, acc, ang_vel);
 
+    // MEKF's error jacobian is different from IEKF's, so it is not computed by ImuModel.
     const auto& A = process_error_jacobian(m_R_ref, acc, ang_vel);
-    static const auto& D = process_noise_jacobian();
-    static const auto& Q = process_noise_covariance();
-    static const Matrix<9,9> Q_hat = D*Q*D.transpose();
+    const auto& Q_hat = imu_model.modified_noise_covariance();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
     m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();
@@ -138,24 +138,6 @@ MEKF::Jacobian<9,9> MEKF::process_error_jacobian(const lie::Rotation& R_ref, con
     jac.block<3,3>(kVelIndex,kRotIndex) = lie::skew(R_ref.inverse()*acc);        // With inversion of R
     jac.block<3,3>(kRotIndex,kRotIndex) = -0.5 * lie::skew(ang_vel);
     return jac;
-}
-
-MEKF::Jacobian<9,6> MEKF::process_noise_jacobian()
-{
-    Jacobian<9,6> jac = Jacobian<9,6>::Zero();
-    jac.block<3,3>(0,0) = Matrix3::Identity();
-    jac.block<3,3>(3,3) = Matrix3::Identity();
-    return jac;
-}
-
-MEKF::Covariance<6> MEKF::process_noise_covariance()
-{
-    constexpr double sigma_gyro  = 0.1 ; // [rad/s]
-    constexpr double sigma_accel = 5.0;  // [m/s^2]
-    Covariance<6> covar = Covariance<6>::Zero();
-    covar.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
-    covar.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
-    return covar;
 }
 
 } // namespace invariant

@@ -32,7 +32,7 @@ public:
         auto visitor = [&](auto&& data) {
             using T = std::decay_t<decltype(data)>;
             if constexpr (std::is_same_v<T, ImuData>) {
-                filter.predict(data.dt, data.acc, data.rate);
+                filter.predict(data.dt, data.acc, data.rate, data.model);
             } else {
                 filter.update(data.measurement, data.model);
             }

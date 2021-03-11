@@ -12,6 +12,7 @@ namespace invariant::test
 
 static ugl::Matrix3 get_accel_covar(ImuNoiseLevel level);
 static ugl::Matrix3 get_gyro_covar(ImuNoiseLevel level);
+static ugl::Matrix<6,6> get_covariance(ImuNoiseLevel level);
 
 const ugl::Vector3 ImuSensorModel::s_gravity{0.0, 0.0, -9.82};
 
@@ -20,12 +21,13 @@ ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency)
     , period_(1.0/frequency)
     , accel_noise_(get_accel_covar(level))
     , gyro_noise_(get_gyro_covar(level))
+    , imu_model_(level == ImuNoiseLevel::None ? get_covariance(ImuNoiseLevel::Low) : get_covariance(level))
 {
 }
 
 ImuData ImuSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    return ImuData{period(), get_accel_reading(t, trajectory), get_gyro_reading(t, trajectory)};
+    return ImuData{period(), get_accel_reading(t, trajectory), get_gyro_reading(t, trajectory), imu_model_};
 }
 
 ugl::Vector3 ImuSensorModel::get_accel_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
@@ -142,6 +144,14 @@ static ugl::Matrix3 get_gyro_covar(ImuNoiseLevel level)
     default:
         throw std::logic_error("The asked for ImuNoiseLevel is not yet implemented for gyroscope.");
     }
+}
+
+static ugl::Matrix<6,6> get_covariance(ImuNoiseLevel level)
+{
+    ugl::Matrix<6,6> covariance = ugl::Matrix<6,6>::Zero();
+    covariance.block<3,3>(0,0) = get_gyro_covar(level);
+    covariance.block<3,3>(3,3) = get_accel_covar(level);
+    return covariance;
 }
 
 } // namespace invariant::test

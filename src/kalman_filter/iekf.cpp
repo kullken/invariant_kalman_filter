@@ -30,15 +30,6 @@ const IEKF::Covariance<9> IEKF::s_default_covariance = []() {
     return covariance;
 }();
 
-const ImuModel IEKF::s_imu_model = []() {
-    constexpr double sigma_gyro  = 0.1 ; // [rad/s]
-    constexpr double sigma_accel = 5.0;  // [m/s^2]
-    Covariance<6> covariance = Covariance<6>::Zero();
-    covariance.block<3,3>(0,0) = Matrix3::Identity() * sigma_gyro*sigma_gyro;
-    covariance.block<3,3>(3,3) = Matrix3::Identity() * sigma_accel*sigma_accel;
-    return ImuModel{covariance};
-}();
-
 IEKF::IEKF(const lie::ExtendedPose& X0, const Covariance<9>& P0)
     : m_X(X0)
     , m_P(P0)
@@ -51,7 +42,7 @@ IEKF::IEKF(const lie::Rotation& R0, const Vector3& p0, const Vector3& v0, const 
 {
 }
 
-void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
+void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel, const ImuModel& imu_model)
 {
     const lie::Rotation R = m_X.rotation();
     const Vector3 v = m_X.velocity();
@@ -63,8 +54,8 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel)
 
     m_X = lie::ExtendedPose{R_pred, v_pred, p_pred};
 
-    const auto& A = s_imu_model.error_jacobian(acc, ang_vel);
-    const auto& Q_hat = s_imu_model.modified_noise_covariance();
+    const auto& A = imu_model.error_jacobian(acc, ang_vel);
+    const auto& Q_hat = imu_model.modified_noise_covariance();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
     m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();

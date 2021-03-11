@@ -11,6 +11,7 @@
 #include <ugl/lie_group/extended_pose.h>
 
 #include "gps_model.h"
+#include "imu_model.h"
 #include "mocap_model.h"
 
 namespace invariant
@@ -46,7 +47,7 @@ public:
     void set_state(const ugl::lie::ExtendedPose& state);
     void set_covariance(const Covariance<9>& P) { m_P = P; }
 
-    void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
+    void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel, const ImuModel& imu_model);
     void update(const ugl::lie::Pose& y, const MocapModel& sensor_model);
     void update(const ugl::lie::Euclidean<3>& y, const GpsModel& sensor_model);
 
@@ -57,12 +58,6 @@ private:
 
     /// @brief Error jacobian of the process model
     static Jacobian<9,9> process_error_jacobian(const ugl::lie::Rotation& R_ref, const ugl::Vector3& acc, const ugl::Vector3& ang_vel);
-
-    /// @brief Noise jacobian of the process model
-    static Jacobian<9,6> process_noise_jacobian();
-
-    /// @brief Noise covariance of the process model
-    static Covariance<6> process_noise_covariance();
 
 private:
     State m_x = State::Zero();
