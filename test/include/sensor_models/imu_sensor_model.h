@@ -34,8 +34,6 @@ enum class ImuNoiseLevel
 class ImuSensorModel
 {
 public:
-    ImuSensorModel() = default;
-
     ImuSensorModel(ImuNoiseLevel level, double frequency);
 
     double period() const
