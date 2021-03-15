@@ -13,7 +13,6 @@ add_library(test_sensor_models SHARED
 target_include_directories(test_sensor_models
   PUBLIC
     include/sensor_models
-    ${catkin_INCLUDE_DIRS}
 )
 target_link_libraries(test_sensor_models
   PUBLIC
@@ -37,7 +36,6 @@ add_library(accuracy_test SHARED
 target_include_directories(accuracy_test
   PUBLIC
     include
-    ${catkin_INCLUDE_DIRS}
 )
 target_link_libraries(accuracy_test
   PUBLIC
@@ -74,7 +72,6 @@ if (CATKIN_ENABLE_TESTING)
   target_include_directories(create_rosbag_data
     PRIVATE
       include
-      ${catkin_INCLUDE_DIRS}
   )
   target_link_libraries(create_rosbag_data
       kalman_filter

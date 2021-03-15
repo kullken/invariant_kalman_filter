@@ -14,6 +14,10 @@ find_package(catkin REQUIRED
     ugl_ros
 )
 
+add_library(catkin_include_interface INTERFACE)
+target_include_directories(catkin_include_interface SYSTEM INTERFACE ${catkin_INCLUDE_DIRS})
+list(APPEND catkin_LIBRARIES catkin_include_interface)
+
 find_package(ugl REQUIRED)
 
 add_library(project_options INTERFACE)
@@ -105,7 +109,6 @@ add_executable(kalman_node
 target_include_directories(kalman_node
   PUBLIC
     include/kalman_node
-    ${catkin_INCLUDE_DIRS}
   PRIVATE
     src/kalman_node
 )
