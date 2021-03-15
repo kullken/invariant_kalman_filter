@@ -19,7 +19,7 @@ public:
     const ros::Time& stamp() const { return m_stamp; }
 
 protected:
-    Measurement(const ros::Time& stamp) : m_stamp(stamp) {}
+    explicit Measurement(const ros::Time& stamp) : m_stamp(stamp) {}
 
 private:
     ros::Time m_stamp;
@@ -28,7 +28,7 @@ private:
 class ImuMeasurement: public Measurement
 {
 public:
-    ImuMeasurement(const sensor_msgs::Imu& imu_msg);
+    explicit ImuMeasurement(const sensor_msgs::Imu& imu_msg);
 
     // Acceleration as measured by accelerometer.
     const ugl::Vector3& acceleration() const { return m_acc; }
@@ -44,7 +44,7 @@ private:
 class MocapMeasurement: public Measurement
 {
 public:
-    MocapMeasurement(const geometry_msgs::PoseStamped& pose_msg);
+    explicit MocapMeasurement(const geometry_msgs::PoseStamped& pose_msg);
 
     // Pose measured by Mocap-system.
     const ugl::lie::Pose& pose() const { return m_pose; }
