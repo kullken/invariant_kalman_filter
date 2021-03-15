@@ -1,6 +1,7 @@
 #include "test_trajectories.h"
 
 #include <algorithm>
+#include <sstream>
 #include <vector>
 
 #include <ugl/math/vector.h>
@@ -53,44 +54,47 @@ auto rotate_yaw(double degrees, double total_duration, double start_degree=0.0)
 
 } // namespace
 
-ugl::trajectory::Trajectory stand_still(double duration)
+TestTrajectory TestTrajectory::stand_still(double duration)
 {
+    std::stringstream ss;
+    ss << "StandStill: " << duration << "s";
+
     ugl::trajectory::Bezier<0> lin_traj{duration, {ugl::Vector3::Zero()}};
 
     ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
 
-    return {lin_traj, ang_traj};
+    return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
 }
 
-ugl::trajectory::Trajectory rotate_in_place(double degrees, double duration)
+TestTrajectory TestTrajectory::rotate_in_place(double degrees, double duration)
 {
+    std::stringstream ss;
+    ss << "Rotate: " << degrees << ", " << duration << "s";
+
     ugl::trajectory::Bezier<0> lin_traj{duration, {ugl::Vector3::Zero()}};
 
     auto ang_traj = rotate_yaw(degrees, duration);
 
-    return {lin_traj, ang_traj};
+    return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
 }
 
-ugl::trajectory::Trajectory constant_velocity(ugl::Vector3 velocity, double duration)
+TestTrajectory TestTrajectory::constant_velocity(ugl::Vector3 velocity, double duration)
 {
+    std::stringstream ss;
+    ss << "ConstantVel: " << "[" << velocity.x() << "," << velocity.y() << "," << velocity.z() << "] m/s, " << duration << "s";
+
     ugl::trajectory::Bezier<1> lin_traj{duration, {ugl::Vector3::Zero(), velocity*duration}};
 
     ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
 
-    return {lin_traj, ang_traj};
+    return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
 }
 
-ugl::trajectory::Trajectory quadratic_translation(ugl::Vector3 delta, double duration)
+TestTrajectory TestTrajectory::start_stop(ugl::Vector3 acceleration, double duration)
 {
-    ugl::trajectory::Bezier<2> lin_traj{duration, {ugl::Vector3::Zero(), ugl::Vector3::Zero(), delta}};
+    std::stringstream ss;
+    ss << "StartStop: " << "[" << acceleration.x() << "," << acceleration.y() << "," << acceleration.z() << "] m/s^2, " << duration << "s";
 
-    ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
-
-    return {lin_traj, ang_traj};
-}
-
-ugl::trajectory::Trajectory start_stop(ugl::Vector3 acceleration, double duration)
-{
     const ugl::Vector3 start = ugl::Vector3::Zero();
     const ugl::Vector3 mid   = std::pow((duration/2), 2) * acceleration / 2;
     const ugl::Vector3 stop  = 2 * mid;
@@ -101,14 +105,18 @@ ugl::trajectory::Trajectory start_stop(ugl::Vector3 acceleration, double duratio
 
     ugl::trajectory::SlerpSegment ang_traj{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
 
-    return {lin_traj, ang_traj};
+    return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
 }
 
-ugl::trajectory::Trajectory circle(double degrees, double radius, double duration)
+TestTrajectory TestTrajectory::circle(double degrees, double radius, double duration)
 {
+    std::stringstream ss;
+    ss << "Circle: " << degrees << ", " << radius << "m, " << duration << "s";
+
     auto lin_traj = ugl::trajectory::CircleArc{deg2rad(degrees), radius, duration};
     auto ang_traj = rotate_yaw(degrees, duration, 90.0);
-    return {lin_traj, ang_traj};
+
+    return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
 }
 
 } // namespace invariant::test

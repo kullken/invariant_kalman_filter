@@ -301,11 +301,11 @@ protected:
 
 TEST_P(GenerateData, CircleTest)
 {
-    run_test(TestTrajectory{"Circle: 360, 1m, 10s", circle(360, 1, 10)});
+    run_test(TestTrajectory::circle(360, 1, 10));
 }
 TEST_P(GenerateData, CircleTest2m)
 {
-    run_test(TestTrajectory{"Circle: 360, 2m, 10s", circle(360, 2, 10)});
+    run_test(TestTrajectory::circle(360, 2, 10));
 }
 INSTANTIATE_TEST_CASE_P(
     Visualization,
