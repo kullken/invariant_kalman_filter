@@ -82,6 +82,20 @@ if (CATKIN_ENABLE_TESTING)
       project_warnings
   )
 
+  catkin_add_executable_with_gtest(generate_data src/generate_data.cpp)
+  target_include_directories(generate_data
+    PRIVATE
+      include
+  )
+  target_link_libraries(generate_data
+      kalman_filter
+      accuracy_test
+      test_sensor_models
+      ${catkin_LIBRARIES}
+      project_options
+      project_warnings
+  )
+
   catkin_add_executable_with_gtest(regression_tests src/regression_tests.cpp)
   target_include_directories(regression_tests
     PRIVATE
