@@ -57,32 +57,6 @@ target_link_libraries(accuracy_test
 #############
 
 if (CATKIN_ENABLE_TESTING)
-  catkin_add_executable_with_gtest(create_csv_data src/create_csv_data.cpp)
-  target_include_directories(create_csv_data
-    PRIVATE
-      include
-  )
-  target_link_libraries(create_csv_data
-      kalman_filter
-      accuracy_test
-      test_sensor_models
-      project_options
-      project_warnings
-  )
-
-  catkin_add_executable_with_gtest(create_rosbag_data src/create_rosbag_data.cpp)
-  target_include_directories(create_rosbag_data
-    PRIVATE
-      include
-  )
-  target_link_libraries(create_rosbag_data
-      kalman_filter
-      accuracy_test
-      test_sensor_models
-      project_options
-      project_warnings
-  )
-
   catkin_add_executable_with_gtest(generate_data src/generate_data.cpp)
   target_include_directories(generate_data
     PRIVATE
