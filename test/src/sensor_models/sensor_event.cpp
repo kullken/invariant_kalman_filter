@@ -5,6 +5,7 @@
 
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <sensor_msgs/Imu.h>
 
 #include <ugl_ros/convert_tf2.h>
 
@@ -19,9 +20,14 @@ ros::Time to_rosbag_time(double t)
     return t == 0.0 ? ros::TIME_MIN : ros::Time{t};
 }
 
-void write_data(rosbag::Bag& /*rosbag*/, const ImuData& /*data*/, double /*time*/, const std::string& /*topic_prefix*/)
+void write_data(rosbag::Bag& rosbag, const ImuData& data, double time, const std::string& topic_prefix)
 {
-    /// TODO: Implement writing ImuData to rosbag. In the mean time we do nothing.
+    sensor_msgs::Imu msg;
+    msg.header.stamp = to_rosbag_time(time);
+    msg.header.frame_id = "base_link";
+    tf2::toMsg(data.acc, msg.linear_acceleration);
+    tf2::toMsg(data.rate, msg.angular_velocity);
+    rosbag.write(topic_prefix + "/imu", msg.header.stamp, msg);
 }
 
 void write_data(rosbag::Bag& rosbag, const GpsData& data, double time, const std::string& topic_prefix)
