@@ -4,6 +4,7 @@ import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d
 
 vec3_type = np.dtype([
     ("x", float),
@@ -117,6 +118,27 @@ def plot_state(data, ground_truth, description):
     for ax in axes.flatten():
         ax.legend()
 
+def plot_3D(data, ground_truth, description):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+
+    # Plot ground truth
+    ax.plot(
+        ground_truth["pos"]["x"],
+        ground_truth["pos"]["y"],
+        ground_truth["pos"]["z"],
+        "k--", label="True value"
+    )
+
+    plot_args = {"linewidth": 1.0}
+    for case_data in data:
+        ax.plot(
+            case_data["pos"]["x"],
+            case_data["pos"]["y"],
+            case_data["pos"]["z"],
+            **plot_args
+        )
+
 
 if __name__ == "__main__":
     args = get_cmdline_args()
@@ -143,5 +165,6 @@ if __name__ == "__main__":
 
     plot_error(data, description)
     plot_state(data, ground_truth, description)
+    plot_3D(data, ground_truth, description)
 
     plt.show()
