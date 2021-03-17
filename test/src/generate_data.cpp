@@ -42,11 +42,11 @@ const auto test_sensor_models = testing::Values(
 const auto offset_generators = testing::Values(
     OffsetGenerator{
         []() {
-            constexpr double kRotationStddev = 1.0;  // [rad]
+            const ugl::Vector3 rotation_stddev{0.2, 0.2, 1.0}; // [rad]
             constexpr double kVelocityStddev = 0.2;  // [m/s]
             constexpr double kpositionStddev = 0.2;  // [m]
             ugl::Matrix<9,9> covariance = ugl::Matrix<9,9>::Zero();
-            covariance.block<3,3>(0,0) = ugl::Matrix3::Identity() * kRotationStddev*kRotationStddev;
+            covariance.block<3,3>(0,0).diagonal() = (rotation_stddev * rotation_stddev.transpose()).diagonal();
             covariance.block<3,3>(3,3) = ugl::Matrix3::Identity() * kVelocityStddev*kVelocityStddev;
             covariance.block<3,3>(6,6) = ugl::Matrix3::Identity() * kpositionStddev*kpositionStddev;
             return covariance;
