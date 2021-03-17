@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <ugl/math/vector.h>
@@ -76,7 +77,7 @@ void write_ground_truth(std::ostream& os, const std::vector<double>& times, cons
 
 } // namespace
 
-void save_to_csv(const std::vector<Result>& results)
+void save_to_csv(const std::vector<Result>& results, std::string_view file_name_prefix)
 {
     auto test_info = testing::UnitTest::GetInstance()->current_test_info();
 
@@ -97,8 +98,10 @@ void save_to_csv(const std::vector<Result>& results)
 
     std::string file_name = test_info->name();
     std::replace(std::begin(file_name), std::end(file_name), '/', '_');
-	const std::string result_path{"/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/" + file_name + ".csv"};
-    std::ofstream csv_file{result_path};
+    std::stringstream file_path;
+    file_path << "/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/" << file_name_prefix << file_name << ".csv";
+
+    std::ofstream csv_file{file_path.str()};
     csv_file << ss.rdbuf();
 }
 
