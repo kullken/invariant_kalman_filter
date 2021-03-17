@@ -28,6 +28,14 @@ struct TestTrajectory
     /// @param duration duration of the trajectory
     /// @return The generated trajectory.
     static TestTrajectory circle(double degrees, double radius, double duration);
+
+    /// @brief helix trajectory around the z-axis, facing in xy-direction of movement.
+    /// @param degrees total rotation around the origin in degrees
+    /// @param radius radius of the circle
+    /// @param z_velocity velocity along the z-axis
+    /// @param duration duration of the trajectory
+    /// @return The generated trajectory.
+    static TestTrajectory helix(double degrees, double radius, double z_velocity, double duration);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const TestTrajectory& param)

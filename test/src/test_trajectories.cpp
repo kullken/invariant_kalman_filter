@@ -10,6 +10,7 @@
 
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/trajectory/circle_arc.h>
+#include <ugl/trajectory/helix.h>
 #include <ugl/trajectory/bezier.h>
 #include <ugl/trajectory/bezier_sequence.h>
 #include <ugl/trajectory/slerp_segment.h>
@@ -114,6 +115,17 @@ TestTrajectory TestTrajectory::circle(double degrees, double radius, double dura
     ss << "Circle: " << degrees << ", " << radius << "m, " << duration << "s";
 
     auto lin_traj = ugl::trajectory::CircleArc{deg2rad(degrees), radius, duration};
+    auto ang_traj = rotate_yaw(degrees, duration, 90.0);
+
+    return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
+}
+
+TestTrajectory TestTrajectory::helix(double degrees, double radius, double z_velocity, double duration)
+{
+    std::stringstream ss;
+    ss << "Helix: " << degrees << ", " << radius << "m, " << z_velocity << "m/s, " << duration << "s";
+
+    auto lin_traj = ugl::trajectory::Helix{deg2rad(degrees), radius, duration, z_velocity};
     auto ang_traj = rotate_yaw(degrees, duration, 90.0);
 
     return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};

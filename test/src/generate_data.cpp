@@ -103,9 +103,9 @@ TEST_P(GenerateData, CircleTest)
 {
     run_test(TestTrajectory::circle(360, 1, 10));
 }
-TEST_P(GenerateData, CircleTest2m)
+TEST_P(GenerateData, HelixTest)
 {
-    run_test(TestTrajectory::circle(360, 2, 10));
+    run_test(TestTrajectory::helix(720, 2, 0.5, 20));
 }
 INSTANTIATE_TEST_CASE_P(
     Visualization,
