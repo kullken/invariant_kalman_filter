@@ -8,30 +8,6 @@
 
 namespace invariant::test
 {
-namespace
-{
-
-constexpr double kRotationStddev = 1.0;  // [rad]
-constexpr double kVelocityStddev = 1.0;  // [m/s]
-constexpr double kpositionStddev = 1.0;  // [m]
-
-} // namespace
-
-const ugl::Matrix<9,9> OffsetGenerator::s_default_covariance = []() {
-    ugl::Matrix<9,9> covariance = ugl::Matrix<9,9>::Zero();
-    covariance.block<3,3>(0,0) = ugl::Matrix3::Identity() * kRotationStddev*kRotationStddev;
-    covariance.block<3,3>(3,3) = ugl::Matrix3::Identity() * kVelocityStddev*kVelocityStddev;
-    covariance.block<3,3>(6,6) = ugl::Matrix3::Identity() * kpositionStddev*kpositionStddev;
-    return covariance;
-}();
-
-const ugl::Vector<9> OffsetGenerator::s_default_uniform_range = []() {
-    ugl::Vector<9> range{};
-    range.segment<3>(0) = ugl::Vector3::Ones() * std::sqrt(3)*kRotationStddev;
-    range.segment<3>(3) = ugl::Vector3::Ones() * std::sqrt(3)*kVelocityStddev;
-    range.segment<3>(6) = ugl::Vector3::Ones() * std::sqrt(3)*kpositionStddev;
-    return range;
-}();
 
 OffsetGenerator::OffsetGenerator(const ugl::Matrix<9,9>& covariance)
     : m_gaussian(covariance)
