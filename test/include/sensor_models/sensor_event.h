@@ -5,8 +5,6 @@
 #include <type_traits>
 #include <variant>
 
-#include <rosbag/bag.h>
-
 #include "imu_sensor_model.h"
 #include "mocap_sensor_model.h"
 #include "gps_sensor_model.h"
@@ -51,8 +49,6 @@ public:
 
         std::visit(visitor, m_data);
     }
-
-    void write_to_rosbag(rosbag::Bag& rosbag, const std::string& topic_prefix) const;
 
 private:
     double m_time;

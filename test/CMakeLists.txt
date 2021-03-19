@@ -21,7 +21,6 @@ target_link_libraries(test_sensor_models
     ugl::lie_group
     ugl::random
     sensor_models
-    ${catkin_LIBRARIES}
   PRIVATE
     project_options
     project_warnings
