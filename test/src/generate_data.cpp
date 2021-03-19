@@ -54,6 +54,10 @@ const auto initial_offsets = testing::Values(
     OffsetGenerator{s_initial_covariance}.sample_uniform(10)
 );
 
+const auto yaw_spread_initial_offsets = testing::Values(
+    InitialValue::uniform_yaw_spread(1.5, 9, s_initial_covariance)
+);
+
 class GenerateData: public testing::TestWithParam<std::tuple<std::vector<VirtualSensor>, std::vector<InitialValue>>>
 {
 protected:

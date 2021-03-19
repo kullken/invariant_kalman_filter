@@ -14,6 +14,9 @@ struct InitialValue
 {
     ugl::lie::ExtendedPose offset;
     ugl::Matrix<9,9> covariance;
+
+    /// @brief Creates a vector of InitialValue's with uniform spread of yaw values in range +-yaw_range.
+    static std::vector<InitialValue> uniform_yaw_spread(double yaw_range, int sample_count, const ugl::Matrix<9,9>& initial_covariance);
 };
 
 class OffsetGenerator

@@ -4,10 +4,25 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
+#include <ugl/math/quaternion.h>
 #include <ugl/lie_group/extended_pose.h>
 
 namespace invariant::test
 {
+
+std::vector<InitialValue> InitialValue::uniform_yaw_spread(double yaw_range, int sample_count, const ugl::Matrix<9,9>& initial_covariance)
+{
+    std::vector<InitialValue> initial_values{};
+    const double yaw0 = -yaw_range;
+    const double yaw_step = 2*yaw_range / (sample_count-1);
+    for (int i = 0; i < sample_count; ++i)
+    {
+        const auto quat = ugl::math::to_quat(yaw0 + i*yaw_step, ugl::Vector3::UnitZ());
+        const auto initial_value = ugl::lie::ExtendedPose{quat, ugl::Vector3::Zero(), ugl::Vector3::Zero()};
+        initial_values.push_back({initial_value, initial_covariance});
+    }
+    return initial_values;
+}
 
 OffsetGenerator::OffsetGenerator(const ugl::Matrix<9,9>& covariance)
     : m_gaussian(covariance)
