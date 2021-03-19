@@ -21,9 +21,29 @@ ugl::lie::ExtendedPose OffsetGenerator::sample_gaussian() const
     return ugl::lie::ExtendedPose::exp(m_gaussian.sample());
 }
 
+std::vector<InitialValue> OffsetGenerator::sample_gaussian(int number_samples) const
+{
+    std::vector<InitialValue> initial_values{};
+    for (int i = 0; i < number_samples; ++i)
+    {
+        initial_values.push_back({sample_gaussian(), m_gaussian.covar()});
+    }
+    return initial_values;
+}
+
 ugl::lie::ExtendedPose OffsetGenerator::sample_uniform() const
 {
     return ugl::lie::ExtendedPose::exp(m_uniform.sample());
+}
+
+std::vector<InitialValue> OffsetGenerator::sample_uniform(int number_samples) const
+{
+    std::vector<InitialValue> initial_values{};
+    for (int i = 0; i < number_samples; ++i)
+    {
+        initial_values.push_back({sample_uniform(), m_gaussian.covar()});
+    }
+    return initial_values;
 }
 
 const ugl::Matrix<9,9>& OffsetGenerator::get_covariance() const

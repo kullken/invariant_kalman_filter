@@ -10,6 +10,12 @@
 namespace invariant::test
 {
 
+struct InitialValue
+{
+    ugl::lie::ExtendedPose offset;
+    ugl::Matrix<9,9> covariance;
+};
+
 class OffsetGenerator
 {
 public:
@@ -20,7 +26,11 @@ public:
 
     ugl::lie::ExtendedPose sample_gaussian() const;
 
+    std::vector<InitialValue> sample_gaussian(int number_samples) const;
+
     ugl::lie::ExtendedPose sample_uniform() const;
+
+    std::vector<InitialValue> sample_uniform(int number_samples) const;
 
     const ugl::Matrix<9,9>& get_covariance() const;
 
