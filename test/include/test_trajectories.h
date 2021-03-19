@@ -29,7 +29,7 @@ struct TestTrajectory
     /// @return The generated trajectory.
     static TestTrajectory circle(double degrees, double radius, double duration);
 
-    /// @brief helix trajectory around the z-axis, facing in xy-direction of movement.
+    /// @brief Helix trajectory around the z-axis, facing in xy-direction of movement.
     /// @param degrees total rotation around the origin in degrees
     /// @param radius radius of the circle
     /// @param z_velocity velocity along the z-axis
