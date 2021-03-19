@@ -3,6 +3,8 @@
 
 #include <gtest/gtest.h>
 
+#include <ugl/math/matrix.h>
+
 #include "iekf.h"
 #include "mekf.h"
 
