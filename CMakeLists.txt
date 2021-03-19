@@ -62,10 +62,13 @@ catkin_package(
 ###########
 
 ## Sensor Models ##
-add_library(sensor_models SHARED
-  src/kalman_filter/gps_model.cpp
-  src/kalman_filter/imu_model.cpp
-  src/kalman_filter/mocap_model.cpp
+add_library(sensor_models SHARED)
+add_library(invariant::sensor_models ALIAS sensor_models)
+target_sources(sensor_models
+  PRIVATE
+    src/kalman_filter/gps_model.cpp
+    src/kalman_filter/imu_model.cpp
+    src/kalman_filter/mocap_model.cpp
 )
 target_include_directories(sensor_models
   PUBLIC
@@ -81,11 +84,14 @@ target_link_libraries(sensor_models
 )
 
 ## Kalman filter ##
-add_library(kalman_filter SHARED
-  src/kalman_filter/iekf.cpp
-  src/kalman_filter/mekf.cpp
-  src/kalman_filter/mocap_model.cpp
-  src/kalman_filter/gps_model.cpp
+add_library(kalman_filter SHARED)
+add_library(invariant::kalman_filter ALIAS kalman_filter)
+target_sources(kalman_filter
+  PRIVATE
+    src/kalman_filter/iekf.cpp
+    src/kalman_filter/mekf.cpp
+    src/kalman_filter/mocap_model.cpp
+    src/kalman_filter/gps_model.cpp
 )
 target_include_directories(kalman_filter
   PUBLIC
@@ -95,16 +101,18 @@ target_link_libraries(kalman_filter
   PUBLIC
     ugl::math
     ugl::lie_group
-    sensor_models
+    invariant::sensor_models
   PRIVATE
     project_options
     project_warnings
 )
 
 ## Kalman ROS-node ##
-add_executable(kalman_node
-  src/kalman_node/kalman_node.cpp
-  src/kalman_node/measurement.cpp
+add_executable(kalman_node)
+target_sources(kalman_node
+  PRIVATE
+    src/kalman_node/kalman_node.cpp
+    src/kalman_node/measurement.cpp
 )
 target_include_directories(kalman_node
   PUBLIC
@@ -114,7 +122,7 @@ target_include_directories(kalman_node
 )
 target_link_libraries(kalman_node
   PUBLIC
-    kalman_filter
+    invariant::kalman_filter
     ${catkin_LIBRARIES}
   PRIVATE
     ugl::math
