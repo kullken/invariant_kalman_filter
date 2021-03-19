@@ -109,6 +109,10 @@ TEST_P(GenerateData, HelixTest)
 {
     run_test(TestTrajectory::helix(720, 2, 0.5, 20));
 }
+TEST_P(GenerateData, HexagonTest)
+{
+    run_test(TestTrajectory::hexagon_start_stop(1, 10));
+}
 INSTANTIATE_TEST_CASE_P(
     Visualization,
     GenerateData,

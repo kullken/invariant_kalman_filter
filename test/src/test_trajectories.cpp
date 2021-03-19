@@ -8,6 +8,8 @@
 #include <ugl/math/matrix.h>
 #include <ugl/math/quaternion.h>
 
+#include <ugl/lie_group/rotation.h>
+
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/trajectory/circle_arc.h>
 #include <ugl/trajectory/helix.h>
@@ -127,6 +129,32 @@ TestTrajectory TestTrajectory::helix(double degrees, double radius, double z_vel
 
     auto lin_traj = ugl::trajectory::Helix{deg2rad(degrees), radius, duration, z_velocity};
     auto ang_traj = rotate_yaw(degrees, duration, 90.0);
+
+    return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
+}
+
+TestTrajectory TestTrajectory::hexagon_start_stop(int laps, double duration)
+{
+    std::stringstream ss;
+    ss << "Hexagon: " << laps << " laps, " << duration << "s";
+
+    const ugl::lie::Rotation rotate_60 = ugl::lie::Rotation{ugl::math::to_quat(deg2rad(60.0), ugl::Vector3::UnitZ())};
+    const int edge_count = laps*6;
+    const double edge_duration = duration / edge_count;
+
+    std::vector<ugl::trajectory::Bezier<2>> beziers;
+    ugl::Vector3 start = ugl::Vector3::UnitX();
+    for (int i = 0; i < edge_count; ++i)
+    {
+        const ugl::Vector3 stop = rotate_60 * start;
+        const ugl::Vector3 mid = (start + stop) / 2;
+        beziers.emplace_back(edge_duration/2, std::array{start, start, mid});
+        beziers.emplace_back(edge_duration/2, std::array{mid, stop, stop});
+        start = rotate_60 * start;
+    }
+
+    const auto lin_traj = ugl::trajectory::BezierSequence<2>{beziers};
+    const auto ang_traj = ugl::trajectory::SlerpSegment{duration, ugl::UnitQuaternion::Identity(), ugl::UnitQuaternion::Identity()};
 
     return TestTrajectory{ss.str(), ugl::trajectory::Trajectory{lin_traj, ang_traj}};
 }

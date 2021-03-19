@@ -36,6 +36,12 @@ struct TestTrajectory
     /// @param duration duration of the trajectory
     /// @return The generated trajectory.
     static TestTrajectory helix(double degrees, double radius, double z_velocity, double duration);
+
+    /// @brief Hexagon shaped trajectory coming to complete stop in every corner.
+    /// @param laps total number of laps around the hexagon
+    /// @param duration duration of the trajectory
+    /// @return The generated trajectory.
+    static TestTrajectory hexagon_start_stop(int laps, double duration);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const TestTrajectory& param)
