@@ -17,6 +17,9 @@ namespace invariant::test
 class SensorEvent
 {
 public:
+    using DataVariant = std::variant<ImuData, MocapData, GpsData>;
+
+public:
     template<typename DataType>
     SensorEvent(double time, const DataType& data)
         : m_time(time)
@@ -24,7 +27,15 @@ public:
     {
     }
 
-    auto time() const { return m_time; }
+    auto time() const
+    {
+        return m_time;
+    }
+
+    const DataVariant& get_variant() const
+    {
+        return m_data;
+    }
 
     template<typename FilterType>
     void update_filter(FilterType& filter) const
@@ -45,7 +56,7 @@ public:
 
 private:
     double m_time;
-    std::variant<ImuData, MocapData, GpsData> m_data;
+    DataVariant m_data;
 };
 
 } // namespace invariant::test
