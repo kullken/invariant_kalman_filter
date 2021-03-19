@@ -10,6 +10,7 @@ if(ENABLE_CPPCHECK)
         --suppress=unusedFunction
         --suppress=missingIncludeSystem
         --suppress=unmatchedSuppression
+        --suppress=syntaxError
         --inline-suppr
         --inconclusive
         --quiet
