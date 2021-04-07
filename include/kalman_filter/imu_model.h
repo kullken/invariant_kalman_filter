@@ -10,6 +10,8 @@ namespace invariant
 class ImuModel
 {
 public:
+    ImuModel() : ImuModel(ugl::Matrix<6,6>::Identity()) {}
+
     explicit ImuModel(const ugl::Matrix<6,6>& noise_covariance);
 
     /// @brief Error jacobian of system dynamics.

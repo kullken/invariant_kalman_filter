@@ -12,6 +12,8 @@ namespace invariant
 class MocapModel
 {
 public:
+    MocapModel() : MocapModel(ugl::lie::Pose::Identity(), ugl::Matrix<6,6>::Identity()){}
+
     MocapModel(const ugl::lie::Pose& offset, const ugl::Matrix<6,6>& noise_covariance);
 
     /// @brief The observation function h(X,w)

@@ -15,6 +15,8 @@ public:
     using MeasurementType = ugl::lie::Euclidean<3>;
 
 public:
+    GpsModel() : GpsModel(MeasurementType::Identity(), ugl::Matrix<3,3>::Identity()) {}
+
     GpsModel(const MeasurementType& offset, const ugl::Matrix<3,3>& noise_covariance);
 
     /// @brief The observation function h(X,w)
