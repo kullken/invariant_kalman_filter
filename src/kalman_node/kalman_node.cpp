@@ -149,13 +149,13 @@ void KalmanNode::process_imu_measurement(const ImuMeasurement& measurement)
     if (dt > 0.05) {
         ROS_WARN("Time between IMU messages is high [dt=%f]. Might result in large discretisation errors.", dt);
     }
-    m_iekf_filter.predict(dt, measurement.acceleration(), measurement.angular_rate());
+    m_iekf_filter.predict(dt, measurement.acceleration(), measurement.angular_rate(), m_imu_model);
     m_previous_imu_time = measurement.stamp();
 }
 
 void KalmanNode::process_mocap_measurement(const MocapMeasurement& measurement)
 {
-    m_iekf_filter.mocap_update(measurement.pose());
+    m_iekf_filter.update(measurement.pose(), m_mocap_model);
 }
 
 void KalmanNode::publish_tf(const ros::Time& stamp)

@@ -74,6 +74,8 @@ private:
     ros::Timer m_timer;
 
     IEKF m_iekf_filter;
+    MocapModel m_mocap_model;
+    ImuModel m_imu_model;
 
     std::priority_queue<MeasurementPtr, std::vector<MeasurementPtr>, MeasurementPriority> m_queue;
 
