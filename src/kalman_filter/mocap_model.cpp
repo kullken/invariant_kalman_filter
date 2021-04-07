@@ -38,7 +38,7 @@ ugl::Matrix<6,9> MocapModel::error_jacobian() const
     return error_jacobian;
 }
 
-ugl::Matrix<6,6> MocapModel::noise_jacobian() const
+ugl::Matrix<6,6> MocapModel::noise_jacobian()
 {
     return ugl::Matrix<6,6>::Identity();
 }

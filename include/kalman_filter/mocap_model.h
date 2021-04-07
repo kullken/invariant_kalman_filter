@@ -38,7 +38,7 @@ public:
 
     /// @brief Noise jacobian of measurement model
     /// @return Const reference to the jacobian matrix
-    ugl::Matrix<6,6> noise_jacobian() const;
+    static ugl::Matrix<6,6> noise_jacobian();
 
     /// @brief Noise covariance of measurement model
     /// @return Const reference to the covariance matrix
