@@ -22,22 +22,25 @@
 namespace invariant::test
 {
 
+static constexpr double kImuFrequency = 100.0;
+static constexpr double kGpsFrequency = 2.0;
+
 const auto test_sensor_models = testing::Values(
     std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 2.0}},
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, kImuFrequency}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, kGpsFrequency}},
     },
     std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 2.0}},
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, kImuFrequency}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, kGpsFrequency}},
     },
     std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 2.0}},
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, kImuFrequency}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, kGpsFrequency}},
     },
     std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 2.0}},
+        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, kImuFrequency}},
+        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, kGpsFrequency}},
     }
 );
 
