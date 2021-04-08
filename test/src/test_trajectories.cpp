@@ -138,19 +138,19 @@ TestTrajectory TestTrajectory::hexagon_start_stop(int laps, double duration)
     std::stringstream ss;
     ss << "Hexagon: " << laps << " laps, " << duration << "s";
 
-    const ugl::lie::Rotation rotate_60 = ugl::lie::Rotation{ugl::math::to_quat(deg2rad(60.0), ugl::Vector3::UnitZ())};
+    const ugl::lie::Rotation rotate_60_yaw = ugl::lie::Rotation{ugl::math::to_quat(deg2rad(60.0), ugl::Vector3::UnitZ())};
     const int edge_count = laps*6;
     const double edge_duration = duration / edge_count;
 
     std::vector<ugl::trajectory::Bezier<2>> beziers;
-    ugl::Vector3 start = ugl::Vector3::UnitX();
+    ugl::Vector3 start = ugl::Vector3::UnitX() + ugl::Vector3::UnitZ();
     for (int i = 0; i < edge_count; ++i)
     {
-        const ugl::Vector3 stop = rotate_60 * start;
+        const ugl::Vector3 stop = rotate_60_yaw * start;
         const ugl::Vector3 mid = (start + stop) / 2;
         beziers.emplace_back(edge_duration/2, std::array{start, start, mid});
         beziers.emplace_back(edge_duration/2, std::array{mid, stop, stop});
-        start = rotate_60 * start;
+        start = stop;
     }
 
     const auto lin_traj = ugl::trajectory::BezierSequence<2>{beziers};
