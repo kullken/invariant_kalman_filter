@@ -118,9 +118,30 @@ def plot_state(data, ground_truth, description):
     for ax in axes.flatten():
         ax.legend()
 
+    return
+
+def set_3d_axis(ax):
+    margin = 0.5
+    xmin = min(ground_truth["pos"]["x"]) - margin
+    xmax = max(ground_truth["pos"]["x"]) + margin
+    ymin = min(ground_truth["pos"]["y"]) - margin
+    ymax = max(ground_truth["pos"]["y"]) + margin
+    zmin = min(ground_truth["pos"]["z"]) - margin
+    zmax = max(ground_truth["pos"]["z"]) + margin
+
+    side_length = max(xmax - xmin, ymax - ymin, zmax - zmin)
+
+    ax.set_xlim3d(-side_length/2, side_length/2)
+    ax.set_ylim3d(-side_length/2, side_length/2)
+    ax.set_zlim3d(0, side_length)
+
+    return
+
 def plot_3D(data, ground_truth, description):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
+
+    set_3d_axis(ax)
 
     # Plot ground truth
     ax.plot(
@@ -138,6 +159,8 @@ def plot_3D(data, ground_truth, description):
             case_data["pos"]["z"],
             **plot_args
         )
+
+    return
 
 
 if __name__ == "__main__":
