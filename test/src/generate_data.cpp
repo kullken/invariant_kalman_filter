@@ -45,7 +45,7 @@ const auto test_sensor_models = testing::Values(
 );
 
 static const ugl::Matrix<9,9> s_initial_covariance = []() {
-    const ugl::Vector3 rotation_stddev{0.2, 0.2, 1.0}; // [rad]
+    const ugl::Vector3 rotation_stddev{0.1, 0.1, 1.0}; // [rad]
     constexpr double kVelocityStddev = 0.2;  // [m/s]
     constexpr double kPositionStddev = 0.2;  // [m]
     ugl::Matrix<9,9> covariance = ugl::Matrix<9,9>::Zero();
@@ -104,13 +104,13 @@ protected:
 };
 
 
-TEST_P(GenerateData, CircleTest)
-{
-    run_test(TestTrajectory::circle(360, 1, 10));
-}
+// TEST_P(GenerateData, CircleTest)
+// {
+//     run_test(TestTrajectory::circle(360, 1, 10));
+// }
 TEST_P(GenerateData, HelixTest)
 {
-    run_test(TestTrajectory::helix(720, 2, 0.5, 20));
+    run_test(TestTrajectory::helix(720, 2, 0.2, 20));
 }
 TEST_P(GenerateData, HexagonTest)
 {
