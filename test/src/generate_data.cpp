@@ -47,11 +47,11 @@ const auto test_sensor_models = testing::Values(
 static const ugl::Matrix<9,9> s_initial_covariance = []() {
     const ugl::Vector3 rotation_stddev{0.2, 0.2, 1.0}; // [rad]
     constexpr double kVelocityStddev = 0.2;  // [m/s]
-    constexpr double kpositionStddev = 0.2;  // [m]
+    constexpr double kPositionStddev = 0.2;  // [m]
     ugl::Matrix<9,9> covariance = ugl::Matrix<9,9>::Zero();
     covariance.block<3,3>(0,0).diagonal() = (rotation_stddev * rotation_stddev.transpose()).diagonal();
     covariance.block<3,3>(3,3) = ugl::Matrix3::Identity() * kVelocityStddev*kVelocityStddev;
-    covariance.block<3,3>(6,6) = ugl::Matrix3::Identity() * kpositionStddev*kpositionStddev;
+    covariance.block<3,3>(6,6) = ugl::Matrix3::Identity() * kPositionStddev*kPositionStddev;
     return covariance;
 }();
 
