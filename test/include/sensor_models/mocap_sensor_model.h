@@ -22,7 +22,8 @@ enum class MocapNoiseLevel
 {
     None,
     Low,
-    High
+    High,
+    Custom,
 };
 
 /// A class for representing virtual Motion-capture sensors.
@@ -31,6 +32,15 @@ class MocapSensorModel
 {
 public:
     MocapSensorModel(MocapNoiseLevel level, double frequency, const ugl::lie::Pose& offset=ugl::lie::Pose::Identity());
+
+    MocapSensorModel(const ugl::Matrix<6,6>& covariance, double frequency, const ugl::lie::Pose& offset=ugl::lie::Pose::Identity());
+
+    MocapSensorModel(
+        const ugl::Matrix<6,6>& true_covariance,
+        const ugl::Matrix<6,6>& believed_covariance,
+        double frequency,
+        const ugl::lie::Pose& offset=ugl::lie::Pose::Identity()
+    );
 
     double period() const
     {

@@ -26,6 +26,7 @@ enum class ImuNoiseLevel
     Low,
     High,
     Mueller18,
+    Custom,
 };
 
 /// A class for representing virtual IMU sensors.
@@ -35,6 +36,10 @@ class ImuSensorModel
 {
 public:
     ImuSensorModel(ImuNoiseLevel level, double frequency);
+
+    ImuSensorModel(const ugl::Matrix<6,6>& covariance, double frequency);
+
+    ImuSensorModel(const ugl::Matrix<6,6>& true_covariance, const ugl::Matrix<6,6>& believed_covariance, double frequency);
 
     double period() const
     {

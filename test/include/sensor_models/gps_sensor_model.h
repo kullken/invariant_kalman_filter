@@ -23,7 +23,8 @@ enum class GpsNoiseLevel
 {
     None,
     Low,
-    High
+    High,
+    Custom,
 };
 
 /// A class for representing virtual Motion-capture sensors.
@@ -32,6 +33,15 @@ class GpsSensorModel
 {
 public:
     GpsSensorModel(GpsNoiseLevel level, double frequency, const GpsModel::MeasurementType& offset=GpsModel::MeasurementType::Identity());
+
+    GpsSensorModel(const ugl::Matrix3& covariance, double frequency, const GpsModel::MeasurementType& offset=GpsModel::MeasurementType::Identity());
+
+    GpsSensorModel(
+        const ugl::Matrix3& true_covariance,
+        const ugl::Matrix3& believed_covariance,
+        double frequency,
+        const GpsModel::MeasurementType& offset=GpsModel::MeasurementType::Identity()
+    );
 
     double period() const
     {

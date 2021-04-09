@@ -25,6 +25,20 @@ ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency)
 {
 }
 
+ImuSensorModel::ImuSensorModel(const ugl::Matrix<6,6>& covariance, double frequency)
+    : ImuSensorModel(covariance, covariance, frequency)
+{
+}
+
+ImuSensorModel::ImuSensorModel(const ugl::Matrix<6,6>& true_covariance, const ugl::Matrix<6,6>& believed_covariance, double frequency)
+    : noise_level_(ImuNoiseLevel::Custom)
+    , period_(1.0/frequency)
+    , accel_noise_(true_covariance.block<3,3>(0,0))
+    , gyro_noise_(true_covariance.block<3,3>(3,3))
+    , imu_model_(believed_covariance)
+{
+}
+
 ImuData ImuSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     return ImuData{period(), get_accel_reading(t, trajectory), get_gyro_reading(t, trajectory), imu_model_};
@@ -56,6 +70,8 @@ std::ostream& operator<<(std::ostream& os, const ImuNoiseLevel& level)
         return os << "High";
     case ImuNoiseLevel::Mueller18:
         return os << "Mueller18";
+    case ImuNoiseLevel::Custom:
+        return os << "Custom";
     }
 }
 

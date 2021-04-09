@@ -21,6 +21,24 @@ GpsSensorModel::GpsSensorModel(GpsNoiseLevel level, double frequency, const GpsM
 {
 }
 
+GpsSensorModel::GpsSensorModel(const ugl::Matrix3& covariance, double frequency, const GpsModel::MeasurementType& offset)
+    : GpsSensorModel(covariance, covariance, frequency, offset)
+{
+}
+
+GpsSensorModel::GpsSensorModel(
+    const ugl::Matrix3& true_covariance,
+    const ugl::Matrix3& believed_covariance,
+    double frequency,
+    const GpsModel::MeasurementType& offset
+)
+    : noise_level_(GpsNoiseLevel::Custom)
+    , period_(1.0/frequency)
+    , position_noise_(true_covariance)
+    , model_(offset, believed_covariance)
+{
+}
+
 GpsData GpsSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     return GpsData{ugl::lie::Euclidean<3>{get_pos_reading(t, trajectory)}, model_};
@@ -41,6 +59,8 @@ std::ostream& operator<<(std::ostream& os, const GpsNoiseLevel& level)
         return os << "Low";
     case GpsNoiseLevel::High:
         return os << "High";
+    case GpsNoiseLevel::Custom:
+        return os << "Custom";
     }
 }
 

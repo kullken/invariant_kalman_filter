@@ -20,6 +20,24 @@ MocapSensorModel::MocapSensorModel(MocapNoiseLevel level, double frequency, cons
 {
 }
 
+MocapSensorModel::MocapSensorModel(const ugl::Matrix<6,6>& covariance, double frequency, const ugl::lie::Pose& offset)
+    : MocapSensorModel(covariance, covariance, frequency, offset)
+{
+}
+
+MocapSensorModel::MocapSensorModel(
+    const ugl::Matrix<6,6>& true_covariance,
+    const ugl::Matrix<6,6>& believed_covariance,
+    double frequency,
+    const ugl::lie::Pose& offset
+)
+    : noise_level_(MocapNoiseLevel::Custom)
+    , period_(1.0/frequency)
+    , noise_(true_covariance)
+    , model_(offset, believed_covariance)
+{
+}
+
 MocapData MocapSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     return MocapData{get_pose_reading(t, trajectory), model_};
@@ -41,6 +59,8 @@ std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level)
         return os << "Low";
     case MocapNoiseLevel::High:
         return os << "High";
+    case MocapNoiseLevel::Custom:
+        return os << "Custom";
     }
 }
 
