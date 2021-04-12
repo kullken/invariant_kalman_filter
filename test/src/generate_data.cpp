@@ -25,23 +25,31 @@ namespace invariant::test
 static constexpr double kImuFrequency = 100.0;
 static constexpr double kGpsFrequency = 2.0;
 
+static const ugl::Matrix<6,6> kImuNoise = []() {
+    constexpr double kGyroStdev = 0.1;  // [rad/s]
+    constexpr double kAccelStddev = 2.5;  // [m/s^2]
+    ugl::Matrix<6,6> covariance = ugl::Matrix<6,6>::Zero();
+    covariance.block<3,3>(0,0) = ugl::Matrix3::Identity() * kGyroStdev*kGyroStdev;
+    covariance.block<3,3>(3,3) = ugl::Matrix3::Identity() * kAccelStddev*kAccelStddev;
+    return covariance;
+}();
+
+static const ugl::Matrix3 kPositionNoise = []() {
+    constexpr double kPositionStddev = 0.1;  // [m]
+    return ugl::Matrix3::Identity() * kPositionStddev*kPositionStddev;
+}();
+
+static const VirtualSensor kPerfectImu   = ImuSensorModel{ugl::Matrix<6,6>::Zero(), kImuNoise, kImuFrequency};
+static const VirtualSensor kNoisyImu     = ImuSensorModel{kImuNoise, kImuNoise, kImuFrequency};
+
+static const VirtualSensor kPerfectGps   = GpsSensorModel{ugl::Matrix3::Zero(), kPositionNoise, kGpsFrequency};
+static const VirtualSensor kNoisyGps     = GpsSensorModel{kPositionNoise, kPositionNoise, kGpsFrequency};
+
 static const auto kTestSensorModels = testing::Values(
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, kImuFrequency}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, kGpsFrequency}},
-    },
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, kImuFrequency}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, kGpsFrequency}},
-    },
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, kImuFrequency}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, kGpsFrequency}},
-    },
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, kImuFrequency}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, kGpsFrequency}},
-    }
+    std::vector{kPerfectImu, kPerfectGps},
+    std::vector{kPerfectImu, kNoisyGps},
+    std::vector{kNoisyImu,   kPerfectGps},
+    std::vector{kNoisyImu,   kNoisyGps}
 );
 
 static const ugl::Matrix<9,9> kInitialCovariance = []() {
