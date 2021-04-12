@@ -157,6 +157,10 @@ def plot_error_dispersion(data_set):
         ry_axes.plot(data_run["time"], data_run["rot_err"]["y"], **plot_args)
         rz_axes.plot(data_run["time"], data_run["rot_err"]["z"], **plot_args)
 
+    # Plot zero lines as reference
+    for ax in axes.flatten():
+        ax.plot(data_set[0]["time"], np.zeros_like(data_set[0]["time"]), "k--", **plot_args)
+
     px_axes.set_ylabel("x position error [m]")
     py_axes.set_ylabel("y position error [m]")
     pz_axes.set_ylabel("z position error [m]")
