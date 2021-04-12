@@ -10,6 +10,7 @@
 #include <ros/time.h>
 #include <ros/duration.h>
 
+#include <ugl/math/matrix.h>
 #include <ugl/lie_group/extended_pose.h>
 #include <ugl/trajectory/trajectory.h>
 #include <ugl/random/seed.h>
@@ -34,6 +35,8 @@ struct Result
     std::vector<double> velocity_errors;
     std::vector<double> rotation_errors;
 
+    std::vector<double> nees_values; // NEES - Normalized Estimation Error Squared
+
     std::vector<ugl::lie::ExtendedPose> estimates;
     std::vector<ugl::lie::ExtendedPose> ground_truth;
 };
@@ -42,12 +45,14 @@ struct Estimate
 {
     ros::Time timestamp;
     ugl::lie::ExtendedPose state;
+    ugl::Matrix<9,9> covariance;
 
     Estimate() = default;
 
-    Estimate(const ros::Time& t_timestamp, const ugl::lie::ExtendedPose& t_state)
+    Estimate(const ros::Time& t_timestamp, const ugl::lie::ExtendedPose& t_state, const ugl::Matrix<9,9>& t_covariance)
         : timestamp(t_timestamp)
         , state(t_state)
+        , covariance(t_covariance)
     {
     }
 };
@@ -87,7 +92,7 @@ std::vector<Estimate> run_filter(FilterType filter, const std::vector<SensorEven
             event_it->update_filter(filter);
             ++event_it;
         }
-        estimates.emplace_back(time, filter.get_state());
+        estimates.emplace_back(time, filter.get_state(), filter.get_covariance());
     }
 
     return estimates;

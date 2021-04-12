@@ -24,6 +24,7 @@ test_case_dtype = np.dtype([
     ("pos_err",  float),
     ("vel_err",  float),
     ("rot_err",  float),
+    ("nees", float),
     ("pos", vec3_type),
     ("vel", vec3_type),
     ("rot", vec3_type),
@@ -63,6 +64,19 @@ def plot_error(data, description):
         pos_axes.plot(case_data["time"], case_data["pos_err"], **plot_args)
         vel_axes.plot(case_data["time"], case_data["vel_err"], **plot_args)
         rot_axes.plot(case_data["time"], case_data["rot_err"], **plot_args)
+
+    return
+
+def plot_nees(data):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    nees_sum = 0
+    for case_data in data:
+        nees_sum += case_data["nees"]
+
+    time = data[0]["time"]
+    ax.plot(time, nees_sum)
 
     return
 
@@ -189,5 +203,6 @@ if __name__ == "__main__":
     plot_error(data, description)
     plot_state(data, ground_truth, description)
     plot_3D(data, ground_truth, description)
+    plot_nees(data)
 
     plt.show()

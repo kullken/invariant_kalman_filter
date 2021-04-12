@@ -25,6 +25,7 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
 {
     os << "time" << delimiter
        << "pos_err" << delimiter << "vel_err" << delimiter << "rot_err" << delimiter
+       << "nees" << delimiter
        << "pos_x" << delimiter << "pos_y" << delimiter << "pos_z" << delimiter
        << "vel_x" << delimiter << "vel_y" << delimiter << "vel_z" << delimiter
        << "rot_x" << delimiter << "rot_y" << delimiter << "rot_z" << delimiter
@@ -37,10 +38,11 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
     const auto size = result.times.size();
     for (std::size_t i = 0; i < size; ++i)
     {
-        os << result.times[i] << delimiter
-           << result.position_errors[i] << delimiter
-           << result.velocity_errors[i] << delimiter
-           << result.rotation_errors[i] << delimiter;
+        os << result.times[i] << delimiter;
+        os << result.position_errors[i] << delimiter;
+        os << result.velocity_errors[i] << delimiter;
+        os << result.rotation_errors[i] << delimiter;
+        os << result.nees_values[i] << delimiter;
 
         write_vector(result.estimates[i].position());
         write_vector(result.estimates[i].velocity());
