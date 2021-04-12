@@ -68,7 +68,7 @@ void write_states(rosbag::Bag& rosbag,
 }
 
 void write_errors(rosbag::Bag& rosbag,
-        const std::vector<double>& errors,
+        const std::vector<ugl::Vector3>& errors,
         const std::vector<double>& times,
         const std::string& topic)
 {
@@ -77,7 +77,7 @@ void write_errors(rosbag::Bag& rosbag,
     {
         const ros::Time stamp = to_rosbag_time(times[i]);
         std_msgs::Float64 error{};
-        error.data = errors[i];
+        error.data = errors[i].norm();
         rosbag.write(topic, stamp, error);
     }
 }

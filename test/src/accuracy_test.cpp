@@ -10,7 +10,6 @@
 
 #include <ugl/math/vector.h>
 #include <ugl/math/matrix.h>
-#include <ugl/math/quaternion.h>
 #include <ugl/lie_group/extended_pose.h>
 #include <ugl/trajectory/trajectory.h>
 
@@ -19,20 +18,6 @@
 
 namespace invariant::test
 {
-namespace
-{
-
-double dist(const ugl::Vector3& a, const ugl::Vector3& b)
-{
-    return (a - b).norm();
-}
-
-double dist(const ugl::UnitQuaternion& a, const ugl::UnitQuaternion& b)
-{
-    return a.angularDistance(b);
-}
-
-} // namespace
 
 std::vector<SensorEvent> generate_events(
         const ugl::trajectory::Trajectory& trajectory,
@@ -68,16 +53,16 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
         const ugl::lie::ExtendedPose ground_truth = trajectory.get_extended_pose(t);
         const ugl::Vector3 true_pos = ground_truth.position();
         const ugl::Vector3 true_vel = ground_truth.velocity();
-        const ugl::UnitQuaternion true_quat = ground_truth.rotation().to_quaternion();
+        const auto true_rot = ground_truth.rotation();
 
         const ugl::Vector3 predicted_pos = estimate.state.position();
         const ugl::Vector3 predicted_vel = estimate.state.velocity();
-        const ugl::UnitQuaternion predicted_quat = estimate.state.rotation().to_quaternion();
+        const auto predicted_rot = estimate.state.rotation();
 
         result.times.push_back(t);
-        result.position_errors.push_back(dist(true_pos, predicted_pos));
-        result.velocity_errors.push_back(dist(true_vel, predicted_vel));
-        result.rotation_errors.push_back(dist(true_quat, predicted_quat));
+        result.position_errors.emplace_back(true_pos - predicted_pos);
+        result.velocity_errors.emplace_back(true_vel - predicted_vel);
+        result.rotation_errors.emplace_back(ominus(true_rot, predicted_rot));
 
         result.estimates.push_back(estimate.state);
         result.ground_truth.push_back(ground_truth);
@@ -88,7 +73,7 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
     }
 
     const auto count = result.times.size();
-    auto square_and_add = [](double sum, double item) { return sum + item*item; };
+    auto square_and_add = [](double sum, const ugl::Vector3& item) { return sum + item.squaredNorm(); };
 
     result.position_rmse = std::sqrt(std::accumulate(std::cbegin(result.position_errors), std::cend(result.position_errors), 0.0, square_and_add) / count);
     result.velocity_rmse = std::sqrt(std::accumulate(std::cbegin(result.velocity_errors), std::cend(result.velocity_errors), 0.0, square_and_add) / count);

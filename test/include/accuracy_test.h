@@ -31,11 +31,11 @@ struct Result
     double rotation_rmse = 0;
 
     std::vector<double> times;
-    std::vector<double> position_errors;
-    std::vector<double> velocity_errors;
-    std::vector<double> rotation_errors;
-
     std::vector<double> nees_values; // NEES - Normalized Estimation Error Squared
+
+    std::vector<ugl::Vector3> position_errors;
+    std::vector<ugl::Vector3> velocity_errors;
+    std::vector<ugl::Vector3> rotation_errors;
 
     std::vector<ugl::lie::ExtendedPose> estimates;
     std::vector<ugl::lie::ExtendedPose> ground_truth;
