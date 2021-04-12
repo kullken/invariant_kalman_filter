@@ -51,7 +51,7 @@ def plot_error(data, description):
     figure, axes = plt.subplots(nrows=1, ncols=3, figsize=(12,4), sharex=True, sharey=True)
     pos_axes, vel_axes, rot_axes = axes
 
-    figure.suptitle(description)
+    # figure.suptitle(description)
     pos_axes.set_xlabel("Time [s]")
     pos_axes.set_ylabel("Error [m]")
     vel_axes.set_xlabel("Time [s]")
@@ -84,7 +84,7 @@ def plot_state(data, ground_truth, description):
     figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
     ((px_axes, py_axes, pz_axes), (vx_axes, vy_axes, vz_axes), (rx_axes, ry_axes, rz_axes)) = axes
 
-    figure.suptitle(description)
+    # figure.suptitle(description)
 
     # Plot trajectory for different initial errors.
     plot_args = {"linewidth": 0.5}
