@@ -44,7 +44,7 @@ const auto test_sensor_models = testing::Values(
     }
 );
 
-static const ugl::Matrix<9,9> s_initial_covariance = []() {
+static const ugl::Matrix<9,9> kInitialCovariance = []() {
     const ugl::Vector3 rotation_stddev{0.1, 0.1, 1.0}; // [rad]
     constexpr double kVelocityStddev = 0.2;  // [m/s]
     constexpr double kPositionStddev = 0.2;  // [m]
@@ -56,11 +56,11 @@ static const ugl::Matrix<9,9> s_initial_covariance = []() {
 }();
 
 const auto initial_offsets = testing::Values(
-    OffsetGenerator{s_initial_covariance}.sample_uniform(10)
+    OffsetGenerator{kInitialCovariance}.sample_uniform(10)
 );
 
 const auto yaw_spread_initial_offsets = testing::Values(
-    InitialValue::uniform_yaw_spread(1.5, 9, s_initial_covariance)
+    InitialValue::uniform_yaw_spread(1.5, 9, kInitialCovariance)
 );
 
 class GenerateData: public testing::TestWithParam<std::tuple<std::vector<VirtualSensor>, std::vector<InitialValue>>>
