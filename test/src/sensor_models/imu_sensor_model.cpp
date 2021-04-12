@@ -33,8 +33,8 @@ ImuSensorModel::ImuSensorModel(const ugl::Matrix<6,6>& covariance, double freque
 ImuSensorModel::ImuSensorModel(const ugl::Matrix<6,6>& true_covariance, const ugl::Matrix<6,6>& believed_covariance, double frequency)
     : noise_level_(ImuNoiseLevel::Custom)
     , period_(1.0/frequency)
-    , accel_noise_(true_covariance.block<3,3>(0,0))
-    , gyro_noise_(true_covariance.block<3,3>(3,3))
+    , accel_noise_(true_covariance.block<3,3>(3,3))
+    , gyro_noise_(true_covariance.block<3,3>(0,0))
     , imu_model_(believed_covariance)
 {
 }
