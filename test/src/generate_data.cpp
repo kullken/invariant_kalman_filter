@@ -81,7 +81,7 @@ protected:
         std::vector<Result> mekf_results{};
         for (const auto& initial_value: m_initial_values)
         {
-            const auto initial_state = trajectory.get_extended_pose(0.0) * initial_value.offset;
+            const auto initial_state = get_initial_state(trajectory, initial_value);
 
             IEKF iekf_filter{initial_state, initial_value.covariance};
             const auto iekf_estimates = run_filter(iekf_filter, sensor_events);
@@ -96,6 +96,17 @@ protected:
         save_to_rosbag(iekf_results, mekf_results, sensor_events);
         save_to_csv(iekf_results, "Iekf");
         save_to_csv(mekf_results, "Mekf");
+    }
+
+private:
+    ugl::lie::ExtendedPose get_initial_state(const ugl::trajectory::Trajectory& trajectory, const InitialValue& initial_value)
+    {
+        if (initial_value.local) {
+            return trajectory.get_extended_pose(0.0) * initial_value.offset;
+        }
+        else {
+            return initial_value.offset;
+        }
     }
 
 protected:
