@@ -50,13 +50,13 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
     for (const auto& estimate : estimates)
     {
         const double t = estimate.timestamp.toSec();
-        const ugl::lie::ExtendedPose ground_truth = trajectory.get_extended_pose(t);
-        const ugl::Vector3 true_pos = ground_truth.position();
-        const ugl::Vector3 true_vel = ground_truth.velocity();
+        const auto ground_truth = trajectory.get_extended_pose(t);
+        const auto true_pos = ground_truth.position();
+        const auto true_vel = ground_truth.velocity();
         const auto true_rot = ground_truth.rotation();
 
-        const ugl::Vector3 predicted_pos = estimate.state.position();
-        const ugl::Vector3 predicted_vel = estimate.state.velocity();
+        const auto predicted_pos = estimate.state.position();
+        const auto predicted_vel = estimate.state.velocity();
         const auto predicted_rot = estimate.state.rotation();
 
         result.times.push_back(t);
