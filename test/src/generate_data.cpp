@@ -25,7 +25,7 @@ namespace invariant::test
 static constexpr double kImuFrequency = 100.0;
 static constexpr double kGpsFrequency = 2.0;
 
-const auto test_sensor_models = testing::Values(
+static const auto kTestSensorModels = testing::Values(
     std::vector{
         VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, kImuFrequency}},
         VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, kGpsFrequency}},
@@ -55,11 +55,11 @@ static const ugl::Matrix<9,9> kInitialCovariance = []() {
     return covariance;
 }();
 
-const auto initial_offsets = testing::Values(
+static const auto kRandomInitialOffsets = testing::Values(
     OffsetGenerator{kInitialCovariance}.sample_uniform(10)
 );
 
-const auto yaw_spread_initial_offsets = testing::Values(
+static const auto kYawSpreadInitialOffsets = testing::Values(
     InitialValue::uniform_yaw_spread(1.5, 9, kInitialCovariance)
 );
 
@@ -131,8 +131,8 @@ INSTANTIATE_TEST_CASE_P(
     Visualization,
     GenerateData,
     ::testing::Combine(
-        test_sensor_models,
-        initial_offsets
+        kTestSensorModels,
+        kRandomInitialOffsets
     ),
 );
 
