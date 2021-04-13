@@ -43,12 +43,12 @@ public:
 
     double period() const
     {
-        return period_;
+        return m_period;
     }
 
     ImuNoiseLevel noise_level() const
     {
-        return noise_level_;
+        return m_noise_level;
     }
 
     /// @brief Generate sensor data from a trajectory
@@ -64,12 +64,12 @@ public:
     ugl::Vector3 get_gyro_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
 private:
-    ImuNoiseLevel noise_level_ = ImuNoiseLevel::None;
-    double period_ = 0.01;
+    ImuNoiseLevel m_noise_level = ImuNoiseLevel::None;
+    double m_period = 0.01;
 
-    ugl::random::NormalDistribution<3> accel_noise_;
-    ugl::random::NormalDistribution<3> gyro_noise_;
-    ImuModel imu_model_;
+    ugl::random::NormalDistribution<3> m_accel_noise;
+    ugl::random::NormalDistribution<3> m_gyro_noise;
+    ImuModel m_imu_model;
 
     static const ugl::Vector3 s_gravity;
 };

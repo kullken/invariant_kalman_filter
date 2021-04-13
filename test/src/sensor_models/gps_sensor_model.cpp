@@ -14,10 +14,10 @@ namespace invariant::test
 static ugl::Matrix3 get_position_covar(GpsNoiseLevel level);
 
 GpsSensorModel::GpsSensorModel(GpsNoiseLevel level, double frequency, const GpsModel::MeasurementType& offset)
-    : noise_level_(level)
-    , period_(1.0/frequency)
-    , position_noise_(get_position_covar(level))
-    , model_(offset, level == GpsNoiseLevel::None ? get_position_covar(GpsNoiseLevel::Low) : get_position_covar(level))
+    : m_noise_level(level)
+    , m_period(1.0/frequency)
+    , m_position_noise(get_position_covar(level))
+    , m_model(offset, level == GpsNoiseLevel::None ? get_position_covar(GpsNoiseLevel::Low) : get_position_covar(level))
 {
 }
 
@@ -32,21 +32,21 @@ GpsSensorModel::GpsSensorModel(
     double frequency,
     const GpsModel::MeasurementType& offset
 )
-    : noise_level_(GpsNoiseLevel::Custom)
-    , period_(1.0/frequency)
-    , position_noise_(true_covariance)
-    , model_(offset, believed_covariance)
+    : m_noise_level(GpsNoiseLevel::Custom)
+    , m_period(1.0/frequency)
+    , m_position_noise(true_covariance)
+    , m_model(offset, believed_covariance)
 {
 }
 
 GpsData GpsSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    return GpsData{ugl::lie::Euclidean<3>{get_pos_reading(t, trajectory)}, model_};
+    return GpsData{ugl::lie::Euclidean<3>{get_pos_reading(t, trajectory)}, m_model};
 }
 
 ugl::Vector3 GpsSensorModel::get_pos_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    return model_.h(trajectory.get_extended_pose(t), position_noise_.sample());
+    return m_model.h(trajectory.get_extended_pose(t), m_position_noise.sample());
 }
 
 std::ostream& operator<<(std::ostream& os, const GpsNoiseLevel& level)

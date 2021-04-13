@@ -13,10 +13,10 @@ namespace invariant::test
 static ugl::Matrix<6,6> get_covariance(MocapNoiseLevel level);
 
 MocapSensorModel::MocapSensorModel(MocapNoiseLevel level, double frequency, const ugl::lie::Pose& offset)
-    : noise_level_(level)
-    , period_(1.0/frequency)
-    , noise_(get_covariance(level))
-    , model_(offset, level == MocapNoiseLevel::None ? get_covariance(MocapNoiseLevel::Low) : get_covariance(level))
+    : m_noise_level(level)
+    , m_period(1.0/frequency)
+    , m_noise(get_covariance(level))
+    , m_model(offset, level == MocapNoiseLevel::None ? get_covariance(MocapNoiseLevel::Low) : get_covariance(level))
 {
 }
 
@@ -31,22 +31,22 @@ MocapSensorModel::MocapSensorModel(
     double frequency,
     const ugl::lie::Pose& offset
 )
-    : noise_level_(MocapNoiseLevel::Custom)
-    , period_(1.0/frequency)
-    , noise_(true_covariance)
-    , model_(offset, believed_covariance)
+    : m_noise_level(MocapNoiseLevel::Custom)
+    , m_period(1.0/frequency)
+    , m_noise(true_covariance)
+    , m_model(offset, believed_covariance)
 {
 }
 
 MocapData MocapSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    return MocapData{get_pose_reading(t, trajectory), model_};
+    return MocapData{get_pose_reading(t, trajectory), m_model};
 }
 
 ugl::lie::Pose MocapSensorModel::get_pose_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
 
-    return model_.h(trajectory.get_extended_pose(t), noise_.sample());
+    return m_model.h(trajectory.get_extended_pose(t), m_noise.sample());
 }
 
 std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level)

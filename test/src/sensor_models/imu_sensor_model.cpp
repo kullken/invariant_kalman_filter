@@ -17,11 +17,11 @@ static ugl::Matrix<6,6> get_covariance(ImuNoiseLevel level);
 const ugl::Vector3 ImuSensorModel::s_gravity{0.0, 0.0, -9.82};
 
 ImuSensorModel::ImuSensorModel(ImuNoiseLevel level, double frequency)
-    : noise_level_(level)
-    , period_(1.0/frequency)
-    , accel_noise_(get_accel_covar(level))
-    , gyro_noise_(get_gyro_covar(level))
-    , imu_model_(level == ImuNoiseLevel::None ? get_covariance(ImuNoiseLevel::Low) : get_covariance(level))
+    : m_noise_level(level)
+    , m_period(1.0/frequency)
+    , m_accel_noise(get_accel_covar(level))
+    , m_gyro_noise(get_gyro_covar(level))
+    , m_imu_model(level == ImuNoiseLevel::None ? get_covariance(ImuNoiseLevel::Low) : get_covariance(level))
 {
 }
 
@@ -31,31 +31,31 @@ ImuSensorModel::ImuSensorModel(const ugl::Matrix<6,6>& covariance, double freque
 }
 
 ImuSensorModel::ImuSensorModel(const ugl::Matrix<6,6>& true_covariance, const ugl::Matrix<6,6>& believed_covariance, double frequency)
-    : noise_level_(ImuNoiseLevel::Custom)
-    , period_(1.0/frequency)
-    , accel_noise_(true_covariance.block<3,3>(3,3))
-    , gyro_noise_(true_covariance.block<3,3>(0,0))
-    , imu_model_(believed_covariance)
+    : m_noise_level(ImuNoiseLevel::Custom)
+    , m_period(1.0/frequency)
+    , m_accel_noise(true_covariance.block<3,3>(3,3))
+    , m_gyro_noise(true_covariance.block<3,3>(0,0))
+    , m_imu_model(believed_covariance)
 {
 }
 
 ImuData ImuSensorModel::get_data(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
-    return ImuData{period(), get_accel_reading(t, trajectory), get_gyro_reading(t, trajectory), imu_model_};
+    return ImuData{period(), get_accel_reading(t, trajectory), get_gyro_reading(t, trajectory), m_imu_model};
 }
 
 ugl::Vector3 ImuSensorModel::get_accel_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     ugl::Vector3 acc = trajectory.get_acceleration(t);
     ugl::lie::Rotation R_inv = trajectory.get_rotation(t).inverse();
-    return R_inv * (acc - s_gravity) + accel_noise_.sample();
+    return R_inv * (acc - s_gravity) + m_accel_noise.sample();
 }
 
 ugl::Vector3 ImuSensorModel::get_gyro_reading(double t, const ugl::trajectory::Trajectory& trajectory) const
 {
     ugl::Vector3 gyro = trajectory.get_angular_velocity(t);
     ugl::lie::Rotation R_inv = trajectory.get_rotation(t).inverse();
-    return R_inv * gyro  + gyro_noise_.sample();
+    return R_inv * gyro  + m_gyro_noise.sample();
 }
 
 std::ostream& operator<<(std::ostream& os, const ImuNoiseLevel& level)

@@ -45,12 +45,12 @@ public:
 
     double period() const
     {
-        return period_;
+        return m_period;
     }
 
     GpsNoiseLevel noise_level() const
     {
-        return noise_level_;
+        return m_noise_level;
     }
 
     /// @brief Generate sensor data from a trajectory
@@ -63,11 +63,11 @@ public:
     ugl::Vector3 get_pos_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
 private:
-    GpsNoiseLevel noise_level_ = GpsNoiseLevel::None;
-    double period_ = 0.1;
+    GpsNoiseLevel m_noise_level = GpsNoiseLevel::None;
+    double m_period = 0.1;
 
-    ugl::random::NormalDistribution<3> position_noise_;
-    GpsModel model_;
+    ugl::random::NormalDistribution<3> m_position_noise;
+    GpsModel m_model;
 };
 
 std::ostream& operator<<(std::ostream& os, const GpsNoiseLevel& level);

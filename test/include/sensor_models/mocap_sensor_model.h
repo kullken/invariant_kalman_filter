@@ -44,12 +44,12 @@ public:
 
     double period() const
     {
-        return period_;
+        return m_period;
     }
 
     MocapNoiseLevel noise_level() const
     {
-        return noise_level_;
+        return m_noise_level;
     }
 
     /// @brief Generate sensor data from a trajectory
@@ -62,11 +62,11 @@ public:
     ugl::lie::Pose get_pose_reading(double t, const ugl::trajectory::Trajectory& trajectory) const;
 
 private:
-    MocapNoiseLevel noise_level_ = MocapNoiseLevel::None;
-    double period_ = 0.01;
+    MocapNoiseLevel m_noise_level = MocapNoiseLevel::None;
+    double m_period = 0.01;
 
-    ugl::random::NormalDistribution<6> noise_;
-    MocapModel model_;
+    ugl::random::NormalDistribution<6> m_noise;
+    MocapModel m_model;
 };
 
 std::ostream& operator<<(std::ostream& os, const MocapNoiseLevel& level);
