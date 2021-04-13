@@ -142,11 +142,6 @@ protected:
     std::vector<InitialValue> m_initial_values;
 };
 
-
-// TEST_P(GenerateData, CircleTest)
-// {
-//     run_test(TestTrajectory::circle(360, 1, 10));
-// }
 TEST_P(GenerateData, HelixTest)
 {
     run_test(TestTrajectory::helix(720, 2, 0.2, 20));
