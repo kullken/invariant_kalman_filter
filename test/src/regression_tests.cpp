@@ -87,7 +87,7 @@ protected:
 
         for (int i = 0; i < kNumTestRuns; ++i)
         {
-            const auto sensor_events = generate_events(this->trajectory_, this->sensors_);
+            const auto sensor_events = generate_events(this->m_trajectory, this->m_sensors);
             for (int j = 0; j < kNumOffsetSamples; ++j)
             {
                 const auto result = this->compute_accuracy<FilterType>(sensor_events);

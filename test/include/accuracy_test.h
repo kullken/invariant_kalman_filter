@@ -102,9 +102,9 @@ class AccuracyTest : public testing::TestWithParam<std::tuple<TestTrajectory, st
 {
 protected:
     AccuracyTest()
-        : trajectory_(std::get<0>(GetParam()).traj)
-        , sensors_(std::get<1>(GetParam()))
-        , offset_(std::get<2>(GetParam()))
+        : m_trajectory(std::get<0>(GetParam()).traj)
+        , m_sensors(std::get<1>(GetParam()))
+        , m_offset(std::get<2>(GetParam()))
     {
         ugl::random::set_seed(117);
     }
@@ -112,20 +112,20 @@ protected:
     template<typename FilterType>
     Result compute_accuracy(const std::vector<SensorEvent>& events)
     {
-        const auto initial_error = offset_.sample_uniform();
-        const auto initial_state = trajectory_.get_extended_pose(0.0) * initial_error;
-        const auto initial_covar = offset_.get_covariance();
+        const auto initial_error = m_offset.sample_uniform();
+        const auto initial_state = m_trajectory.get_extended_pose(0.0) * initial_error;
+        const auto initial_covar = m_offset.get_covariance();
 
         FilterType filter{initial_state, initial_covar};
 
         const auto estimates = run_filter(filter, events);
-        return calculate_result(trajectory_, estimates);
+        return calculate_result(m_trajectory, estimates);
     }
 
 protected:
-    ugl::trajectory::Trajectory trajectory_;
-    std::vector<VirtualSensor> sensors_;
-    OffsetGenerator offset_;
+    ugl::trajectory::Trajectory m_trajectory;
+    std::vector<VirtualSensor> m_sensors;
+    OffsetGenerator m_offset;
 };
 
 } // namespace invariant::test
