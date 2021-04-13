@@ -220,11 +220,9 @@ def plot_3D(data, ground_truth, description):
 
     return
 
-
-if __name__ == "__main__":
-    args = get_cmdline_args()
-    file_ending = ".csv"
-    file_path = args.folder + args.file + file_ending
+def load_data(file_path):
+    FILE_HEADER_ROWS = 6
+    CASE_HEADER_ROWS = 2
 
     with open(file_path, 'r') as f:
         description = f.readline()[2:]
@@ -234,15 +232,22 @@ if __name__ == "__main__":
         f.readline()
         rows_per_case = int(f.readline())
 
-    FILE_HEADER_ROWS = 6
-    CASE_HEADER_ROWS = 2
-
     ground_truth = np.loadtxt(file_path, dtype=ground_truth_dtype, skiprows=FILE_HEADER_ROWS+CASE_HEADER_ROWS, max_rows=rows_per_case)
 
     data = []
     for n in range(test_case_count):
         skip_rows = FILE_HEADER_ROWS + CASE_HEADER_ROWS*(n+2) + rows_per_case*(n+1)
         data.append(np.loadtxt(file_path, dtype=test_case_dtype, skiprows=skip_rows, max_rows=rows_per_case))
+
+    return ground_truth, data, description
+
+
+if __name__ == "__main__":
+    args = get_cmdline_args()
+    file_ending = ".csv"
+    file_path = args.folder + args.file + file_ending
+
+    ground_truth, data, description = load_data(file_path)
 
     plot_error_norm(data, description)
     plot_state_dispersion(data, ground_truth, description)
