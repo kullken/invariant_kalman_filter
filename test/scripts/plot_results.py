@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+from __future__ import division
 
 import argparse
 
 import numpy as np
+import scipy.stats
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
 
@@ -79,8 +81,21 @@ def plot_nees(data):
     for case_data in data:
         nees_sum += case_data["nees"]
 
+    degrees_of_freedom = len(data) * 9
+    confidence_interval = 0.95
+    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
+
+    hit_ratio = len([nees for nees in nees_sum if lower_bound <= nees <= upper_bound]) / len(nees_sum)
+
     time = data[0]["time"]
-    ax.plot(time, nees_sum)
+    ax.plot(time, nees_sum, label="{:2.2%} in interval".format(hit_ratio))
+    ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
+    ax.plot(time, np.ones_like(time) * upper_bound, "k--")
+
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("NEES")
+
+    ax.legend()
 
     return
 
