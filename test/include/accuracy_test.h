@@ -2,6 +2,7 @@
 #define INVARIANT_ACCURACY_TEST_H
 
 #include <tuple>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,7 @@ struct Result
 
     std::vector<double> times;
     std::vector<double> nees_values; // NEES - Normalized Estimation Error Squared
+    std::vector<double> nis_values;  // NIS  - Normalized Innovation Squared
 
     std::vector<ugl::Vector3> position_errors;
     std::vector<ugl::Vector3> velocity_errors;
@@ -46,13 +48,18 @@ struct Estimate
     ros::Time timestamp;
     ugl::lie::ExtendedPose state;
     ugl::Matrix<9,9> covariance;
+    double nis;  // NIS - Normalized Innovation Squared
 
     Estimate() = default;
 
-    Estimate(const ros::Time& t_timestamp, const ugl::lie::ExtendedPose& t_state, const ugl::Matrix<9,9>& t_covariance)
+    Estimate(const ros::Time& t_timestamp,
+             const ugl::lie::ExtendedPose& t_state,
+             const ugl::Matrix<9,9>& t_covariance,
+             double t_nis)
         : timestamp(t_timestamp)
         , state(t_state)
         , covariance(t_covariance)
+        , nis(t_nis)
     {
     }
 };
@@ -87,12 +94,23 @@ std::vector<Estimate> run_filter(FilterType filter, const std::vector<SensorEven
     auto event_it = std::cbegin(events);
     for (ros::Time time = start_time; time <= end_time; time += dt)
     {
+        // TODO: Currently, only the NIS-value from the last
+        // measurement update of every timestep is saved.
+        std::optional<double> nis{};
         while (event_it != std::cend(events) && event_it->time() <= time.toSec())
         {
-            event_it->update_filter(filter);
+            auto update_filter = [&](auto&& data) {
+                using T = std::decay_t<decltype(data)>;
+                if constexpr (std::is_same_v<T, ImuData>) {
+                    filter.predict(data.dt, data.acc, data.rate, data.model);
+                } else {
+                    nis = filter.update(data.measurement, data.model);
+                }
+            };
+            std::visit(update_filter, event_it->get_variant());
             ++event_it;
         }
-        estimates.emplace_back(time, filter.get_state(), filter.get_covariance());
+        estimates.emplace_back(time, filter.get_state(), filter.get_covariance(), nis.value_or(-1));
     }
 
     return estimates;

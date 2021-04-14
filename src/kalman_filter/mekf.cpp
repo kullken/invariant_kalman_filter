@@ -60,18 +60,18 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel, const 
     reset_attitude_error();
 }
 
-void MEKF::update(const lie::Pose&, const MocapModel&)
+double MEKF::update(const lie::Pose&, const MocapModel&)
 {
-
+    return 0.0;
 }
 
-void MEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
+double MEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
 {
     const auto& H = sensor_model.error_jacobian();
     const auto& N_hat = sensor_model.modified_noise_covariance();
 
-    const Matrix<3,3> S = H * m_P * H.transpose() + N_hat;
-    const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
+    const Matrix<3,3> Sinv = (H * m_P * H.transpose() + N_hat).inverse();
+    const Matrix<9,3> K = m_P * H.transpose() * Sinv;
 
     const Vector3 innovation = y.vector() - sensor_model.h(get_state());
 
@@ -79,6 +79,8 @@ void MEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
 
     reset_attitude_error();
+
+    return innovation.transpose() * Sinv * innovation;
 }
 
 void MEKF::reset_attitude_error()

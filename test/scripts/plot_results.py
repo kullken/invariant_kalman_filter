@@ -15,15 +15,16 @@ vec3_type = np.dtype([
 ])
 
 ground_truth_dtype = np.dtype([
-    ("time",     float),
+    ("time", float),
     ("pos", vec3_type),
     ("vel", vec3_type),
     ("rot", vec3_type),
 ])
 
 test_case_dtype = np.dtype([
-    ("time",     float),
+    ("time", float),
     ("nees", float),
+    ("nis",  float),
     ("pos_err", vec3_type),
     ("vel_err", vec3_type),
     ("rot_err", vec3_type),
@@ -77,6 +78,8 @@ def plot_nees(data):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
+    time = data[0]["time"]
+
     nees_sum = 0
     for case_data in data:
         nees_sum += case_data["nees"]
@@ -85,15 +88,46 @@ def plot_nees(data):
     confidence_interval = 0.95
     lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
 
-    hit_ratio = len([nees for nees in nees_sum if lower_bound <= nees <= upper_bound]) / len(nees_sum)
+    count_inside_bounds = sum(1 for x in nees_sum if lower_bound <= x <= upper_bound)
+    hit_ratio = count_inside_bounds / len(nees_sum)
 
-    time = data[0]["time"]
     ax.plot(time, nees_sum, label="{:2.2%} in interval".format(hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("NEES")
+
+    ax.legend()
+
+    return
+
+def plot_nis(data):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    # NIS-values only exist where a measurement update has been done, the rest are dummy-values.
+    mask = data[0]["nis"] >= 0
+    time = data[0]["time"][mask]
+
+    nis_sum = 0
+    for case_data in data:
+        nis_sum += case_data["nis"][mask]
+
+    # NOTE: GPS -> *3, Mocap -> *6
+    degrees_of_freedom = len(data) * 3
+    confidence_interval = 0.95
+    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
+
+    count_inside_bounds = sum(1 for x in nis_sum if lower_bound <= x <= upper_bound)
+    hit_ratio = count_inside_bounds / len(nis_sum)
+
+    ax.plot(time, nis_sum, label="{:2.2%} in interval".format(hit_ratio))
+    ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
+    ax.plot(time, np.ones_like(time) * upper_bound, "k--")
+
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("NIS")
 
     ax.legend()
 
@@ -269,5 +303,6 @@ if __name__ == "__main__":
     plot_error_dispersion(data)
     plot_3D(data, ground_truth, description)
     plot_nees(data)
+    plot_nis(data)
 
     plt.show()

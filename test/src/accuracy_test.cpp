@@ -70,6 +70,7 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
         const ugl::Vector<9> log_error = ominus(ground_truth, estimate.state);
         const double nees = log_error.transpose() * estimate.covariance.inverse() * log_error;
         result.nees_values.push_back(nees);
+        result.nis_values.push_back(estimate.nis);
     }
 
     const auto count = result.times.size();

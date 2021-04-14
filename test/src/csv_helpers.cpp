@@ -25,6 +25,7 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
 {
     os << "time" << delimiter
        << "nees" << delimiter
+       << "nis"  << delimiter
        << "pos_err_x" << delimiter << "pos_err_y" << delimiter << "pos_err_z" << delimiter
        << "vel_err_x" << delimiter << "vel_err_y" << delimiter << "vel_err_z" << delimiter
        << "rot_err_x" << delimiter << "rot_err_y" << delimiter << "rot_err_z" << delimiter
@@ -42,6 +43,7 @@ std::ostream& operator<<(std::ostream& os, const Result& result)
     {
         os << result.times[i] << delimiter;
         os << result.nees_values[i] << delimiter;
+        os << result.nis_values[i] << delimiter;
 
         write_vector(result.position_errors[i]);
         write_vector(result.velocity_errors[i]);

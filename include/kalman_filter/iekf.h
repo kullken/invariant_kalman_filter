@@ -46,8 +46,12 @@ public:
     void set_covariance(const Covariance<9>& P) { m_P = P; }
 
     void predict(double dt, const ugl::Vector3& acc, const ugl::Vector3& ang_vel, const ImuModel& imu_model);
-    void update(const ugl::lie::Pose& y, const MocapModel& sensor_model);
-    void update(const ugl::lie::Euclidean<3>& y, const GpsModel& sensor_model);
+
+    /// @return NIS - Normalized Innovation Squared
+    double update(const ugl::lie::Pose& y, const MocapModel& sensor_model);
+
+    /// @return NIS - Normalized Innovation Squared
+    double update(const ugl::lie::Euclidean<3>& y, const GpsModel& sensor_model);
 
 private:
     ugl::lie::ExtendedPose m_X = ugl::lie::ExtendedPose::Identity();

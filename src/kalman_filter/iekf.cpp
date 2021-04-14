@@ -50,32 +50,36 @@ void IEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel, const 
     m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();
 }
 
-void IEKF::update(const lie::Pose& y, const MocapModel& sensor_model)
+double IEKF::update(const lie::Pose& y, const MocapModel& sensor_model)
 {
     const auto& H = sensor_model.error_jacobian();
     const auto& N_hat = sensor_model.modified_noise_covariance();
 
-    const Matrix<6,6> S = H * m_P * H.transpose() + N_hat;
-    const Matrix<9,6> K = m_P * H.transpose() * S.inverse();
+    const Matrix<6,6> Sinv = (H * m_P * H.transpose() + N_hat).inverse();
+    const Matrix<9,6> K = m_P * H.transpose() * Sinv;
 
     const auto innovation = lie::ominus(MocapModel::group_action(m_X.inverse(), y), sensor_model.target());
 
     m_X = lie::oplus(m_X, K*innovation);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
+
+    return innovation.transpose() * Sinv * innovation;
 }
 
-void IEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
+double IEKF::update(const lie::Euclidean<3>& y, const GpsModel& sensor_model)
 {
     const auto& H = sensor_model.error_jacobian();
     const auto& N_hat = sensor_model.modified_noise_covariance();
 
-    const Matrix<3,3> S = H * m_P * H.transpose() + N_hat;
-    const Matrix<9,3> K = m_P * H.transpose() * S.inverse();
+    const Matrix<3,3> Sinv = (H * m_P * H.transpose() + N_hat).inverse();
+    const Matrix<9,3> K = m_P * H.transpose() * Sinv;
 
     const auto innovation = lie::ominus(GpsModel::group_action(m_X.inverse(), y), sensor_model.target());
 
     m_X = lie::oplus(m_X, K*innovation);
     m_P = (Covariance<9>::Identity() - K*H) * m_P;
+
+    return innovation.transpose() * Sinv * innovation;
 }
 
 } // namespace invariant
