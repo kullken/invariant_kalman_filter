@@ -106,6 +106,10 @@ def plot_nis(data):
     mask = data[0]["nis"] >= 0
     time = data[0]["time"][mask]
 
+    if not np.any(mask):
+        print("No valid NIS-values found.")
+        return
+
     nis_sum = np.zeros_like(time)
     for case_data in data:
         nis_sum += case_data["nis"][mask]
