@@ -58,18 +58,12 @@ static const VirtualSensor kNoisyMocap   = MocapSensorModel{kPoseNoise, kPoseNoi
 static const VirtualSensor kPerfectGps   = GpsSensorModel{ugl::Matrix3::Zero(), kPositionNoise, kGpsFrequency};
 static const VirtualSensor kNoisyGps     = GpsSensorModel{kPositionNoise, kPositionNoise, kGpsFrequency};
 
-static const auto kTestSensorModelsMocap = testing::Values(
-    std::vector{kPerfectImu, kPerfectMocap},
-    std::vector{kPerfectImu, kNoisyMocap},
-    std::vector{kNoisyImu,   kPerfectMocap},
-    std::vector{kNoisyImu,   kNoisyMocap}
-);
-
-static const auto kTestSensorModelsGps = testing::Values(
+static const auto kTestSensorModels = testing::Values(
+    std::vector{kNoisyImu},
     std::vector{kPerfectImu, kPerfectGps},
-    std::vector{kPerfectImu, kNoisyGps},
-    std::vector{kNoisyImu,   kPerfectGps},
-    std::vector{kNoisyImu,   kNoisyGps}
+    std::vector{kNoisyImu,   kNoisyGps},
+    std::vector{kPerfectImu, kPerfectMocap},
+    std::vector{kNoisyImu,   kNoisyMocap}
 );
 
 static const ugl::Matrix<9,9> kInitialCovariance = []() {
@@ -154,7 +148,7 @@ INSTANTIATE_TEST_CASE_P(
     Visualization,
     GenerateData,
     ::testing::Combine(
-        kTestSensorModelsMocap,
+        kTestSensorModels,
         kRandomInitialOffsets
     ),
 );
