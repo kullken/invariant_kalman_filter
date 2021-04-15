@@ -44,6 +44,11 @@ def create_arg_parser():
             help="Path to where to find file",
             default="/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/"
     )
+    parser.add_argument(
+            "--dof",
+            help="Degrees of freedom of measurement innovation. Used for confidence intervals of NIS.",
+            default="3"
+    )
 
     return parser
 
@@ -74,14 +79,14 @@ def plot_error_norm(data, description):
 
     return
 
-def plot_confidence_intervals(data):
+def plot_confidence_intervals(data, nis_dof):
     """Plot NEES- and NIS-values over time, and their corresponding confidence intervals."""
 
     figure, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,20))
     # nees_ax, nis_ax = axes
 
     plot_nees(data, axes[0])
-    plot_nis(data, axes[1])
+    plot_nis(data, nis_dof, axes[1])
 
     return
 
@@ -114,7 +119,7 @@ def plot_nees(data, ax=None):
 
     return
 
-def plot_nis(data, ax=None):
+def plot_nis(data, dof, ax=None):
     # NIS-values only exist where a measurement update has been done, the rest are dummy-values.
     mask = data[0]["nis"] >= 0
     time = data[0]["time"][mask]
@@ -127,8 +132,7 @@ def plot_nis(data, ax=None):
     for case_data in data:
         nis_sum += case_data["nis"][mask]
 
-    # NOTE: GPS -> *3, Mocap -> *6
-    degrees_of_freedom = len(data) * 3
+    degrees_of_freedom = len(data) * dof
     confidence_interval = 0.95
     lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
 
@@ -319,6 +323,6 @@ if __name__ == "__main__":
     plot_state_dispersion(data, ground_truth, description)
     plot_error_dispersion(data)
     plot_3D(data, ground_truth, description)
-    plot_confidence_intervals(data)
+    plot_confidence_intervals(data, int(args.dof))
 
     plt.show()
