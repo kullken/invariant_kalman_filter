@@ -58,11 +58,10 @@ def create_arg_parser():
 def get_cmdline_args():
     return create_arg_parser().parse_args()
 
-def plot_error_norm(data, description):
-    figure, axes = plt.subplots(nrows=1, ncols=3, figsize=(12,4), sharex=True, sharey=True)
+def plot_error_norm(data):
+    _figure, axes = plt.subplots(nrows=1, ncols=3, figsize=(12,4), sharex=True, sharey=True)
     pos_axes, vel_axes, rot_axes = axes
 
-    # figure.suptitle(description)
     pos_axes.set_xlabel("Time [s]")
     pos_axes.set_ylabel("Error [m]")
     vel_axes.set_xlabel("Time [s]")
@@ -85,7 +84,7 @@ def plot_error_norm(data, description):
 def plot_confidence_intervals(data, nis_dof):
     """Plot NEES- and NIS-values over time, and their corresponding confidence intervals."""
 
-    figure, axes = plt.subplots(nrows=3, ncols=1, figsize=(10,10))
+    _figure, axes = plt.subplots(nrows=3, ncols=1, figsize=(10,10))
 
     plot_full_nees(data, axes[0])
     plot_seperate_nees(data, axes[1])
@@ -108,8 +107,7 @@ def plot_full_nees(data, ax=None):
     hit_ratio = count_inside_bounds / len(nees_sum)
 
     if ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        ax = plt.figure().add_subplot(111)
 
     ax.plot(time, nees_sum, label="{:2.2%} in interval".format(hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
@@ -142,8 +140,7 @@ def plot_seperate_nees(data, ax=None):
     rot_hit_ratio = sum(1 for x in rot_nees if lower_bound <= x <= upper_bound) / len(rot_nees)
 
     if ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        ax = plt.figure().add_subplot(111)
 
     plot_args = {"linewidth": 0.75}
     ax.plot(time, pos_nees, label="Position: {:2.2%} in interval".format(pos_hit_ratio), **plot_args)
@@ -180,8 +177,7 @@ def plot_nis(data, dof, ax=None):
     hit_ratio = count_inside_bounds / len(nis_sum)
 
     if ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        ax = plt.figure().add_subplot(111)
 
     ax.plot(time, nis_sum, label="{:2.1%} of samples in interval".format(hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
@@ -194,11 +190,9 @@ def plot_nis(data, dof, ax=None):
 
     return
 
-def plot_state_dispersion(data, ground_truth, description):
-    figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
+def plot_state_dispersion(data, ground_truth):
+    _figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
     ((px_axes, py_axes, pz_axes), (vx_axes, vy_axes, vz_axes), (rx_axes, ry_axes, rz_axes)) = axes
-
-    # figure.suptitle(description)
 
     # Plot trajectory for different initial errors.
     plot_args = {"linewidth": 0.5}
@@ -249,7 +243,7 @@ def plot_state_dispersion(data, ground_truth, description):
     return
 
 def plot_error_dispersion(data_set):
-    figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
+    _figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
     ((px_axes, py_axes, pz_axes), (vx_axes, vy_axes, vz_axes), (rx_axes, ry_axes, rz_axes)) = axes
 
     # Plot trajectory for different initial errors.
@@ -305,9 +299,8 @@ def set_3d_axis(ax):
 
     return
 
-def plot_3D(data, ground_truth, description):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
+def plot_3D(data, ground_truth):
+    ax = plt.figure().add_subplot(111, projection="3d")
 
     set_3d_axis(ax)
 
@@ -357,12 +350,12 @@ if __name__ == "__main__":
     file_ending = ".csv"
     file_path = args.folder + args.file + file_ending
 
-    ground_truth, data, description = load_data(file_path)
+    ground_truth, data, _description = load_data(file_path)
 
-    plot_error_norm(data, description)
-    plot_state_dispersion(data, ground_truth, description)
+    plot_error_norm(data)
+    plot_state_dispersion(data, ground_truth)
     plot_error_dispersion(data)
-    plot_3D(data, ground_truth, description)
+    plot_3D(data, ground_truth)
     plot_confidence_intervals(data, int(args.dof))
 
     plt.show()
