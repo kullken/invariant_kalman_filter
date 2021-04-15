@@ -299,25 +299,26 @@ def set_3d_axis(ax):
 
     return
 
-def plot_3D(data, ground_truth):
+def plot_3D(data, ground_truth, duration=float("inf")):
     ax = plt.figure().add_subplot(111, projection="3d")
-
     set_3d_axis(ax)
+
+    mask = ground_truth["time"] <= duration
 
     # Plot ground truth
     ax.plot(
-        ground_truth["pos"]["x"],
-        ground_truth["pos"]["y"],
-        ground_truth["pos"]["z"],
+        ground_truth["pos"]["x"][mask],
+        ground_truth["pos"]["y"][mask],
+        ground_truth["pos"]["z"][mask],
         "k--", label="True value"
     )
 
     plot_args = {"linewidth": 1.0}
     for case_data in data:
         ax.plot(
-            case_data["pos"]["x"],
-            case_data["pos"]["y"],
-            case_data["pos"]["z"],
+            case_data["pos"]["x"][mask],
+            case_data["pos"]["y"][mask],
+            case_data["pos"]["z"][mask],
             **plot_args
         )
 
