@@ -82,7 +82,7 @@ def plot_error_norm(data, description):
 def plot_confidence_intervals(data, nis_dof):
     """Plot NEES- and NIS-values over time, and their corresponding confidence intervals."""
 
-    figure, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,20))
+    figure, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,8))
     # nees_ax, nis_ax = axes
 
     plot_nees(data, axes[0])
@@ -143,7 +143,7 @@ def plot_nis(data, dof, ax=None):
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-    ax.plot(time, nis_sum, label="{:2.2%} in interval".format(hit_ratio))
+    ax.plot(time, nis_sum, label="{:2.1%} of samples in interval".format(hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
 
