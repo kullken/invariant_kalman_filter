@@ -34,6 +34,9 @@ struct Result
     std::vector<double> times;
     std::vector<double> nees_values; // NEES - Normalized Estimation Error Squared
     std::vector<double> nis_values;  // NIS  - Normalized Innovation Squared
+    std::vector<double> position_nees;
+    std::vector<double> velocity_nees;
+    std::vector<double> rotation_nees;
 
     std::vector<ugl::Vector3> position_errors;
     std::vector<ugl::Vector3> velocity_errors;

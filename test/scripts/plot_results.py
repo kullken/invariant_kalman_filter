@@ -25,6 +25,9 @@ test_case_dtype = np.dtype([
     ("time", float),
     ("nees", float),
     ("nis",  float),
+    ("pos_nees", float),
+    ("vel_nees", float),
+    ("rot_nees", float),
     ("pos_err", vec3_type),
     ("vel_err", vec3_type),
     ("rot_err", vec3_type),
@@ -82,15 +85,15 @@ def plot_error_norm(data, description):
 def plot_confidence_intervals(data, nis_dof):
     """Plot NEES- and NIS-values over time, and their corresponding confidence intervals."""
 
-    figure, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,8))
-    # nees_ax, nis_ax = axes
+    figure, axes = plt.subplots(nrows=3, ncols=1, figsize=(10,10))
 
-    plot_nees(data, axes[0])
-    plot_nis(data, nis_dof, axes[1])
+    plot_full_nees(data, axes[0])
+    plot_seperate_nees(data, axes[1])
+    plot_nis(data, nis_dof, axes[2])
 
     return
 
-def plot_nees(data, ax=None):
+def plot_full_nees(data, ax=None):
     time = data[0]["time"]
 
     nees_sum = np.zeros_like(time)
@@ -109,6 +112,43 @@ def plot_nees(data, ax=None):
         ax = fig.add_subplot(111)
 
     ax.plot(time, nees_sum, label="{:2.2%} in interval".format(hit_ratio))
+    ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
+    ax.plot(time, np.ones_like(time) * upper_bound, "k--")
+
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("NEES")
+
+    ax.legend()
+
+    return
+
+def plot_seperate_nees(data, ax=None):
+    time = data[0]["time"]
+
+    pos_nees = np.zeros_like(time)
+    vel_nees = np.zeros_like(time)
+    rot_nees = np.zeros_like(time)
+    for case_data in data:
+        pos_nees += case_data["pos_nees"]
+        vel_nees += case_data["vel_nees"]
+        rot_nees += case_data["rot_nees"]
+
+    degrees_of_freedom = len(data) * 3
+    confidence_interval = 0.95
+    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
+
+    pos_hit_ratio = sum(1 for x in pos_nees if lower_bound <= x <= upper_bound) / len(pos_nees)
+    vel_hit_ratio = sum(1 for x in vel_nees if lower_bound <= x <= upper_bound) / len(vel_nees)
+    rot_hit_ratio = sum(1 for x in rot_nees if lower_bound <= x <= upper_bound) / len(rot_nees)
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+    plot_args = {"linewidth": 0.75}
+    ax.plot(time, pos_nees, label="Position: {:2.2%} in interval".format(pos_hit_ratio), **plot_args)
+    ax.plot(time, vel_nees, label="Velocity: {:2.2%} in interval".format(vel_hit_ratio), **plot_args)
+    ax.plot(time, rot_nees, label="Rotation: {:2.2%} in interval".format(rot_hit_ratio), **plot_args)
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
 

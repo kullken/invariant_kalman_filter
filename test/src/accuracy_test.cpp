@@ -71,6 +71,18 @@ Result calculate_result(const ugl::trajectory::Trajectory& trajectory, const std
         const double nees = log_error.transpose() * estimate.covariance.inverse() * log_error;
         result.nees_values.push_back(nees);
         result.nis_values.push_back(estimate.nis);
+
+        const ugl::Vector<3> pos_log_error = log_error.segment<3>(6);
+        const ugl::Vector<3> vel_log_error = log_error.segment<3>(3);
+        const ugl::Vector<3> rot_log_error = log_error.segment<3>(0);
+
+        const double pos_nees = pos_log_error.transpose() * estimate.covariance.block<3,3>(6,6).inverse() * pos_log_error;
+        const double vel_nees = vel_log_error.transpose() * estimate.covariance.block<3,3>(3,3).inverse() * vel_log_error;
+        const double rot_nees = rot_log_error.transpose() * estimate.covariance.block<3,3>(0,0).inverse() * rot_log_error;
+
+        result.position_nees.push_back(pos_nees);
+        result.velocity_nees.push_back(vel_nees);
+        result.rotation_nees.push_back(rot_nees);
     }
 
     const auto count = result.times.size();
