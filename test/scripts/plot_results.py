@@ -74,7 +74,18 @@ def plot_error_norm(data, description):
 
     return
 
-def plot_nees(data):
+def plot_confidence_intervals(data):
+    """Plot NEES- and NIS-values over time, and their corresponding confidence intervals."""
+
+    figure, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,20))
+    # nees_ax, nis_ax = axes
+
+    plot_nees(data, axes[0])
+    plot_nis(data, axes[1])
+
+    return
+
+def plot_nees(data, ax=None):
     time = data[0]["time"]
 
     nees_sum = np.zeros_like(time)
@@ -88,8 +99,10 @@ def plot_nees(data):
     count_inside_bounds = sum(1 for x in nees_sum if lower_bound <= x <= upper_bound)
     hit_ratio = count_inside_bounds / len(nees_sum)
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
     ax.plot(time, nees_sum, label="{:2.2%} in interval".format(hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
@@ -101,7 +114,7 @@ def plot_nees(data):
 
     return
 
-def plot_nis(data):
+def plot_nis(data, ax=None):
     # NIS-values only exist where a measurement update has been done, the rest are dummy-values.
     mask = data[0]["nis"] >= 0
     time = data[0]["time"][mask]
@@ -122,8 +135,10 @@ def plot_nis(data):
     count_inside_bounds = sum(1 for x in nis_sum if lower_bound <= x <= upper_bound)
     hit_ratio = count_inside_bounds / len(nis_sum)
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
     ax.plot(time, nis_sum, label="{:2.2%} in interval".format(hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
@@ -304,7 +319,6 @@ if __name__ == "__main__":
     plot_state_dispersion(data, ground_truth, description)
     plot_error_dispersion(data)
     plot_3D(data, ground_truth, description)
-    plot_nees(data)
-    plot_nis(data)
+    plot_confidence_intervals(data)
 
     plt.show()
