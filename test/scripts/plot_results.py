@@ -39,17 +39,22 @@ test_case_dtype = np.dtype([
 def create_arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-            "file",
-            help="Name of file to process"
+            "data_file",
+            help="Name of file to load data from."
     )
     parser.add_argument(
-            "--folder",
-            help="Path to where to find file",
+            "--data_folder",
+            help="Path to where to find the data file.",
             default="/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/"
     )
     parser.add_argument(
+            "--savefile_stem",
+            help="Stem of the names of the figure savefiles. If not specified no figures are saved.",
+            default=None
+    )
+    parser.add_argument(
             "--dof",
-            help="Degrees of freedom of measurement innovation. Used for confidence intervals of NIS.",
+            help="Degrees of freedom of measurement innovation. Used for confidence intervals of NIS. Defaults to 3.",
             default="3"
     )
 
@@ -59,7 +64,7 @@ def get_cmdline_args():
     return create_arg_parser().parse_args()
 
 def plot_error_norm(data):
-    _figure, axes = plt.subplots(nrows=1, ncols=3, figsize=(12,4), sharex=True, sharey=True)
+    figure, axes = plt.subplots(nrows=1, ncols=3, figsize=(12,4), sharex=True, sharey=True)
     pos_axes, vel_axes, rot_axes = axes
 
     pos_axes.set_xlabel("Time [s]")
@@ -79,17 +84,19 @@ def plot_error_norm(data):
         vel_axes.plot(case_data["time"], [vec_norm(error) for error in case_data["vel_err"]], **plot_args)
         rot_axes.plot(case_data["time"], [vec_norm(error) for error in case_data["rot_err"]], **plot_args)
 
+    save_figure(figure, "error_norm")
     return
 
 def plot_confidence_intervals(data, nis_dof):
     """Plot NEES- and NIS-values over time, and their corresponding confidence intervals."""
 
-    _figure, axes = plt.subplots(nrows=3, ncols=1, figsize=(10,10))
+    figure, axes = plt.subplots(nrows=3, ncols=1, figsize=(10,10))
 
     plot_full_nees(data, axes[0])
     plot_seperate_nees(data, axes[1])
     plot_nis(data, nis_dof, axes[2])
 
+    save_figure(figure, "chi2")
     return
 
 def plot_full_nees(data, ax=None):
@@ -115,7 +122,6 @@ def plot_full_nees(data, ax=None):
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("NEES")
-
     ax.legend()
 
     return
@@ -151,7 +157,6 @@ def plot_seperate_nees(data, ax=None):
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("NEES")
-
     ax.legend()
 
     return
@@ -166,12 +171,13 @@ def plot_nis(data, dof, ax=None):
         return
 
     nis_sum = np.zeros_like(time)
-    for case_data in data:
-        nis_sum += case_data["nis"][mask]
+    for testcase in data:
+        nis_sum += testcase["nis"][mask]
 
-    degrees_of_freedom = len(data) * dof
+    testcase_count = len(data)
+    chi2_dof = testcase_count * dof
     confidence_interval = 0.95
-    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
+    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, chi2_dof)
 
     count_inside_bounds = sum(1 for x in nis_sum if lower_bound <= x <= upper_bound)
     hit_ratio = count_inside_bounds / len(nis_sum)
@@ -185,13 +191,12 @@ def plot_nis(data, dof, ax=None):
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("NIS")
-
     ax.legend()
 
     return
 
 def plot_state_dispersion(data, ground_truth):
-    _figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
+    figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
     ((px_axes, py_axes, pz_axes), (vx_axes, vy_axes, vz_axes), (rx_axes, ry_axes, rz_axes)) = axes
 
     # Plot trajectory for different initial errors.
@@ -240,10 +245,11 @@ def plot_state_dispersion(data, ground_truth):
     for ax in axes.flatten():
         ax.legend()
 
+    save_figure(figure, "state_dispersion")
     return
 
 def plot_error_dispersion(data_set):
-    _figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
+    figure, axes = plt.subplots(nrows=3, ncols=3, figsize=(10,10), sharex="row", sharey="row")
     ((px_axes, py_axes, pz_axes), (vx_axes, vy_axes, vz_axes), (rx_axes, ry_axes, rz_axes)) = axes
 
     # Plot trajectory for different initial errors.
@@ -280,6 +286,7 @@ def plot_error_dispersion(data_set):
     for ax in axes.flatten():
         ax.set_xlabel("Time [s]")
 
+    save_figure(figure, "dispersion")
     return
 
 def set_3d_axis(ax):
@@ -300,7 +307,8 @@ def set_3d_axis(ax):
     return
 
 def plot_3D(data, ground_truth, duration=float("inf")):
-    ax = plt.figure().add_subplot(111, projection="3d")
+    figure = plt.figure(figsize=(10,10))
+    ax = figure.add_subplot(111, projection="3d")
     set_3d_axis(ax)
 
     mask = ground_truth["time"] <= duration
@@ -322,6 +330,7 @@ def plot_3D(data, ground_truth, duration=float("inf")):
             **plot_args
         )
 
+    save_figure(figure, "3d")
     return
 
 def load_data(file_path):
@@ -345,11 +354,21 @@ def load_data(file_path):
 
     return ground_truth, data, description
 
+def save_figure(figure, filename_ending):
+    args = get_cmdline_args()
+    if args.savefile_stem is None:
+        return
+
+    filename = "/home/vk/Documents/master_thesis/figures/automatic/" + args.savefile_stem + '_' + filename_ending
+    figure.savefig(filename, dpi="figure", format="png", bbox_inches="tight")
+
+    return
+
 
 if __name__ == "__main__":
     args = get_cmdline_args()
     file_ending = ".csv"
-    file_path = args.folder + args.file + file_ending
+    file_path = args.data_folder + args.data_file + file_ending
 
     ground_truth, data, _description = load_data(file_path)
 
