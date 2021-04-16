@@ -372,10 +372,15 @@ if __name__ == "__main__":
 
     ground_truth, data, _description = load_data(file_path)
 
+    if "Hexagon" in args.data_file:
+        duration_3d = 10
+    else:
+        duration_3d = float("inf")
+
     plot_error_norm(data)
     plot_state_dispersion(data, ground_truth)
     plot_error_dispersion(data)
-    plot_3D(data, ground_truth)
+    plot_3D(data, ground_truth, duration_3d)
     plot_confidence_intervals(data, int(args.dof))
 
     plt.show()
