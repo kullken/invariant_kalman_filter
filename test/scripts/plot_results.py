@@ -359,7 +359,7 @@ def save_figure(figure, filename_ending):
     if args.savefile_stem is None:
         return
 
-    filename = "/home/vk/Documents/master_thesis/figures/automatic/" + args.savefile_stem + '_' + filename_ending
+    filename = "/home/vk/Documents/master_thesis/figures/automatic/" + args.savefile_stem + '_' + filename_ending + ".png"
     figure.savefig(filename, dpi="figure", format="png", bbox_inches="tight")
 
     return
