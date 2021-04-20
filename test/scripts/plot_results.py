@@ -120,12 +120,16 @@ def plot_full_nees(data, ax=None):
     for case_data in data:
         nees_sum += case_data["nees"]
 
-    degrees_of_freedom = len(data) * 9
+    sample_count = len(data)
+    chi2_dof = sample_count * 9
     confidence_interval = 0.95
-    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
+    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, chi2_dof)
+    hit_ratio = sum(1 for x in nees_sum if lower_bound <= x <= upper_bound) / len(nees_sum)
 
-    count_inside_bounds = sum(1 for x in nees_sum if lower_bound <= x <= upper_bound)
-    hit_ratio = count_inside_bounds / len(nees_sum)
+    # Scale the output by number of samples.
+    nees_sum /= sample_count
+    lower_bound /= sample_count
+    upper_bound /= sample_count
 
     if ax is None:
         ax = plt.figure().add_subplot(111)
@@ -151,13 +155,20 @@ def plot_seperate_nees(data, ax=None):
         vel_nees += case_data["vel_nees"]
         rot_nees += case_data["rot_nees"]
 
-    degrees_of_freedom = len(data) * 3
+    sample_count = len(data)
+    chi2_dof = sample_count * 3
     confidence_interval = 0.95
-    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, degrees_of_freedom)
-
+    lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, chi2_dof)
     pos_hit_ratio = sum(1 for x in pos_nees if lower_bound <= x <= upper_bound) / len(pos_nees)
     vel_hit_ratio = sum(1 for x in vel_nees if lower_bound <= x <= upper_bound) / len(vel_nees)
     rot_hit_ratio = sum(1 for x in rot_nees if lower_bound <= x <= upper_bound) / len(rot_nees)
+
+    # Scale the output by number of samples.
+    pos_nees /= sample_count
+    vel_nees /= sample_count
+    rot_nees /= sample_count
+    lower_bound /= sample_count
+    upper_bound /= sample_count
 
     if ax is None:
         ax = plt.figure().add_subplot(111)
@@ -191,13 +202,16 @@ def plot_nis(data, dof, ax=None):
     for testcase in data:
         nis_sum += testcase["nis"][mask]
 
-    testcase_count = len(data)
-    chi2_dof = testcase_count * dof
+    sample_count = len(data)
+    chi2_dof = sample_count * dof
     confidence_interval = 0.95
     lower_bound, upper_bound = scipy.stats.chi2.interval(confidence_interval, chi2_dof)
+    hit_ratio = sum(1 for x in nis_sum if lower_bound <= x <= upper_bound) / len(nis_sum)
 
-    count_inside_bounds = sum(1 for x in nis_sum if lower_bound <= x <= upper_bound)
-    hit_ratio = count_inside_bounds / len(nis_sum)
+    # Scale the output by number of samples.
+    nis_sum /= sample_count
+    lower_bound /= sample_count
+    upper_bound /= sample_count
 
     if ax is None:
         ax = plt.figure().add_subplot(111)
