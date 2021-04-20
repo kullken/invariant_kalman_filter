@@ -115,7 +115,7 @@ protected:
             const auto mekf_result = calculate_result(trajectory, mekf_estimates);
             mekf_results.push_back(mekf_result);
         }
-        save_to_rosbag(iekf_results, mekf_results, sensor_events);
+        // save_to_rosbag(iekf_results, mekf_results, sensor_events);
         save_to_csv(iekf_results, "Iekf");
         save_to_csv(mekf_results, "Mekf");
     }
