@@ -49,7 +49,7 @@ def create_arg_parser():
     )
     parser.add_argument(
             "--savefile_stem",
-            help="Stem of the names of the figure savefiles. If not specified no figures are saved.",
+            help="Stem of the names of the figure savefiles. E.g. 'hexagon_mocap_lownoise' -> 'hexagon_mocap_lownoise_dispersion.png'. If not specified no figures are saved.",
             default=None
     )
     parser.add_argument(
