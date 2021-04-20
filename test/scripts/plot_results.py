@@ -412,4 +412,6 @@ if __name__ == "__main__":
 
     print_average_rmse(data)
 
-    plt.show()
+    # Only show figures on screen if not run in 'save'-mode.
+    if args.savefile_stem is None:
+        plt.show()
