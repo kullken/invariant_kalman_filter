@@ -29,23 +29,27 @@ const auto test_trajectories = testing::Values(
     TestTrajectory::circle(720, 1, 10)
 );
 
-const auto test_sensor_models = testing::Values(
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 10.0}},
-    },
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::None, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 10.0}},
-    },
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::None, 10.0}},
-    },
-    std::vector{
-        VirtualSensor{ImuSensorModel{ImuNoiseLevel::Low, 100.0}},
-        VirtualSensor{GpsSensorModel{GpsNoiseLevel::Low, 10.0}},
-    }
+static const VirtualSensor kPerfectImu   = ImuSensorModel{ImuNoiseLevel::None, 100.0};
+static const VirtualSensor kNoisyImu     = ImuSensorModel{ImuNoiseLevel::Low, 100.0};
+
+static const VirtualSensor kPerfectGps   = GpsSensorModel{GpsNoiseLevel::None, 10.0};
+static const VirtualSensor kNoisyGps     = GpsSensorModel{GpsNoiseLevel::Low, 10.0};
+
+static const VirtualSensor kPerfectMocap = MocapSensorModel{MocapNoiseLevel::None, 10.0};
+static const VirtualSensor kNoisyMocap   = MocapSensorModel{MocapNoiseLevel::Low, 10.0};
+
+const auto test_sensor_models_gps = testing::Values(
+    std::vector{kPerfectImu, kPerfectGps},
+    std::vector{kPerfectImu, kNoisyGps},
+    std::vector{kNoisyImu,   kPerfectGps},
+    std::vector{kNoisyImu,   kNoisyGps}
+);
+
+const auto test_sensor_models_mocap = testing::Values(
+    std::vector{kPerfectImu, kPerfectMocap},
+    std::vector{kPerfectImu, kNoisyMocap},
+    std::vector{kNoisyImu,   kPerfectMocap},
+    std::vector{kNoisyImu,   kNoisyMocap}
 );
 
 const auto offset_generators = testing::Values(
@@ -61,12 +65,6 @@ const auto offset_generators = testing::Values(
             return covariance;
         }()
     }
-);
-
-const auto test_configs = testing::Combine(
-    test_trajectories,
-    test_sensor_models,
-    offset_generators
 );
 
 } // namepsace
@@ -111,20 +109,40 @@ protected:
     }
 };
 
-using IekfTestSuite = RegressionTest<IEKF>;
-TEST_P(IekfTestSuite, IekfTestCase) { run_test(); }
+using IekfMocapTestSuite = RegressionTest<IEKF>;
+TEST_P(IekfMocapTestSuite, IekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     RegressionTests,
-    IekfTestSuite,
-    test_configs,
+    IekfMocapTestSuite,
+    testing::Combine(
+        test_trajectories,
+        test_sensor_models_mocap,
+        offset_generators
+    ),
 );
 
-using MekfTestSuite = RegressionTest<MEKF>;
-TEST_P(MekfTestSuite, MekfTestCase) { run_test(); }
+using IekfGpsTestSuite = RegressionTest<IEKF>;
+TEST_P(IekfGpsTestSuite, IekfTestCase) { run_test(); }
 INSTANTIATE_TEST_CASE_P(
     RegressionTests,
-    MekfTestSuite,
-    test_configs,
+    IekfGpsTestSuite,
+    testing::Combine(
+        test_trajectories,
+        test_sensor_models_gps,
+        offset_generators
+    ),
+);
+
+using MekfGpsTestSuite = RegressionTest<MEKF>;
+TEST_P(MekfGpsTestSuite, MekfTestCase) { run_test(); }
+INSTANTIATE_TEST_CASE_P(
+    RegressionTests,
+    MekfGpsTestSuite,
+    testing::Combine(
+        test_trajectories,
+        test_sensor_models_gps,
+        offset_generators
+    ),
 );
 
 } // namespace invariant::test
