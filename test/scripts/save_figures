@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rosrun invariant_kalman_filter plot_results.py IekfHelixTest_3 --savefile_stem=helix_mocap_nonoise
+rosrun invariant_kalman_filter plot_results.py IekfHelixTest_4 --savefile_stem=helix_mocap_lownoise
+rosrun invariant_kalman_filter plot_results.py IekfHexagonTest_3 --savefile_stem=hexagon_mocap_nonoise
+rosrun invariant_kalman_filter plot_results.py IekfHexagonTest_4 --savefile_stem=hexagon_mocap_lownoise
