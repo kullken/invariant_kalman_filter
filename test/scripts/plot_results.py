@@ -55,7 +55,7 @@ def create_arg_parser():
     parser.add_argument(
             "--dof",
             help="Degrees of freedom of measurement innovation. Used for confidence intervals of NIS. Defaults to 3.",
-            default="3"
+            default=None
     )
 
     return parser
@@ -176,7 +176,10 @@ def plot_seperate_nees(data, ax=None):
     return
 
 def plot_nis(data, dof, ax=None):
-    # NIS-values only exist where a measurement update has been done, the rest are dummy-values.
+    if dof is None:
+        return
+
+    # NIS-values only exist where a measurement update has been done, the rest are (negative) dummy-values.
     mask = data[0]["nis"] >= 0
     time = data[0]["time"][mask]
 
@@ -384,18 +387,28 @@ if __name__ == "__main__":
     file_ending = ".csv"
     file_path = args.data_folder + args.data_file + file_ending
 
-    ground_truth, data, _description = load_data(file_path)
+    ground_truth, data, description = load_data(file_path)
 
     if "Hexagon" in args.data_file:
         duration_3d = 10
     else:
         duration_3d = float("inf")
 
+    if args.dof is None:
+        if "gps" in description.lower():
+            nis_dof = 3
+        elif "mocap" in description.lower():
+            nis_dof = 6
+        else:
+            nis_dof = None
+    else:
+        nis_dof = int(args.dof)
+
     plot_error_norm(data)
     plot_state_dispersion(data, ground_truth)
     plot_error_dispersion(data)
     plot_3D(data, ground_truth, duration_3d)
-    plot_confidence_intervals(data, int(args.dof))
+    plot_confidence_intervals(data, nis_dof)
 
     print_average_rmse(data)
 
