@@ -96,9 +96,11 @@ def print_average_rmse(data_set):
     vel_time_average_rmse = np.mean(np.sqrt(np.mean(vel_error_squared, axis=0)))
     rot_time_average_rmse = np.mean(np.sqrt(np.mean(rot_error_squared, axis=0)))
 
-    print("Time averaged position RMSE:  {:0<8.6} m".format(pos_time_average_rmse))
-    print("Time averaged velocity RMSE:  {:0<8.6} m/s".format(vel_time_average_rmse))
-    print("Time averaged rotation RMSE:  {:0<8.6} rad".format(rot_time_average_rmse))
+    print("Time averaged RMSE:")
+    print("position: {:0<6.4} m".format(pos_time_average_rmse))
+    print("velocity: {:0<6.4} m/s".format(vel_time_average_rmse))
+    print("rotation: {:0<6.4} rad".format(rot_time_average_rmse))
+    print("")
     return
 
 def plot_confidence_intervals(data, nis_dof):
