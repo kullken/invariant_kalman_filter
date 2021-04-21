@@ -55,7 +55,7 @@ void MEKF::predict(double dt, const Vector3& acc, const Vector3& ang_vel, const 
     const auto& Q_hat = imu_model.modified_noise_covariance();
 
     const Matrix<9,9> Phi = Matrix<9,9>::Identity() + A*dt; // Approximates Phi = exp(A*dt)
-    m_P = Phi * (m_P + Q_hat*dt*dt) * Phi.transpose();
+    m_P = Phi * (m_P + Q_hat*dt) * Phi.transpose();
 
     reset_attitude_error();
 }

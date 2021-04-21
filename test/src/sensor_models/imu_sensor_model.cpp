@@ -35,7 +35,7 @@ ImuSensorModel::ImuSensorModel(const ugl::Matrix<6,6>& true_covariance, const ug
     , m_period(1.0/frequency)
     , m_accel_noise(true_covariance.block<3,3>(3,3))
     , m_gyro_noise(true_covariance.block<3,3>(0,0))
-    , m_imu_model(believed_covariance)
+    , m_imu_model(believed_covariance * m_period)
 {
 }
 
