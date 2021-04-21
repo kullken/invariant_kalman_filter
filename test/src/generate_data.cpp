@@ -27,8 +27,8 @@ static constexpr double kGpsFrequency   = 2.0;
 static constexpr double kMocapFrequency = 2.0;
 
 static const ugl::Matrix<6,6> kImuNoise = []() {
-    constexpr double kGyroStdev = 0.1;  // [rad/s]
-    constexpr double kAccelStddev = 2.5;  // [m/s^2]
+    constexpr double kGyroStdev = 0.05;  // [rad/s]
+    constexpr double kAccelStddev = 0.2;  // [m/s^2]
     ugl::Matrix<6,6> covariance = ugl::Matrix<6,6>::Zero();
     covariance.block<3,3>(0,0) = ugl::Matrix3::Identity() * kGyroStdev*kGyroStdev;
     covariance.block<3,3>(3,3) = ugl::Matrix3::Identity() * kAccelStddev*kAccelStddev;
@@ -67,7 +67,7 @@ static const auto kTestSensorModels = testing::Values(
 );
 
 static const ugl::Matrix<9,9> kInitialCovariance = []() {
-    const ugl::Vector3 rotation_stddev{0.1, 0.1, 1.0}; // [rad]
+    const ugl::Vector3 rotation_stddev{0.2, 0.2, 0.8}; // [rad]
     constexpr double kVelocityStddev = 0.2;  // [m/s]
     constexpr double kPositionStddev = 0.2;  // [m]
     ugl::Matrix<9,9> covariance = ugl::Matrix<9,9>::Zero();
