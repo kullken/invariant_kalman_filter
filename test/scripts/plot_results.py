@@ -140,6 +140,8 @@ def plot_full_nees(data, ax=None):
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
 
+    ax.set_ylim(0, None)
+
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("NEES")
     ax.legend()
@@ -175,12 +177,13 @@ def plot_seperate_nees(data, ax=None):
     if ax is None:
         ax = plt.figure().add_subplot(111)
 
-    plot_args = {"linewidth": 0.75}
-    ax.plot(time, pos_nees, label="Position: {:2.2%} in interval".format(pos_hit_ratio), **plot_args)
-    ax.plot(time, vel_nees, label="Velocity: {:2.2%} in interval".format(vel_hit_ratio), **plot_args)
-    ax.plot(time, rot_nees, label="Rotation: {:2.2%} in interval".format(rot_hit_ratio), **plot_args)
+    ax.plot(time, pos_nees, label="Position: {:2.2%} in interval".format(pos_hit_ratio))
+    ax.plot(time, vel_nees, label="Velocity: {:2.2%} in interval".format(vel_hit_ratio))
+    ax.plot(time, rot_nees, label="Rotation: {:2.2%} in interval".format(rot_hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
+
+    ax.set_ylim(0, None)
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("NEES")
@@ -221,6 +224,8 @@ def plot_nis(data, dof, ax=None):
     ax.plot(time, nis_sum, label="{:2.1%} of samples in interval".format(hit_ratio))
     ax.plot(time, np.ones_like(time) * lower_bound, "k--", label="{:2.0%} confidence interval".format(0.95))
     ax.plot(time, np.ones_like(time) * upper_bound, "k--")
+
+    ax.set_ylim(0, None)
 
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("NIS")
