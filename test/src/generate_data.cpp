@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <tuple>
+#include <variant>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -106,6 +108,14 @@ protected:
         const auto& [sensors, initial_values, resample_sensors] = GetParam();
         const auto& trajectory = test_trajectory.traj;
         auto sensor_events = generate_events(trajectory, sensors);
+
+        // MEKF::update(...) for mocap measurements is a stub to make the code compile,
+        // so we do not run MEKF if a MocapSensorModel is detected to save running time.
+        const bool use_mekf = std::none_of(
+            std::begin(sensors), std::end(sensors),
+            [](const auto& sensor){ return std::holds_alternative<MocapSensorModel>(sensor.get_variant()); }
+        );
+
         std::vector<Result> iekf_results{};
         std::vector<Result> mekf_results{};
         for (const auto& initial_value: initial_values)
@@ -120,14 +130,18 @@ protected:
             const auto iekf_result = calculate_result(trajectory, iekf_estimates);
             iekf_results.push_back(iekf_result);
 
-            MEKF mekf_filter{initial_state, initial_value.covariance};
-            const auto mekf_estimates = run_filter(mekf_filter, sensor_events);
-            const auto mekf_result = calculate_result(trajectory, mekf_estimates);
-            mekf_results.push_back(mekf_result);
+            if (use_mekf) {
+                MEKF mekf_filter{initial_state, initial_value.covariance};
+                const auto mekf_estimates = run_filter(mekf_filter, sensor_events);
+                const auto mekf_result = calculate_result(trajectory, mekf_estimates);
+                mekf_results.push_back(mekf_result);
+            }
         }
         // save_to_rosbag(iekf_results, mekf_results, sensor_events);
         save_to_csv(iekf_results, "Iekf");
-        save_to_csv(mekf_results, "Mekf");
+        if (use_mekf) {
+            save_to_csv(mekf_results, "Mekf");
+        }
     }
 
 private:
