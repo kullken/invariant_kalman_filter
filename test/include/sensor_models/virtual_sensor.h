@@ -17,10 +17,18 @@ namespace invariant::test
 class VirtualSensor
 {
 public:
+    using Variant = std::variant<ImuSensorModel, MocapSensorModel, GpsSensorModel>;
+
+public:
     template<typename SensorType>
     VirtualSensor(const SensorType& sensor)
         : m_sensor(sensor)
     {
+    }
+
+    const Variant& get_variant() const
+    {
+        return m_sensor;
     }
 
     double period() const;
@@ -30,7 +38,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const VirtualSensor& sensor);
 
 private:
-    std::variant<ImuSensorModel, MocapSensorModel, GpsSensorModel> m_sensor;
+    Variant m_sensor;
 };
 
 } // namespace invariant::test
