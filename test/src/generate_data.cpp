@@ -145,14 +145,9 @@ protected:
     }
 
 private:
-    ugl::lie::ExtendedPose get_initial_state(const ugl::trajectory::Trajectory& trajectory, const InitialValue& initial_value)
+    static ugl::lie::ExtendedPose get_initial_state(const ugl::trajectory::Trajectory& trajectory, const InitialValue& initial_value)
     {
-        if (initial_value.local) {
-            return trajectory.get_extended_pose(0.0) * initial_value.offset;
-        }
-        else {
-            return initial_value.offset;
-        }
+        return initial_value.local ? trajectory.get_extended_pose(0.0) * initial_value.offset : initial_value.offset;
     }
 };
 
