@@ -66,6 +66,18 @@ static const auto kTestSensorModels = testing::Values(
     std::vector{kNoisyImu,   kNoisyMocap}
 );
 
+static const auto kMonteCarloSensorModels = testing::Values(
+    std::vector{kNoisyImu},
+    std::vector{kNoisyImu, kNoisyGps},
+    std::vector{kNoisyImu, VirtualSensor{MocapSensorModel{kPoseNoise,  0.1 * kPoseNoise, kMocapFrequency}}},
+    std::vector{kNoisyImu, VirtualSensor{MocapSensorModel{kPoseNoise,  0.2 * kPoseNoise, kMocapFrequency}}},
+    std::vector{kNoisyImu, VirtualSensor{MocapSensorModel{kPoseNoise,  0.5 * kPoseNoise, kMocapFrequency}}},
+    std::vector{kNoisyImu, VirtualSensor{MocapSensorModel{kPoseNoise,  1.0 * kPoseNoise, kMocapFrequency}}},
+    std::vector{kNoisyImu, VirtualSensor{MocapSensorModel{kPoseNoise,  2.0 * kPoseNoise, kMocapFrequency}}},
+    std::vector{kNoisyImu, VirtualSensor{MocapSensorModel{kPoseNoise,  5.0 * kPoseNoise, kMocapFrequency}}},
+    std::vector{kNoisyImu, VirtualSensor{MocapSensorModel{kPoseNoise, 10.0 * kPoseNoise, kMocapFrequency}}}
+);
+
 static const ugl::Matrix<9,9> kInitialCovariance = []() {
     const ugl::Vector3 rotation_stddev{0.2, 0.2, 0.8}; // [rad]
     constexpr double kVelocityStddev = 0.2;  // [m/s]
@@ -77,32 +89,30 @@ static const ugl::Matrix<9,9> kInitialCovariance = []() {
     return covariance;
 }();
 
-static const auto kRandomInitialOffsets = testing::Values(
-    OffsetGenerator{kInitialCovariance}.sample_uniform(10)
-);
+static const OffsetGenerator kOffsetGenerator{kInitialCovariance};
 
-static const auto kYawSpreadInitialOffsets = testing::Values(
-    InitialValue::uniform_yaw_spread(1.5, 9, kInitialCovariance)
-);
+enum class ResampleSensors { kYes, kNo };
 
-class GenerateData: public testing::TestWithParam<std::tuple<std::vector<VirtualSensor>, std::vector<InitialValue>>>
+class GenerateData: public testing::TestWithParam<std::tuple<std::vector<VirtualSensor>, std::vector<InitialValue>, ResampleSensors>>
 {
 protected:
     GenerateData()
-        : m_sensors(std::get<0>(GetParam()))
-        , m_initial_values(std::get<1>(GetParam()))
     {
         ugl::random::set_seed(117);
     }
 
     void run_test(const TestTrajectory& test_trajectory)
     {
+        const auto& [sensors, initial_values, resample_sensors] = GetParam();
         const auto& trajectory = test_trajectory.traj;
-        const auto sensor_events = generate_events(trajectory, m_sensors);
+        auto sensor_events = generate_events(trajectory, sensors);
         std::vector<Result> iekf_results{};
         std::vector<Result> mekf_results{};
-        for (const auto& initial_value: m_initial_values)
+        for (const auto& initial_value: initial_values)
         {
+            if (resample_sensors == ResampleSensors::kYes) {
+                sensor_events = generate_events(trajectory, sensors);
+            }
             const auto initial_state = get_initial_state(trajectory, initial_value);
 
             IEKF iekf_filter{initial_state, initial_value.covariance};
@@ -130,10 +140,6 @@ private:
             return initial_value.offset;
         }
     }
-
-protected:
-    std::vector<VirtualSensor> m_sensors;
-    std::vector<InitialValue> m_initial_values;
 };
 
 TEST_P(GenerateData, HelixTest)
@@ -144,12 +150,24 @@ TEST_P(GenerateData, HexagonTest)
 {
     run_test(TestTrajectory::hexagon_start_stop(2, 20));
 }
+
 INSTANTIATE_TEST_CASE_P(
     Visualization,
     GenerateData,
     ::testing::Combine(
         kTestSensorModels,
-        kRandomInitialOffsets
+        ::testing::Values(kOffsetGenerator.sample_uniform(10)),
+        ::testing::Values(ResampleSensors::kNo)
+    ),
+);
+
+INSTANTIATE_TEST_CASE_P(
+    MonteCarlo,
+    GenerateData,
+    ::testing::Combine(
+        kMonteCarloSensorModels,
+        ::testing::Values(kOffsetGenerator.sample_uniform(20)),
+        ::testing::Values(ResampleSensors::kYes)
     ),
 );
 

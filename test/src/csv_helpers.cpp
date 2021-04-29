@@ -93,7 +93,7 @@ void save_to_csv(const std::vector<Result>& results, std::string_view file_name_
     auto test_info = testing::UnitTest::GetInstance()->current_test_info();
 
     std::stringstream ss;
-    ss << "# " << test_info->name() << ": " << test_info->value_param() << '\n';
+    ss << "# " << test_info->test_case_name() << '.' << test_info->name() << ": " << test_info->value_param() << '\n';
     ss << '\n';
     ss << "test_case_count" << '\n' << results.size() << '\n';
     ss << "rows_per_case" << '\n' << results[0].times.size() << '\n';
@@ -109,8 +109,12 @@ void save_to_csv(const std::vector<Result>& results, std::string_view file_name_
 
     std::string file_name = test_info->name();
     std::replace(std::begin(file_name), std::end(file_name), '/', '_');
+
+    std::string subfolder = test_info->test_case_name();
+    subfolder.erase(std::find(std::begin(subfolder), std::end(subfolder), '/'), std::end(subfolder));
+
     std::stringstream file_path;
-    file_path << "/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/" << file_name_prefix << file_name << ".csv";
+    file_path << "/home/vk/mav_ws/src/invariant_kalman_filter/test/results/data/" << subfolder << '/' << file_name_prefix << file_name << ".csv";
 
     std::ofstream csv_file{file_path.str()};
     csv_file << ss.rdbuf();
