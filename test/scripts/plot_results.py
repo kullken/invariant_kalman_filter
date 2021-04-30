@@ -61,22 +61,6 @@ def plot_error_norm(data):
     save_figure(figure, "error_norm")
     return
 
-def print_average_rmse(data_set):
-    pos_error_squared = np.array([[(vec["x"]**2 + vec["y"]**2 + vec["z"]**2) for vec in data_sample["pos_err"]] for data_sample in data_set])
-    vel_error_squared = np.array([[(vec["x"]**2 + vec["y"]**2 + vec["z"]**2) for vec in data_sample["vel_err"]] for data_sample in data_set])
-    rot_error_squared = np.array([[(vec["x"]**2 + vec["y"]**2 + vec["z"]**2) for vec in data_sample["rot_err"]] for data_sample in data_set])
-
-    pos_time_average_rmse = np.mean(np.sqrt(np.mean(pos_error_squared, axis=0)))
-    vel_time_average_rmse = np.mean(np.sqrt(np.mean(vel_error_squared, axis=0)))
-    rot_time_average_rmse = np.mean(np.sqrt(np.mean(rot_error_squared, axis=0)))
-
-    print("Time averaged RMSE:")
-    print("position: {:0<6.4} m".format(pos_time_average_rmse))
-    print("velocity: {:0<6.4} m/s".format(vel_time_average_rmse))
-    print("rotation: {:0<6.4} rad".format(rot_time_average_rmse))
-    print("")
-    return
-
 def plot_confidence_intervals(data, nis_dof):
     """Plot NEES- and NIS-values over time, and their corresponding confidence intervals."""
 
@@ -383,8 +367,6 @@ if __name__ == "__main__":
     plot_error_dispersion(data)
     plot_3D(data, ground_truth, duration_3d)
     plot_confidence_intervals(data, nis_dof)
-
-    print_average_rmse(data)
 
     # Only show figures on screen if not run in 'save'-mode.
     if args.savefile_stem is None:
