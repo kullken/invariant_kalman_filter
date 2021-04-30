@@ -29,7 +29,6 @@ test_case_dtype = np.dtype([
 ])
 
 def load_data(file_path):
-    FILE_HEADER_ROWS = 6
     CASE_HEADER_ROWS = 2
 
     with open(file_path, 'r') as file:
@@ -40,11 +39,10 @@ def load_data(file_path):
         file.readline()
         rows_per_case = int(file.readline())
 
-    ground_truth = np.loadtxt(file_path, dtype=ground_truth_dtype, skiprows=FILE_HEADER_ROWS+CASE_HEADER_ROWS, max_rows=rows_per_case)
+        ground_truth = np.loadtxt(file, dtype=ground_truth_dtype, skiprows=CASE_HEADER_ROWS, max_rows=rows_per_case)
 
-    data = []
-    for n in range(test_case_count):
-        skip_rows = FILE_HEADER_ROWS + CASE_HEADER_ROWS*(n+2) + rows_per_case*(n+1)
-        data.append(np.loadtxt(file_path, dtype=test_case_dtype, skiprows=skip_rows, max_rows=rows_per_case))
+        data = []
+        for _ in range(test_case_count):
+            data.append(np.loadtxt(file, dtype=test_case_dtype, skiprows=CASE_HEADER_ROWS, max_rows=rows_per_case))
 
     return ground_truth, data, description
