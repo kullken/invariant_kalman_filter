@@ -172,7 +172,7 @@ INSTANTIATE_TEST_CASE_P(
     GenerateData,
     ::testing::Combine(
         kMonteCarloSensorModels,
-        ::testing::Values(kOffsetGenerator.sample_uniform(20)),
+        ::testing::Values(kOffsetGenerator.sample_uniform(50)),
         ::testing::Values(ResampleSensors::kYes)
     ),
 );
