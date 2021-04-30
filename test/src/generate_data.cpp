@@ -98,11 +98,6 @@ enum class ResampleSensors { kYes, kNo };
 class GenerateData: public testing::TestWithParam<std::tuple<std::vector<VirtualSensor>, std::vector<InitialValue>, ResampleSensors>>
 {
 protected:
-    GenerateData()
-    {
-        ugl::random::set_seed(117);
-    }
-
     void run_test(const TestTrajectory& test_trajectory)
     {
         const auto& [sensors, initial_values, resample_sensors] = GetParam();
@@ -153,10 +148,12 @@ private:
 
 TEST_P(GenerateData, HelixTest)
 {
+    ugl::random::set_seed(117);
     run_test(TestTrajectory::helix(720, 2, 0.2, 20));
 }
 TEST_P(GenerateData, HexagonTest)
 {
+    ugl::random::set_seed(118);
     run_test(TestTrajectory::hexagon_start_stop(2, 20));
 }
 
