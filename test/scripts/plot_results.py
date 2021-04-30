@@ -251,17 +251,17 @@ def plot_error_dispersion(data_set):
     # Plot trajectory for different initial errors.
     plot_args = {"linewidth": 0.5}
     for data_run in data_set:
-        px_axes.plot(data_run["time"], data_run["pos_err"]["x"], **plot_args)
-        py_axes.plot(data_run["time"], data_run["pos_err"]["y"], **plot_args)
-        pz_axes.plot(data_run["time"], data_run["pos_err"]["z"], **plot_args)
+        px_axes.plot(data_run["time"], -data_run["pos_err"]["x"], **plot_args)
+        py_axes.plot(data_run["time"], -data_run["pos_err"]["y"], **plot_args)
+        pz_axes.plot(data_run["time"], -data_run["pos_err"]["z"], **plot_args)
 
-        vx_axes.plot(data_run["time"], data_run["vel_err"]["x"], **plot_args)
-        vy_axes.plot(data_run["time"], data_run["vel_err"]["y"], **plot_args)
-        vz_axes.plot(data_run["time"], data_run["vel_err"]["z"], **plot_args)
+        vx_axes.plot(data_run["time"], -data_run["vel_err"]["x"], **plot_args)
+        vy_axes.plot(data_run["time"], -data_run["vel_err"]["y"], **plot_args)
+        vz_axes.plot(data_run["time"], -data_run["vel_err"]["z"], **plot_args)
 
-        rx_axes.plot(data_run["time"], data_run["rot_err"]["x"], **plot_args)
-        ry_axes.plot(data_run["time"], data_run["rot_err"]["y"], **plot_args)
-        rz_axes.plot(data_run["time"], data_run["rot_err"]["z"], **plot_args)
+        rx_axes.plot(data_run["time"], -data_run["rot_err"]["x"], **plot_args)
+        ry_axes.plot(data_run["time"], -data_run["rot_err"]["y"], **plot_args)
+        rz_axes.plot(data_run["time"], -data_run["rot_err"]["z"], **plot_args)
 
     # Plot zero lines as reference
     for ax in axes.flatten():
