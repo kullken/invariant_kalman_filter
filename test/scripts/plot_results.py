@@ -8,33 +8,7 @@ import scipy.stats
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
 
-vec3_type = np.dtype([
-    ("x", float),
-    ("y", float),
-    ("z", float),
-])
-
-ground_truth_dtype = np.dtype([
-    ("time", float),
-    ("pos", vec3_type),
-    ("vel", vec3_type),
-    ("rot", vec3_type),
-])
-
-test_case_dtype = np.dtype([
-    ("time", float),
-    ("nees", float),
-    ("nis",  float),
-    ("pos_nees", float),
-    ("vel_nees", float),
-    ("rot_nees", float),
-    ("pos_err", vec3_type),
-    ("vel_err", vec3_type),
-    ("rot_err", vec3_type),
-    ("pos", vec3_type),
-    ("vel", vec3_type),
-    ("rot", vec3_type),
-])
+from load_csv import load_data
 
 def create_arg_parser():
     parser = argparse.ArgumentParser()
@@ -370,27 +344,6 @@ def plot_3D(data, ground_truth, duration=float("inf")):
 
     save_figure(figure, "3d")
     return
-
-def load_data(file_path):
-    FILE_HEADER_ROWS = 6
-    CASE_HEADER_ROWS = 2
-
-    with open(file_path, 'r') as f:
-        description = f.readline()[2:]
-        f.readline()
-        f.readline()
-        test_case_count = int(f.readline())
-        f.readline()
-        rows_per_case = int(f.readline())
-
-    ground_truth = np.loadtxt(file_path, dtype=ground_truth_dtype, skiprows=FILE_HEADER_ROWS+CASE_HEADER_ROWS, max_rows=rows_per_case)
-
-    data = []
-    for n in range(test_case_count):
-        skip_rows = FILE_HEADER_ROWS + CASE_HEADER_ROWS*(n+2) + rows_per_case*(n+1)
-        data.append(np.loadtxt(file_path, dtype=test_case_dtype, skiprows=skip_rows, max_rows=rows_per_case))
-
-    return ground_truth, data, description
 
 def save_figure(figure, filename_ending):
     args = get_cmdline_args()
