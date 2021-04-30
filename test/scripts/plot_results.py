@@ -306,6 +306,9 @@ def plot_3D(data, ground_truth, duration=float("inf")):
     figure = plt.figure(figsize=(10,10))
     ax = figure.add_subplot(111, projection="3d")
     set_3d_axis(ax)
+    ax.set_xlabel("x [m]")
+    ax.set_ylabel("y [m]")
+    ax.set_zlabel("z [m]")
 
     mask = ground_truth["time"] <= duration
 
